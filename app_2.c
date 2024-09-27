@@ -97,86 +97,84 @@
  *               Variable Definitions
  ******************************************************/
 
-const osThreadAttr_t thread_attributes = {
-  .name       = "app",
-  .attr_bits  = 0,
-  .cb_mem     = 0,
-  .cb_size    = 0,
-  .stack_mem  = 0,
-  .stack_size = 3072,
-  .priority   = osPriorityLow,
-  .tz_module  = 0,
-  .reserved   = 0,
-};
+// const osThreadAttr_t thread_attributes = {
+//   .name       = "mqtt_app",
+//   .attr_bits  = 0,
+//   .cb_mem     = 0,
+//   .cb_size    = 0,
+//   .stack_mem  = 0,
+//   .stack_size = 3072,
+//   .priority   = osPriorityLow,
+//   .tz_module  = 0,
+//   .reserved   = 0,
+// };
 
-static sl_wifi_device_configuration_t wifi_mqtt_client_configuration = {
-  .boot_option = LOAD_NWP_FW,
-  .mac_address = NULL,
-  .band        = SL_SI91X_WIFI_BAND_2_4GHZ,
-  .boot_config = { .oper_mode = SL_SI91X_CLIENT_MODE,
-                   .coex_mode = SL_SI91X_WLAN_ONLY_MODE,
-                   .feature_bit_map =
-                     (SL_SI91X_FEAT_SECURITY_OPEN | SL_SI91X_FEAT_AGGREGATION | SL_SI91X_FEAT_ULP_GPIO_BASED_HANDSHAKE
-#ifdef SLI_SI91X_MCU_INTERFACE
-                      | SL_SI91X_FEAT_WPS_DISABLE
-#endif
-                      ),
-                   .tcp_ip_feature_bit_map = (SL_SI91X_TCP_IP_FEAT_DHCPV4_CLIENT | SL_SI91X_TCP_IP_FEAT_EXTENSION_VALID
-                                              | SL_SI91X_TCP_IP_FEAT_SSL),
-                   .custom_feature_bit_map = (SL_SI91X_CUSTOM_FEAT_EXTENTION_VALID),
-                   .ext_custom_feature_bit_map = (SL_SI91X_EXT_FEAT_LOW_POWER_MODE | SL_SI91X_EXT_FEAT_XTAL_CLK
-                                                  | SL_SI91X_EXT_FEAT_DISABLE_DEBUG_PRINTS | MEMORY_CONFIG
-#ifdef SLI_SI917
-                                                  | SL_SI91X_EXT_FEAT_FRONT_END_SWITCH_PINS_ULP_GPIO_4_5_0
-#endif
-                                                  ),
-                   .bt_feature_bit_map         = 0,
-                   .ext_tcp_ip_feature_bit_map = (SL_SI91X_CONFIG_FEAT_EXTENTION_VALID | SL_SI91X_EXT_EMB_MQTT_ENABLE),
-                   .ble_feature_bit_map        = 0,
-                   .ble_ext_feature_bit_map    = 0,
-                   .config_feature_bit_map = (SL_SI91X_FEAT_SLEEP_GPIO_SEL_BITMAP | SL_SI91X_ENABLE_ENHANCED_MAX_PSP) }
-};
+// static sl_wifi_device_configuration_t wifi_mqtt_client_configuration = {
+//   .boot_option = LOAD_NWP_FW,
+//   .mac_address = NULL,
+//   .band        = SL_SI91X_WIFI_BAND_2_4GHZ,
+//   .boot_config = { .oper_mode = SL_SI91X_CLIENT_MODE,
+//                    .coex_mode = SL_SI91X_WLAN_ONLY_MODE,
+//                    .feature_bit_map =
+//                      (SL_SI91X_FEAT_SECURITY_OPEN | SL_SI91X_FEAT_AGGREGATION | SL_SI91X_FEAT_ULP_GPIO_BASED_HANDSHAKE
+// #ifdef SLI_SI91X_MCU_INTERFACE
+//                       | SL_SI91X_FEAT_WPS_DISABLE
+// #endif
+//                       ),
+//                    .tcp_ip_feature_bit_map = (SL_SI91X_TCP_IP_FEAT_DHCPV4_CLIENT | SL_SI91X_TCP_IP_FEAT_EXTENSION_VALID
+//                                               | SL_SI91X_TCP_IP_FEAT_SSL),
+//                    .custom_feature_bit_map = (SL_SI91X_CUSTOM_FEAT_EXTENTION_VALID),
+//                    .ext_custom_feature_bit_map = (SL_SI91X_EXT_FEAT_LOW_POWER_MODE | SL_SI91X_EXT_FEAT_XTAL_CLK
+//                                                   | SL_SI91X_EXT_FEAT_DISABLE_DEBUG_PRINTS | MEMORY_CONFIG
+// #ifdef SLI_SI917
+//                                                   | SL_SI91X_EXT_FEAT_FRONT_END_SWITCH_PINS_ULP_GPIO_4_5_0
+// #endif
+//                                                   ),
+//                    .bt_feature_bit_map         = 0,
+//                    .ext_tcp_ip_feature_bit_map = (SL_SI91X_CONFIG_FEAT_EXTENTION_VALID | SL_SI91X_EXT_EMB_MQTT_ENABLE),
+//                    .ble_feature_bit_map        = 0,
+//                    .ble_ext_feature_bit_map    = 0,
+//                    .config_feature_bit_map = (SL_SI91X_FEAT_SLEEP_GPIO_SEL_BITMAP | SL_SI91X_ENABLE_ENHANCED_MAX_PSP) }
+// };
 
-sl_wifi_twt_request_t default_twt_setup_configuration = {
-  .twt_enable              = 1,
-  .twt_flow_id             = 1,
-  .wake_duration           = 0x80,
-  .wake_duration_unit      = 0,
-  .wake_duration_tol       = 0x80,
-  .wake_int_exp            = 13,
-  .wake_int_exp_tol        = 13,
-  .wake_int_mantissa       = 0x1B00,
-  .wake_int_mantissa_tol   = 0x1B00,
-  .implicit_twt            = 1,
-  .un_announced_twt        = 1,
-  .triggered_twt           = 0,
-  .twt_channel             = 0,
-  .twt_protection          = 0,
-  .restrict_tx_outside_tsp = 1,
-  .twt_retry_limit         = 6,
-  .twt_retry_interval      = 10,
-  .req_type                = 1,
-  .negotiation_type        = 0,
-};
+ sl_wifi_twt_request_t default_twt_setup_configuration = {
+   .twt_enable              = 1,
+   .twt_flow_id             = 1,
+   .wake_duration           = 0x80,
+   .wake_duration_unit      = 0,
+   .wake_duration_tol       = 0x80,
+   .wake_int_exp            = 13,
+   .wake_int_exp_tol        = 13,
+   .wake_int_mantissa       = 0x1B00,
+   .wake_int_mantissa_tol   = 0x1B00,
+   .implicit_twt            = 1,
+   .un_announced_twt        = 1,
+   .triggered_twt           = 0,
+   .twt_channel             = 0,
+   .twt_protection          = 0,
+   .restrict_tx_outside_tsp = 1,
+   .twt_retry_limit         = 6,
+   .twt_retry_interval      = 10,
+   .req_type                = 1,
+   .negotiation_type        = 0,
+ };
 
-sl_wifi_twt_selection_t default_twt_selection_configuration = {
-  .twt_enable                            = 1,
-  .average_tx_throughput                 = 1000,
-  .tx_latency                            = 0,
-  .rx_latency                            = 5000,
-  .device_average_throughput             = DEVICE_AVERAGE_THROUGHPUT,
-  .estimated_extra_wake_duration_percent = ESTIMATE_EXTRA_WAKE_DURATION_PERCENT,
-  .twt_tolerable_deviation               = TWT_TOLERABLE_DEVIATION,
-  .default_wake_interval_ms              = TWT_DEFAULT_WAKE_INTERVAL_MS,
-  .default_minimum_wake_duration_ms      = TWT_DEFAULT_WAKE_DURATION_MS,
-  .beacon_wake_up_count_after_sp         = MAX_BEACON_WAKE_UP_AFTER_SP
-};
+ sl_wifi_twt_selection_t default_twt_selection_configuration = {
+   .twt_enable                            = 1,
+   .average_tx_throughput                 = 1000,
+   .tx_latency                            = 0,
+   .rx_latency                            = 5000,
+   .device_average_throughput             = DEVICE_AVERAGE_THROUGHPUT,
+   .estimated_extra_wake_duration_percent = ESTIMATE_EXTRA_WAKE_DURATION_PERCENT,
+   .twt_tolerable_deviation               = TWT_TOLERABLE_DEVIATION,
+   .default_wake_interval_ms              = TWT_DEFAULT_WAKE_INTERVAL_MS,
+   .default_minimum_wake_duration_ms      = TWT_DEFAULT_WAKE_DURATION_MS,
+   .beacon_wake_up_count_after_sp         = MAX_BEACON_WAKE_UP_AFTER_SP
+ };
 
 sl_status_t callback_status = SL_STATUS_OK;
 
 sl_mqtt_client_t client              = { 0 };
-sl_ip_address_t ip_address           = { 0 };
-sl_net_wifi_client_profile_t profile = { 0 };
 
 uint8_t is_execution_completed = 0;
 
@@ -217,13 +215,11 @@ sl_mqtt_client_last_will_message_t last_will_message = {
 /******************************************************
  *               Function Declarations
  ******************************************************/
-static void application_start(void *argument);
 void mqtt_client_message_handler(void *client, sl_mqtt_client_message_t *message, void *context);
 void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event, void *event_data, void *context);
 void mqtt_client_error_event_handler(void *client, sl_mqtt_client_error_status_t *error);
 void mqtt_client_cleanup();
 void print_char_buffer(char *buffer, uint32_t buffer_length);
-sl_status_t mqtt_example();
 sl_status_t twt_callback_handler(sl_wifi_event_t event,
                                  sl_si91x_twt_response_t *result,
                                  uint32_t result_length,
@@ -232,61 +228,55 @@ sl_status_t twt_callback_handler(sl_wifi_event_t event,
  *               Function Definitions
  ******************************************************/
 
-void app_init(const void *unused)
-{
-  UNUSED_PARAMETER(unused);
-  osThreadNew((osThreadFunc_t)application_start, NULL, &thread_attributes);
-}
+// void application_start(void *argument)
+// {
+//   UNUSED_PARAMETER(argument);
+//   sl_status_t status;
 
-static void application_start(void *argument)
-{
-  UNUSED_PARAMETER(argument);
-  sl_status_t status;
+//   status = sl_net_init(SL_NET_WIFI_CLIENT_INTERFACE, &wifi_mqtt_client_configuration, NULL, NULL);
+//   if (status != SL_STATUS_OK && status != SL_STATUS_ALREADY_INITIALIZED) {
+//     printf("Failed to start Wi-Fi client interface: 0x%lX\r\n", status);
+//     return;
+//   }
+//   printf("Start Wi-Fi client interface Success \r\n");
 
-  status = sl_net_init(SL_NET_WIFI_CLIENT_INTERFACE, &wifi_mqtt_client_configuration, NULL, NULL);
-  if (status != SL_STATUS_OK && status != SL_STATUS_ALREADY_INITIALIZED) {
-    printf("Failed to start Wi-Fi client interface: 0x%lX\r\n", status);
-    return;
-  }
-  printf("Start Wi-Fi client interface Success \r\n");
+//   status = sl_net_up(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID);
+//   if (status != SL_STATUS_OK) {
+//     printf("Failed to bring Wi-Fi client interface up: 0x%lX\r\n", status);
+//     return;
+//   }
+//   printf("Wi-Fi client connected\r\n");
 
-  status = sl_net_up(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID);
-  if (status != SL_STATUS_OK) {
-    printf("Failed to bring Wi-Fi client interface up: 0x%lX\r\n", status);
-    return;
-  }
-  printf("Wi-Fi client connected\r\n");
+//   status = sl_net_get_profile(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID, &profile);
+//   if (status != SL_STATUS_OK) {
+//     printf("Failed to get client profile: 0x%lx\r\n", status);
+//     return;
+//   }
+//   printf("\r\nSuccess to get client profile\r\n");
 
-  status = sl_net_get_profile(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID, &profile);
-  if (status != SL_STATUS_OK) {
-    printf("Failed to get client profile: 0x%lx\r\n", status);
-    return;
-  }
-  printf("\r\nSuccess to get client profile\r\n");
+//   ip_address.type = SL_IPV4;
+//   memcpy(&ip_address.ip.v4.bytes, &profile.ip.ip.v4.ip_address.bytes, sizeof(sl_ipv4_address_t));
+//   print_sl_ip_address(&ip_address);
 
-  ip_address.type = SL_IPV4;
-  memcpy(&ip_address.ip.v4.bytes, &profile.ip.ip.v4.ip_address.bytes, sizeof(sl_ipv4_address_t));
-  print_sl_ip_address(&ip_address);
+//   mqtt_example();
 
-  mqtt_example();
+// #ifdef SLI_SI91X_MCU_INTERFACE
 
-#ifdef SLI_SI91X_MCU_INTERFACE
+// #if (SL_SI91X_TICKLESS_MODE == 0)
+//   sl_si91x_m4_sleep_wakeup();
+// #else
+//   osSemaphoreId_t wait_semaphore;
+//   wait_semaphore = osSemaphoreNew(1, 0, NULL);
+//   if (wait_semaphore == NULL) {
+//     printf("Failed to create semaphore\r\n");
+//     return;
+//   }
+//   // Waiting forever using semaphore to put M4 to sleep in tick less mode
+//   osSemaphoreAcquire(wait_semaphore, osWaitForever);
+// #endif
 
-#if (SL_SI91X_TICKLESS_MODE == 0)
-  sl_si91x_m4_sleep_wakeup();
-#else
-  osSemaphoreId_t wait_semaphore;
-  wait_semaphore = osSemaphoreNew(1, 0, NULL);
-  if (wait_semaphore == NULL) {
-    printf("Failed to create semaphore\r\n");
-    return;
-  }
-  // Waiting forever using semaphore to put M4 to sleep in tick less mode
-  osSemaphoreAcquire(wait_semaphore, osWaitForever);
-#endif
-
-#endif
-}
+// #endif
+// }
 
 sl_status_t twt_callback_handler(sl_wifi_event_t event,
                                  sl_si91x_twt_response_t *result,

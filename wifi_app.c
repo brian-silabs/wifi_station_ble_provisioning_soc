@@ -47,6 +47,8 @@
 #include "wifi_config.h"
 #include "rsi_common_apis.h"
 
+#include "app.h"
+
 // WLAN include file for configuration
 
 extern osSemaphoreId_t wlan_thread_sem;
@@ -406,6 +408,9 @@ void wifi_app_task()
 
         osSemaphoreRelease(wlan_thread_sem);
         LOG_PRINT("WIFI App IPCONFIG Done State\n");
+        LOG_PRINT("WIFI App READY for TWT\n");
+
+        mqtt_example();
       } break;
 
       case WIFI_APP_ERROR_STATE: {

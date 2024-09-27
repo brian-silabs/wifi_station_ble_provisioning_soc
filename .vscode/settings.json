@@ -1,0 +1,7 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "files.associations": {
+        "sl_wifi_callback_framework.h": "c",
+        "sl_status.h": "c"
+    }
+}
