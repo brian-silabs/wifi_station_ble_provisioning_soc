@@ -40,6 +40,7 @@
 #include "sl_wifi_callback_framework.h"
 #include "sl_net_wifi_types.h"
 
+#include "wifi_config.h"
 #include "app.h"
 
 #ifdef SLI_SI91X_MCU_INTERFACE
@@ -49,6 +50,12 @@
 /******************************************************
  *                    Constants
  ******************************************************/
+
+
+// application event list
+#define MQTT_INIT_EVENT     0x01
+#define MQTT_PUBLISH_EVENT  0x02
+
 #define ENABLE_MQTT_SUBSCRIBE_PUBLISH 1
 
 #define MQTT_BROKER_PORT 1883
@@ -127,6 +134,7 @@ sl_mqtt_client_last_will_message_t last_will_message = {
 };
 
 extern osSemaphoreId_t mqtt_thread_sem;
+static volatile uint32_t mqtt_app_event_map;
 
 /******************************************************
  *               Function Declarations
@@ -137,6 +145,69 @@ void mqtt_client_error_event_handler(void *client, sl_mqtt_client_error_status_t
 void mqtt_client_cleanup();
 void print_char_buffer(char *buffer, uint32_t buffer_length);
 void mqtt_client_task(void *argument);
+void wifi_app_send_to_mqtt(uint16_t msg_type, uint8_t *data, uint16_t data_len);
+sl_status_t setup_mqtt(void);
+
+static int32_t mqtt_app_get_event(void);
+static void mqtt_app_set_event(uint32_t event_num);
+static void mqtt_app_clear_event(uint32_t event_num);
+
+/*==============================================*/
+/**
+ * @fn         mqtt_app_clear_event
+ * @brief      clears the specific event.
+ * @param[in]  event_num, specific event number.
+ * @return     none.
+ * @section description
+ * This function is used to clear the specific event.
+ */
+static void mqtt_app_clear_event(uint32_t event_num)
+{
+  mqtt_app_event_map &= ~BIT(event_num);
+  return;
+}
+
+/*==============================================*/
+/**
+ * @fn         mqtt_app_get_event
+ * @brief      returns the first set event based on priority
+ * @param[in]  none.
+ * @return     int32_t
+ *             > 0  = event number
+ *             -1   = not received any event
+ * @section description
+ * This function returns the highest priority event among all the set events
+ */
+static int32_t mqtt_app_get_event(void)
+{
+  uint32_t ix;
+
+  for (ix = 0; ix < 32; ix++) {
+    if (mqtt_app_event_map & (1 << ix)) {
+      return ix;
+    }
+  }
+
+  return (-1);
+}
+
+/*==============================================*/
+/**
+ * @fn         mqtt_app_set_event
+ * @brief      sets the specific event.
+ * @param[in]  event_num, specific event number.
+ * @return     none.
+ * @section description
+ * This function is used to set/raise the specific event.
+ */
+static void mqtt_app_set_event(uint32_t event_num)
+{
+  mqtt_app_event_map |= BIT(event_num);
+
+  osSemaphoreRelease(mqtt_thread_sem);
+
+  return;
+}
 
 void mqtt_client_cleanup()
 {
@@ -274,53 +345,9 @@ void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event, void 
   }
 }
 
-sl_status_t mqtt_example()
+sl_status_t setup_mqtt(void)
 {
   sl_status_t status;
-
-  // if (ENCRYPT_CONNECTION) {
-  //   // Load SSL CA certificate
-  //   status =
-  //     sl_net_set_credential(SL_NET_TLS_SERVER_CREDENTIAL_ID(0), SL_NET_SIGNING_CERTIFICATE, cacert, sizeof(cacert) - 1);
-  //   if (status != SL_STATUS_OK) {
-  //     printf("\r\nLoading TLS CA certificate in to FLASH Failed, Error Code : 0x%lX\r\n", status);
-  //     return status;
-  //   }
-  //   printf("\r\nLoad TLS CA certificate at index %d Success\r\n", 0);
-  // }
-
-  // if (SEND_CREDENTIALS) {
-  //   uint16_t username_length, password_length;
-
-  //   username_length = strlen(USERNAME);
-  //   password_length = strlen(PASSWORD);
-
-  //   uint32_t malloc_size = sizeof(sl_mqtt_client_credentials_t) + username_length + password_length;
-
-  //   client_credentails = malloc(malloc_size);
-  //   if (client_credentails == NULL)
-  //     return SL_STATUS_ALLOCATION_FAILED;
-  //   memset(client_credentails, 0, malloc_size);
-  //   client_credentails->username_length = username_length;
-  //   client_credentails->password_length = password_length;
-
-  //   memcpy(&client_credentails->data[0], USERNAME, username_length);
-  //   memcpy(&client_credentails->data[username_length], PASSWORD, password_length);
-
-  //   status = sl_net_set_credential(SL_NET_MQTT_CLIENT_CREDENTIAL_ID(0),
-  //                                  SL_NET_MQTT_CLIENT_CREDENTIAL,
-  //                                  client_credentails,
-  //                                  malloc_size);
-
-  //   if (status != SL_STATUS_OK) {
-  //     mqtt_client_cleanup();
-  //     printf("Failed to set credentials: 0x%lX\r\n ", status);
-
-  //     return status;
-  //   }
-
-  //   mqtt_client_configuration.credential_id = SL_NET_MQTT_CLIENT_CREDENTIAL_ID(0);
-  // }
 
   status = sl_mqtt_client_init(&client, mqtt_client_event_handler);
   if (status != SL_STATUS_OK) {
@@ -329,7 +356,7 @@ sl_status_t mqtt_example()
     mqtt_client_cleanup();
     return status;
   }
-  printf("\r\nMQTT Client Init Done\r\n");
+  printf("\r\nMQTT Client Init Successful\r\n");
 
   printf("\r\nConnecting to Broker at : \r\n");
   print_sl_ip_address(&mqtt_broker_ip);
@@ -346,10 +373,6 @@ sl_status_t mqtt_example()
     return status;
   }
 
-  // while (!is_execution_completed) {
-  //   osThreadYield();
-  // }
-
   return SL_STATUS_OK;
 }
 
@@ -357,12 +380,56 @@ sl_status_t mqtt_example()
 void mqtt_client_task(void *argument)
 {
   UNUSED_PARAMETER(argument);
+  int32_t event_id;
 
   while(1){
+        // checking for events list
+    event_id = mqtt_app_get_event();
 
-    osSemaphoreAcquire(mqtt_thread_sem, osWaitForever);
-    // if events are not received loop will be continued.
+    if (event_id == -1) {
+      osSemaphoreAcquire(mqtt_thread_sem, osWaitForever);
+      // if events are not received loop will be continued.
+      continue;
+    }
 
-    printf("MQTT LOOP\r\n");
+    switch (event_id)
+    {
+    case MQTT_INIT_EVENT:
+      mqtt_app_clear_event(MQTT_INIT_EVENT);
+      setup_mqtt();
+      break;
+    
+    case MQTT_PUBLISH_EVENT:
+      mqtt_app_clear_event(MQTT_PUBLISH_EVENT);
+      printf("MQTT PUBLISH\r\n");
+      break;
+    
+    default:
+      break;
+    }
+  }
+}
+
+/*==============================================*/
+/**
+ * @fn         wifi_app_send_to_mqtt
+ * @brief      this function is used to send data to mqtt app.
+ * @param[in]   msg_type, it indicates write/notification event id.
+ * @param[in]  data, raw data pointer.
+ * @param[in]  data_len, raw data length.
+ * @return     none.
+ * @section description
+ */
+void wifi_app_send_to_mqtt(uint16_t msg_type, uint8_t *data, uint16_t data_len)
+{
+  UNUSED_PARAMETER(data);
+  UNUSED_PARAMETER(data_len);
+
+  switch (msg_type) {
+    case WIFI_APP_CONNECTION_STATUS:
+      mqtt_app_set_event(MQTT_INIT_EVENT);
+      break;
+    default:
+      break;
   }
 }

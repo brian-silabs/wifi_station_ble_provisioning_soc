@@ -27,7 +27,6 @@ extern sl_ip_address_t mqtt_broker_ip;
  * Initialize application.
  ******************************************************************************/
 void app_init(void);
-sl_status_t mqtt_example();
 
 /***************************************************************************/ /**
  * App ticking function.

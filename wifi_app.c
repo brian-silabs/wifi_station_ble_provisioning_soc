@@ -101,6 +101,7 @@ sl_ip_address_t mqtt_broker_ip;
 
 static sl_status_t set_twt(void);
 extern void wifi_app_send_to_ble(uint16_t msg_type, uint8_t *data, uint16_t data_len);
+extern void wifi_app_send_to_mqtt(uint16_t msg_type, uint8_t *data, uint16_t data_len);
 static sl_status_t show_scan_results();
 void wifi_app_set_event(uint32_t event_num);
 extern uint8_t coex_ssid[50], pwd[34], sec_type;
@@ -540,6 +541,7 @@ void wifi_app_task()
           // update wlan application state
           wifi_app_set_event(WIFI_APP_IPCONFIG_DONE_STATE);
           wifi_app_send_to_ble(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
+          wifi_app_send_to_mqtt(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
         }
 
         osSemaphoreRelease(wlan_thread_sem);
@@ -558,8 +560,6 @@ void wifi_app_task()
           return;
         }
         printf("\r\nTWT Config Done\r\n");
-
-        mqtt_example();
       } break;
 
       case WIFI_APP_ERROR_STATE: {
