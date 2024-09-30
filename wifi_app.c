@@ -55,11 +55,13 @@
 extern osSemaphoreId_t wlan_thread_sem;
 
 #define DHCP_HOST_NAME    NULL
-#define TIMEOUT_MS        5000
-#define WIFI_SCAN_TIMEOUT 10000
+#define TIMEOUT_MS        15000
+#define WIFI_SCAN_TIMEOUT 15000
 
 #define TWT_AUTO_CONFIG  1
 #define TWT_SCAN_TIMEOUT 10000
+
+#define MQTT_SERVER_ADDRESS_BYTE_4 1
 
 // Use case based TWT selection params
 #define TWT_RX_LATENCY                       60000 // in milli seconds
@@ -536,7 +538,7 @@ void wifi_app_task()
 
           LOG_PRINT("\r\nDeriving into MQTT Broker Address : \r\n");
           memcpy(&mqtt_broker_ip, &ip, sizeof(sl_ip_address_t));
-          mqtt_broker_ip.ip.v4.bytes[3] = 1;
+          mqtt_broker_ip.ip.v4.bytes[3] = MQTT_SERVER_ADDRESS_BYTE_4;
 
           // update wlan application state
           wifi_app_set_event(WIFI_APP_IPCONFIG_DONE_STATE);

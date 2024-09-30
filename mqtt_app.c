@@ -56,6 +56,8 @@
 #define MQTT_INIT_EVENT     0x01
 #define MQTT_PUBLISH_EVENT  0x02
 
+#define MQTT_TIMEOUT_MS     5000 //30s
+
 #define ENABLE_MQTT_SUBSCRIBE_PUBLISH 1
 
 #define MQTT_BROKER_PORT 1883
@@ -92,6 +94,8 @@
 /******************************************************
  *               Variable Definitions
  ******************************************************/
+
+static bool mqttIsInitialized = false;
 
 sl_status_t callback_status = SL_STATUS_OK;
 
@@ -267,19 +271,19 @@ void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event, void 
       printf("MQTT client connection success\r\n");
 #if ENABLE_MQTT_SUBSCRIBE_PUBLISH
       sl_status_t status;
-      status = sl_mqtt_client_subscribe(client,
-                                        (uint8_t *)TOPIC_TO_BE_SUBSCRIBED,
-                                        strlen(TOPIC_TO_BE_SUBSCRIBED),
-                                        QOS_OF_SUBSCRIPTION,
-                                        0,
-                                        mqtt_client_message_handler,
-                                        TOPIC_TO_BE_SUBSCRIBED);
-      if (status != SL_STATUS_IN_PROGRESS) {
-        printf("Failed to subscribe : 0x%lX\r\n", status);
-
-        mqtt_client_cleanup();
-        return;
-      }
+//      status = sl_mqtt_client_subscribe(client,
+//                                        (uint8_t *)TOPIC_TO_BE_SUBSCRIBED,
+//                                        strlen(TOPIC_TO_BE_SUBSCRIBED),
+//                                        QOS_OF_SUBSCRIPTION,
+//                                        0,
+//                                        mqtt_client_message_handler,
+//                                        TOPIC_TO_BE_SUBSCRIBED);
+//      if (status != SL_STATUS_IN_PROGRESS) {
+//        printf("Failed to subscribe : 0x%lX\r\n", status);
+//
+//        mqtt_client_cleanup();
+//        return;
+//      }
 
       status = sl_mqtt_client_publish(client, &message_to_be_published, 0, &message_to_be_published);
       if (status != SL_STATUS_IN_PROGRESS) {
@@ -373,6 +377,7 @@ sl_status_t setup_mqtt(void)
     return status;
   }
 
+  mqttIsInitialized = true;
   return SL_STATUS_OK;
 }
 
@@ -381,14 +386,18 @@ void mqtt_client_task(void *argument)
 {
   UNUSED_PARAMETER(argument);
   int32_t event_id;
+  sl_status_t status;
 
   while(1){
         // checking for events list
     event_id = mqtt_app_get_event();
 
     if (event_id == -1) {
-      osSemaphoreAcquire(mqtt_thread_sem, osWaitForever);
+      osStatus_t error = osSemaphoreAcquire(mqtt_thread_sem, MQTT_TIMEOUT_MS);
       // if events are not received loop will be continued.
+      if ((osErrorTimeout == error) && (mqttIsInitialized)){
+        mqtt_app_set_event(MQTT_PUBLISH_EVENT);
+      }
       continue;
     }
 
@@ -402,6 +411,13 @@ void mqtt_client_task(void *argument)
     case MQTT_PUBLISH_EVENT:
       mqtt_app_clear_event(MQTT_PUBLISH_EVENT);
       printf("MQTT PUBLISH\r\n");
+      status = sl_mqtt_client_publish(&client, &message_to_be_published, 0, &message_to_be_published);
+      if (status != SL_STATUS_IN_PROGRESS) {
+        printf("Failed to publish message: 0x%lX\r\n", status);
+
+        mqtt_client_cleanup();
+        return;
+      }
       break;
     
     default:

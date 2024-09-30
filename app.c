@@ -185,31 +185,31 @@ void application(void *argument)
     return;
   }
 
-  ble_thread_sem = osSemaphoreNew(1, 0, NULL);
-  if (ble_thread_sem == NULL) {
-    LOG_PRINT("Failed to create ble_thread_sem\n");
-    return;
-  }
+   ble_thread_sem = osSemaphoreNew(1, 0, NULL);
+   if (ble_thread_sem == NULL) {
+     LOG_PRINT("Failed to create ble_thread_sem\n");
+     return;
+   }
 
-  if (osThreadNew((osThreadFunc_t)rsi_ble_configurator_task, NULL, &ble_thread_attributes) == NULL) {
-    LOG_PRINT("Failed to create BLE thread\n");
-  }
+   if (osThreadNew((osThreadFunc_t)rsi_ble_configurator_task, NULL, &ble_thread_attributes) == NULL) {
+     LOG_PRINT("Failed to create BLE thread\n");
+   }
 
-  mqtt_thread_sem = osSemaphoreNew(1, 0, NULL);
-  if (mqtt_thread_sem == NULL) {
-    LOG_PRINT("Failed to create mqtt_thread_sem\n");
-    return;
-  }
+   mqtt_thread_sem = osSemaphoreNew(1, 0, NULL);
+   if (mqtt_thread_sem == NULL) {
+     LOG_PRINT("Failed to create mqtt_thread_sem\n");
+     return;
+   }
 
-  if (osThreadNew((osThreadFunc_t)mqtt_client_task, NULL, &mqtt_thread_attributes) == NULL) {
-    LOG_PRINT("Failed to create MQTT thread\n");
-  }
+   if (osThreadNew((osThreadFunc_t)mqtt_client_task, NULL, &mqtt_thread_attributes) == NULL) {
+     LOG_PRINT("Failed to create MQTT thread\n");
+   }
 
-  // BLE initialization
-  rsi_ble_configurator_init();
+   // BLE initialization
+   rsi_ble_configurator_init();
 
-  // Remains running as the WiFi Task
-  wifi_app_task();
+   // Remains running as the WiFi Task
+   wifi_app_task();
 
   return;
 }
