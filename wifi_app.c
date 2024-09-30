@@ -48,6 +48,7 @@
 #include "rsi_common_apis.h"
 
 #include "app.h"
+#include "sl_constants.h"
 
 // WLAN include file for configuration
 
@@ -56,6 +57,20 @@ extern osSemaphoreId_t wlan_thread_sem;
 #define DHCP_HOST_NAME    NULL
 #define TIMEOUT_MS        5000
 #define WIFI_SCAN_TIMEOUT 10000
+
+#define TWT_AUTO_CONFIG  1
+#define TWT_SCAN_TIMEOUT 10000
+
+// Use case based TWT selection params
+#define TWT_RX_LATENCY                       60000 // in milli seconds
+#define DEVICE_AVERAGE_THROUGHPUT            20000 // Kbps
+#define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT 0     // in percentage
+#define TWT_TOLERABLE_DEVIATION              10    // in percentage
+#define TWT_DEFAULT_WAKE_INTERVAL_MS         1024  // in milli seconds
+#define TWT_DEFAULT_WAKE_DURATION_MS         8     // in milli seconds
+#define MAX_BEACON_WAKE_UP_AFTER_SP \
+  2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
+
 
 /*
  *********************************************************************************************************
@@ -76,6 +91,7 @@ sl_wifi_client_configuration_t access_point = { 0 };
 sl_net_ip_configuration_t ip_address        = { 0 };
 
 static uint32_t wlan_app_event_map;
+sl_ip_address_t mqtt_broker_ip;
 
 /*
  *********************************************************************************************************
@@ -83,6 +99,7 @@ static uint32_t wlan_app_event_map;
  *********************************************************************************************************
  */
 
+static sl_status_t set_twt(void);
 extern void wifi_app_send_to_ble(uint16_t msg_type, uint8_t *data, uint16_t data_len);
 static sl_status_t show_scan_results();
 void wifi_app_set_event(uint32_t event_num);
@@ -91,6 +108,127 @@ uint8_t retry = 1;
 
 uint8_t conn_status;
 extern uint8_t magic_word;
+
+sl_wifi_twt_request_t default_twt_setup_configuration = {
+  .twt_enable              = 1,
+  .twt_flow_id             = 1,
+  .wake_duration           = 0x60,
+  .wake_duration_unit      = 0,
+  .wake_duration_tol       = 0x60,
+  .wake_int_exp            = 13,
+  .wake_int_exp_tol        = 13,
+  .wake_int_mantissa       = 0x1D4C,
+  .wake_int_mantissa_tol   = 0x1D4C,
+  .implicit_twt            = 1,
+  .un_announced_twt        = 1,
+  .triggered_twt           = 0,
+  .twt_channel             = 0,
+  .twt_protection          = 0,
+  .restrict_tx_outside_tsp = 1,
+  .twt_retry_limit         = 6,
+  .twt_retry_interval      = 10,
+  .req_type                = 1,
+  .negotiation_type        = 0,
+};
+
+sl_wifi_twt_selection_t default_twt_selection_configuration = {
+  .twt_enable                            = 1,
+  .average_tx_throughput                 = 0,
+  .tx_latency                            = 0,
+  .rx_latency                            = TWT_RX_LATENCY,
+  .device_average_throughput             = DEVICE_AVERAGE_THROUGHPUT,
+  .estimated_extra_wake_duration_percent = ESTIMATE_EXTRA_WAKE_DURATION_PERCENT,
+  .twt_tolerable_deviation               = TWT_TOLERABLE_DEVIATION,
+  .default_wake_interval_ms              = TWT_DEFAULT_WAKE_INTERVAL_MS,
+  .default_minimum_wake_duration_ms      = TWT_DEFAULT_WAKE_DURATION_MS,
+  .beacon_wake_up_count_after_sp         = MAX_BEACON_WAKE_UP_AFTER_SP
+};
+
+
+sl_status_t twt_callback_handler(sl_wifi_event_t event,
+                                 sl_si91x_twt_response_t *result,
+                                 uint32_t result_length,
+                                 void *arg);
+/******************************************************
+ *               Function Definitions
+ ******************************************************/
+
+sl_status_t twt_callback_handler(sl_wifi_event_t event,
+                                 sl_si91x_twt_response_t *result,
+                                 uint32_t result_length,
+                                 void *arg)
+{
+  UNUSED_PARAMETER(result_length);
+  UNUSED_PARAMETER(arg);
+
+  if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
+    return SL_STATUS_FAIL;
+  }
+
+  switch (event) {
+    case SL_WIFI_TWT_RESPONSE_EVENT:
+      printf("\r\nTWT Setup success");
+      break;
+    case SL_WIFI_TWT_UNSOLICITED_SESSION_SUCCESS_EVENT:
+      printf("\r\nUnsolicited TWT Setup success");
+      break;
+    case SL_WIFI_TWT_AP_REJECTED_EVENT:
+      printf("\r\nTWT Setup Failed. TWT Setup rejected by AP");
+      break;
+    case SL_WIFI_TWT_OUT_OF_TOLERANCE_EVENT:
+      printf("\r\nTWT Setup Failed. TWT response out of tolerance limits");
+      break;
+    case SL_WIFI_TWT_RESPONSE_NOT_MATCHED_EVENT:
+      printf("\r\nTWT Setup Failed. TWT Response not matched with the request parameters");
+      break;
+    case SL_WIFI_TWT_UNSUPPORTED_RESPONSE_EVENT:
+      printf("\r\nTWT Setup Failed. TWT Response Unsupported");
+      break;
+    case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
+      printf("\r\nTWT Setup Failed. Max retries reached");
+      break;
+    case SL_WIFI_TWT_INACTIVE_DUE_TO_ROAMING_EVENT:
+      printf("\r\nTWT session inactive due to roaming");
+      break;
+    case SL_WIFI_TWT_INACTIVE_DUE_TO_DISCONNECT_EVENT:
+      printf("\r\nTWT session inactive due to wlan disconnection");
+      break;
+    case SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT:
+      printf("\r\nTWT session teardown success");
+      break;
+    case SL_WIFI_TWT_AP_TEARDOWN_SUCCESS_EVENT:
+      printf("\r\nTWT session teardown from AP");
+      break;
+    case SL_WIFI_TWT_INACTIVE_NO_AP_SUPPORT_EVENT:
+      printf("\r\nConnected AP Does not support TWT");
+      break;
+    case SL_WIFI_RESCHEDULE_TWT_SUCCESS_EVENT:
+      printf("\r\nTWT rescheduled");
+      break;
+    case SL_WIFI_TWT_INFO_FRAME_EXCHANGE_FAILED_EVENT:
+      printf("\r\nTWT rescheduling failed due to a failure in the exchange of TWT information frames.");
+      break;
+    default:
+      printf("\r\nTWT Setup Failed.");
+  }
+  if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {
+    printf("\r\n wake duration : 0x%X", result->wake_duration);
+    printf("\r\n wake_duration_unit: 0x%X", result->wake_duration_unit);
+    printf("\r\n wake_int_exp : 0x%X", result->wake_int_exp);
+    printf("\r\n negotiation_type : 0x%X", result->negotiation_type);
+    printf("\r\n wake_int_mantissa : 0x%X", result->wake_int_mantissa);
+    printf("\r\n implicit_twt : 0x%X", result->implicit_twt);
+    printf("\r\n un_announced_twt : 0x%X", result->un_announced_twt);
+    printf("\r\n triggered_twt : 0x%X", result->triggered_twt);
+    printf("\r\n twt_channel : 0x%X", result->twt_channel);
+    printf("\r\n twt_protection : 0x%X", result->twt_protection);
+    printf("\r\n twt_flow_id : 0x%X\r\n", result->twt_flow_id);
+  } else if (event < SL_WIFI_TWT_EVENTS_END) {
+    printf("\r\n twt_flow_id : 0x%X", result->twt_flow_id);
+    printf("\r\n negotiation_type : 0x%X\r\n", result->negotiation_type);
+  }
+  return SL_STATUS_OK;
+}
 
 /*==============================================*/
 /**
@@ -387,11 +525,17 @@ void wifi_app_task()
           disassosiated = 0;
 
 #if defined(SL_SI91X_PRINT_DBG_LOG)
+          LOG_PRINT("\r\nIP Address : \r\n");
           sl_ip_address_t ip = { 0 };
           ip.type            = ip_address.type;
           ip.ip.v4.value     = ip_address.ip.v4.ip_address.value;
           print_sl_ip_address(&ip);
+          LOG_PRINT("\r\n");
 #endif
+
+          LOG_PRINT("\r\nDeriving into MQTT Broker Address : \r\n");
+          memcpy(&mqtt_broker_ip, &ip, sizeof(sl_ip_address_t));
+          mqtt_broker_ip.ip.v4.bytes[3] = 1;
 
           // update wlan application state
           wifi_app_set_event(WIFI_APP_IPCONFIG_DONE_STATE);
@@ -400,15 +544,20 @@ void wifi_app_task()
 
         osSemaphoreRelease(wlan_thread_sem);
         LOG_PRINT("WIFI App Connected State\n");
-
       } break;
 
       case WIFI_APP_IPCONFIG_DONE_STATE: {
         wifi_app_clear_event(WIFI_APP_IPCONFIG_DONE_STATE);
 
         osSemaphoreRelease(wlan_thread_sem);
-        LOG_PRINT("WIFI App IPCONFIG Done State\n");
-        LOG_PRINT("WIFI App READY for TWT\n");
+        LOG_PRINT("WIFI App IPCONFIG Done State, setting up TWT\n");
+
+        status = set_twt();
+        if (status != SL_STATUS_OK) {
+          printf("\r\nError while configuring TWT parameters: 0x%lx \r\n", status);
+          return;
+        }
+        printf("\r\nTWT Config Done\r\n");
 
         mqtt_example();
       } break;
@@ -470,4 +619,41 @@ void wifi_app_task()
   if (scan_result != NULL) {
     free(scan_result);
   }
+}
+
+//SL_ADDITIONAL_STATUS_ERRORS
+static sl_status_t set_twt(void){
+  sl_wifi_performance_profile_t performance_profile = { 0 };
+  sl_status_t status                                = SL_STATUS_OK;
+
+  LOG_PRINT("\r\nSetting up TWT\n");
+  //! Set TWT Config
+  sl_wifi_set_twt_config_callback(twt_callback_handler, NULL);
+  if (TWT_AUTO_CONFIG == 1) {
+    performance_profile.twt_selection = default_twt_selection_configuration;
+    status                            = sl_wifi_target_wake_time_auto_selection(&performance_profile.twt_selection);
+  } else {
+    performance_profile.twt_request = default_twt_setup_configuration;
+    status                          = sl_wifi_enable_target_wake_time(&performance_profile.twt_request);
+  }
+
+  VERIFY_STATUS_AND_RETURN(status);
+  // A small delay is added so that the asynchronous response from TWT is printed in correct format.
+  osDelay(100);
+
+  //! Enable Broadcast data filter
+  status = sl_wifi_filter_broadcast(5000, 1, 1);
+
+  VERIFY_STATUS_AND_RETURN(status);
+
+  //! Apply power save profile
+  performance_profile.profile = ASSOCIATED_POWER_SAVE_LOW_LATENCY;
+  status                      = sl_wifi_set_performance_profile(&performance_profile);
+  if (status != SL_STATUS_OK) {
+    printf("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
+    return status;
+  }
+
+  LOG_PRINT("\r\nAssociated Power Save Enabled\n");
+  return SL_STATUS_OK;
 }

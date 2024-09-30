@@ -54,11 +54,13 @@
 // Function prototypes
 extern void wifi_app_task(void);
 extern void rsi_ble_configurator_task(void *argument);
+extern void mqtt_client_task(void *argument);
 void rsi_ble_configurator_init(void);
 uint8_t magic_word;
 
 osSemaphoreId_t wlan_thread_sem;
 osSemaphoreId_t ble_thread_sem;
+osSemaphoreId_t mqtt_thread_sem;
 
 static const sl_wifi_device_configuration_t
   config = { .boot_option = LOAD_NWP_FW,
@@ -142,6 +144,18 @@ const osThreadAttr_t ble_thread_attributes = {
   .reserved   = 0,
 };
 
+const osThreadAttr_t mqtt_thread_attributes = {
+  .name       = "mqtt_thread",
+  .attr_bits  = 0,
+  .cb_mem     = 0,
+  .cb_size    = 0,
+  .stack_mem  = 0,
+  .stack_size = 3072,
+  .priority   = osPriorityNormal,
+  .tz_module  = 0,
+  .reserved   = 0,
+};
+
 void application(void *argument)
 {
   UNUSED_PARAMETER(argument);
@@ -181,9 +195,20 @@ void application(void *argument)
     LOG_PRINT("Failed to create BLE thread\n");
   }
 
+  mqtt_thread_sem = osSemaphoreNew(1, 0, NULL);
+  if (mqtt_thread_sem == NULL) {
+    LOG_PRINT("Failed to create mqtt_thread_sem\n");
+    return;
+  }
+
+  if (osThreadNew((osThreadFunc_t)mqtt_client_task, NULL, &mqtt_thread_attributes) == NULL) {
+    LOG_PRINT("Failed to create MQTT thread\n");
+  }
+
   // BLE initialization
   rsi_ble_configurator_init();
 
+  // Remains running as the WiFi Task
   wifi_app_task();
 
   return;
