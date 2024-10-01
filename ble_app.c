@@ -658,6 +658,12 @@ void rsi_ble_configurator_init(void)
   // set device in advertising mode.
   rsi_ble_start_advertising();
   LOG_PRINT("\r\nBLE Advertising Started...\r\n");
+
+  //! initiating power save in BLE mode
+  LOG_PRINT("\r\nPutting BLE in Power Save mode...\r\n");
+  if (rsi_bt_power_save_profile(PSP_MODE, PSP_TYPE) != RSI_SUCCESS) {
+    LOG_PRINT("\r\n Failed to initiate power save in BLE mode \r\n");
+  }
 }
 
 /*==============================================*/
@@ -726,13 +732,13 @@ void rsi_ble_configurator_task(void *argument)
                   rsi_6byte_dev_address_to_ascii(remote_dev_addr, disconn_event_to_app.dev_addr));
 
         // set device in advertising mode.
-adv:
-        status = rsi_ble_start_advertising();
-        if (status != RSI_SUCCESS) {
-          goto adv;
-        } else {
-          LOG_PRINT("\r\nStarted Advertising \n");
-        }
+//adv:
+//        status = rsi_ble_start_advertising();
+//        if (status != RSI_SUCCESS) {
+//          goto adv;
+//        } else {
+//          LOG_PRINT("\r\nStarted Advertising \n");
+//        }
       } break;
       case RSI_APP_FW_VERSION: {
         sl_wifi_firmware_version_t firmware_version = { 0 };

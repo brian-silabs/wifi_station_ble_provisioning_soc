@@ -171,6 +171,7 @@ sl_status_t twt_callback_handler(sl_wifi_event_t event,
   switch (event) {
     case SL_WIFI_TWT_RESPONSE_EVENT:
       printf("\r\nTWT Setup success");
+      wifi_app_send_to_mqtt(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
       break;
     case SL_WIFI_TWT_UNSOLICITED_SESSION_SUCCESS_EVENT:
       printf("\r\nUnsolicited TWT Setup success");
@@ -543,7 +544,6 @@ void wifi_app_task()
           // update wlan application state
           wifi_app_set_event(WIFI_APP_IPCONFIG_DONE_STATE);
           wifi_app_send_to_ble(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
-          wifi_app_send_to_mqtt(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
         }
 
         osSemaphoreRelease(wlan_thread_sem);
@@ -649,7 +649,7 @@ static sl_status_t set_twt(void){
   VERIFY_STATUS_AND_RETURN(status);
 
   //! Apply power save profile
-  performance_profile.profile = ASSOCIATED_POWER_SAVE_LOW_LATENCY;
+  performance_profile.profile = ASSOCIATED_POWER_SAVE;
   status                      = sl_wifi_set_performance_profile(&performance_profile);
   if (status != SL_STATUS_OK) {
     printf("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
