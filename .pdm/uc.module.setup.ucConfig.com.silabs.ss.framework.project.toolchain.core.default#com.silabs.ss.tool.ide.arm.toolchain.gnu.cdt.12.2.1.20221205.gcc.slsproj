@@ -12,6 +12,9 @@
     <file name="sl_core_config.h" generated="true" linked="false"/>
     <file name="emlib_core_debug_config.h" generated="true" linked="false"/>
     <file name="sl_si91x_stack_size_config.h" generated="true" linked="false"/>
+    <file name="sl_si91x_power_manager_wakeup_source_config.h" generated="true" linked="false"/>
+    <file name="sl_sleeptimer_config.h" generated="true" linked="false"/>
+    <file name="sl_si91x_power_manager_config_1.h" generated="true" linked="false"/>
   </folder>
   <includePath uri="studio:/project/config"/>
 </project>

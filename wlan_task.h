@@ -35,6 +35,13 @@ typedef enum wifi_app_cmd_e
   WIFI_APP_TIMEOUT_NOTIFY = 5
 } wifi_app_cmd_t;
 
+/**
+ * @brief Start the WLAN task context.
+ *
+ * This function initializes and starts the WLAN task context, which is responsible for managing the WiFi connection and related functionality.
+ *
+ * @return SL_STATUS_OK if the WLAN task context was started successfully, or an appropriate error code otherwise.
+ */
 sl_status_t start_wlan_task_context(void);
 
 #endif // WLAN_TASK_H

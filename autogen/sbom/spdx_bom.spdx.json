@@ -5,7 +5,7 @@
   "name" : "Silicon-Laboratories",
   "documentNamespace" : "https://silabs.com",
   "creationInfo" : {
-    "created" : "2025-02-18T13:59:04.315538Z",
+    "created" : "2025-02-18T16:12:11.476934Z",
     "creators" : [ "Tool: Silicon Labs Configuration Tooling" ]
   },
   "comment" : "TERMS OF USE - SILICON LABORATORIES INC.\n(With respect to Silicon Labs software components, this Software Bill of Materials (SBOM) is based upon Silicon Labs'\nreview and analysis of the code version when released.  It is provided \"AS IS\" and does not modify, change or alter\nthe terms or conditions of your use of Silicon Labs' software and/or SDKs based upon license terms and/or agreements\nassociated with this software or SDKs when distributed to you, received by you, or installed by you.  Further, no\nwarranties or obligations are created by this SBOM.  It is your obligation to comply with the terms of licenses\nreferenced in this SBOM.)",
@@ -640,6 +640,78 @@
     "supplier" : "Organization: NOASSERTION",
     "licenseConcluded" : "Zlib"
   }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager",
+    "name" : "Power Manager",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save",
+    "name" : "POWER SAVE",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save",
+    "name" : "ROM DRIVER POWER SAVE",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode",
+    "name" : "SI91X TICK-LESS MODE",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "MSLA"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save",
+    "name" : "Si91x Cortex-M4 Powersave",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config",
+    "name" : "PM Wakeup Source Configuration",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc",
+    "name" : "SYSRTC",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config",
+    "name" : "Power Manager Configuration",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x",
+    "name" : "Sleep Timer for Si91x",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
     "SPDXID" : "SPDXRef-simplicity_sdk-2024.12.1",
     "name" : "Simplicity SDK Suite",
     "versionInfo" : "2024.12.1",
@@ -917,6 +989,14 @@
   }, {
     "SPDXID" : "SPDXRef-simplicity_sdk-2024.12.1-sl_common",
     "name" : "Common Functions",
+    "versionInfo" : "2024.12.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: Silicon Laboratories, Inc.",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-simplicity_sdk-2024.12.1-sleeptimer",
+    "name" : "Sleep Timer",
     "versionInfo" : "2024.12.1",
     "primaryPackagePurpose" : "LIBRARY",
     "downloadLocation" : "NOASSERTION",
@@ -1240,6 +1320,42 @@
     "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc",
     "relationshipType" : "CONTAINS"
   }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x",
+    "relationshipType" : "CONTAINS"
+  }, {
     "spdxElementId" : "SPDXRef-simplicity_sdk-2024.12.1",
     "relatedSpdxElement" : "SPDXRef-simplicity_sdk-2024.12.1-brd4002a",
     "relationshipType" : "CONTAINS"
@@ -1362,6 +1478,10 @@
   }, {
     "spdxElementId" : "SPDXRef-simplicity_sdk-2024.12.1",
     "relatedSpdxElement" : "SPDXRef-simplicity_sdk-2024.12.1-sl_common",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-simplicity_sdk-2024.12.1",
+    "relatedSpdxElement" : "SPDXRef-simplicity_sdk-2024.12.1-sleeptimer",
     "relationshipType" : "CONTAINS"
   } ]
 }

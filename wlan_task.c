@@ -5,18 +5,18 @@
 #include "wlan_task_config.h"
 
 #include "cmsis_os2.h"
-
 #include "sl_status.h"
 
+// Local utilities
+#include "thread_safe_print.h"
+
 //SL Wi-Fi SDK includes
+#include "sl_constants.h"
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
 #include "sl_net.h"
 #include "sl_utility.h"
 #include "sl_net_si91x.h"
-
-// Local utilities
-#include "thread_safe_print.h"
 
 /*
  *********************************************************************************************************
@@ -55,6 +55,8 @@ static volatile bool scan_complete          = false;
 static volatile sl_status_t callback_status = SL_STATUS_OK;
 sl_wifi_client_configuration_t access_point = { 0 };
 sl_net_ip_configuration_t ip_address        = { 0 };
+
+static sl_wifi_performance_profile_t performance_profile_g = { .profile = SL_WIFI_PERFORMANCE_PROFILE };
 
 //extern uint8_t coex_ssid[50], pwd[34], sec_type;
 uint8_t coex_ssid[50], pwd[34], sec_type;
@@ -210,7 +212,7 @@ void wlan_task(void *argument)
 {
     UNUSED_PARAMETER(argument);
 
-    int32_t status                     = RSI_SUCCESS;
+    sl_status_t status                 = SL_STATUS_OK;
     sl_wifi_firmware_version_t version = { 0 };
 
     int32_t wlan_event_id = 0;
@@ -219,9 +221,9 @@ void wlan_task(void *argument)
     status = sl_wifi_init(&config, NULL, sl_wifi_default_event_handler);
     if (status != SL_STATUS_OK) {
         THREAD_SAFE_PRINT("\r\nWi-Fi Initialization Failed, Error Code : 0x%lX\r\n", status);
-        return;
+        return; // Should be an assertion
     }
-    THREAD_SAFE_PRINT("\r\n Wi-Fi initialization is successful\n");
+    THREAD_SAFE_PRINT("\r\nWi-Fi initialization is successful\n");
 
     //! Firmware version Prints
     status = sl_wifi_get_firmware_version(&version);
@@ -235,9 +237,15 @@ void wlan_task(void *argument)
     scan_result = (sl_wifi_scan_result_t *)malloc(scanbuf_size);
     if (scan_result == NULL) {
         THREAD_SAFE_PRINT("Failed to allocate memory for scan result\n");
-        return;
+        return; // Should be an assertion
     }
     memset(scan_result, 0, scanbuf_size);
+
+    status = sl_wifi_set_performance_profile(&performance_profile_g);
+    if(status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("Failed to set performance profile, Error Code : 0x%lX\r\n", status);
+        return; // Should be an assertion
+    }
 
     while (true)
     {

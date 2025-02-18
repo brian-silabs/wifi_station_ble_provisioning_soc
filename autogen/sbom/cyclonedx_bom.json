@@ -3,7 +3,7 @@
   "specVersion" : "1.6",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2025-02-18T13:59:04.315538Z",
+    "timestamp" : "2025-02-18T16:12:11.476934Z",
     "authors" : [ {
       "name" : "Silicon Laboratories, Inc."
     } ],
@@ -719,6 +719,87 @@
       "licenses" : [ {
         "expression" : "Zlib"
       } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:sl_power_manager",
+      "name" : "Power Manager",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:systemlevel_power_save",
+      "name" : "POWER SAVE",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:romdriver_power_save",
+      "name" : "ROM DRIVER POWER SAVE",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:si91x_tickless_mode",
+      "name" : "SI91X TICK-LESS MODE",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "MSLA"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:sllib_m4_power_save",
+      "name" : "Si91x Cortex-M4 Powersave",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:wakeup_source_config",
+      "name" : "PM Wakeup Source Configuration",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:rsilib_sysrtc",
+      "name" : "SYSRTC",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:power_manager_config",
+      "name" : "Power Manager Configuration",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:sleeptimer_si91x",
+      "name" : "Sleep Timer for Si91x",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
     } ]
   }, {
     "scope" : "required",
@@ -1126,6 +1207,18 @@
       "type" : "library",
       "bom-ref" : "simplicity_sdk:2024.12.1:sl_common",
       "name" : "Common Functions",
+      "version" : "2024.12.1",
+      "supplier" : {
+        "name" : "Silicon Laboratories, Inc."
+      },
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "simplicity_sdk:2024.12.1:sleeptimer",
+      "name" : "Sleep Timer",
       "version" : "2024.12.1",
       "supplier" : {
         "name" : "Silicon Laboratories, Inc."

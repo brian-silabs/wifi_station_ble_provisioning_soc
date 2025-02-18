@@ -39,7 +39,7 @@
 #include "app.h"
 #include "thread_safe_print.h"
 #include "wlan_task.h"
-// #include "ble_task.h"
+#include "ble_task.h"
 // #include "mqtt_task.h"
 // #include "host_task.h"
 
@@ -65,6 +65,7 @@ void startup_routine(void *argument)
 
   THREAD_SAFE_PRINT("Setting up application tasks\n");
   start_wlan_task_context();
+  start_ble_task_context();
 
   THREAD_SAFE_PRINT("\nApplication tasks setup Done, killing startup routine\n");
   osThreadExit();

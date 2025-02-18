@@ -13,7 +13,7 @@ DocumentNamespace: https://silabs.com
 
 ## Creation Information
 Creator: Organization: Silicon Laboratories, Inc.
-Created: 2025-02-18T13:59:04.315538Z
+Created: 2025-02-18T16:12:11.476934Z
 ## Relationships
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-wiseconnect3_sdk-3.4.1
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-simplicity_sdk-2024.12.1
@@ -102,6 +102,15 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_usart_driver
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_ulpss
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
 
 ## Package Information
 PackageName: SIWG917M111MGTBA
@@ -954,6 +963,105 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
+PackageName: Power Manager
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: POWER SAVE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: ROM DRIVER POWER SAVE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: SI91X TICK-LESS MODE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: MSLA
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Si91x Cortex-M4 Powersave
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: PM Wakeup Source Configuration
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: SYSRTC
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Power Manager Configuration
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Sleep Timer for Si91x
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
 PackageName: Simplicity SDK Suite
 SPDXID: SPDXRef-simplicity_sdk-2024.12.1
 PackageVersion: 2024.12.1
@@ -988,6 +1096,7 @@ Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-emlib_core
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sl_system_init
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sl_common
+Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
 
 ## Package Information
 PackageName: BRD4002A
@@ -1345,3 +1454,14 @@ PackageSupplier: Organization: Silicon Laboratories, Inc.
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-simplicity_sdk-2024.12.1-sl_common CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1
+
+## Package Information
+PackageName: Sleep Timer
+SPDXID: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
+PackageVersion: 2024.12.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: Silicon Laboratories, Inc.
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1

@@ -1,8 +1,11 @@
 #ifndef THREAD_SAFE_PRINT_H
 #define THREAD_SAFE_PRINT_H
 
+#include <stdio.h>
+
 #include "sl_status.h"
 #include "cmsis_os2.h"
+
 
 extern osMutexId_t debug_prints_mutex;
 

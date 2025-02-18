@@ -10,7 +10,7 @@ referenced in this SBOM.)
 -->
 <bom xmlns="http://cyclonedx.org/schema/bom/1.6" version="1">
   <metadata>
-    <timestamp>2025-02-18T13:59:04.315538Z</timestamp>
+    <timestamp>2025-02-18T16:12:11.476934Z</timestamp>
     <authors>
       <author>
         <name>Silicon Laboratories, Inc.</name>
@@ -571,6 +571,69 @@ referenced in this SBOM.)
             <expression>Zlib</expression>
           </licenses>
         </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:sl_power_manager" type="library">
+          <name>Power Manager</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:systemlevel_power_save" type="library">
+          <name>POWER SAVE</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:romdriver_power_save" type="library">
+          <name>ROM DRIVER POWER SAVE</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:si91x_tickless_mode" type="library">
+          <name>SI91X TICK-LESS MODE</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>MSLA</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:sllib_m4_power_save" type="library">
+          <name>Si91x Cortex-M4 Powersave</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:wakeup_source_config" type="library">
+          <name>PM Wakeup Source Configuration</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:rsilib_sysrtc" type="library">
+          <name>SYSRTC</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:power_manager_config" type="library">
+          <name>Power Manager Configuration</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:sleeptimer_si91x" type="library">
+          <name>Sleep Timer for Si91x</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
       </components>
     </component>
     <component bom-ref="simplicity_sdk:2024.12.1" type="library">
@@ -922,6 +985,16 @@ referenced in this SBOM.)
         </component>
         <component bom-ref="simplicity_sdk:2024.12.1:sl_common" type="library">
           <name>Common Functions</name>
+          <version>2024.12.1</version>
+	      <supplier>
+	        <name>Silicon Laboratories, Inc.</name>
+	      </supplier>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="simplicity_sdk:2024.12.1:sleeptimer" type="library">
+          <name>Sleep Timer</name>
           <version>2024.12.1</version>
 	      <supplier>
 	        <name>Silicon Laboratories, Inc.</name>

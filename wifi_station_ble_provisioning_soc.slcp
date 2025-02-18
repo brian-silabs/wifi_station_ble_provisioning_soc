@@ -36,6 +36,7 @@ component:
 - {from: wiseconnect3_sdk, id: mqtt}
 - {from: wiseconnect3_sdk, id: network_manager}
 - {from: wiseconnect3_sdk, id: si917_memory_default_config}
+- {from: wiseconnect3_sdk, id: sl_power_manager}
 - {from: wiseconnect3_sdk, id: sl_si91x_basic_buffers}
 - {from: wiseconnect3_sdk, id: sl_si91x_internal_stack}
 - {from: wiseconnect3_sdk, id: syscalls}

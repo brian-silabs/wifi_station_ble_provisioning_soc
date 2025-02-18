@@ -140,9 +140,11 @@
                     <file name="rsi_dac.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_dac.c"/>
                     <file name="rsi_egpio.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_egpio.c"/>
                     <file name="rsi_opamp.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_opamp.c"/>
+                    <file name="rsi_sysrtc.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_sysrtc.c"/>
                     <file name="rsi_udma.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_udma.c"/>
                     <file name="rsi_udma_wrapper.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_udma_wrapper.c"/>
                     <file name="rsi_usart.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/rsi_usart.c"/>
+                    <file name="sl_si91x_m4_ps.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/src/sl_si91x_m4_ps.c"/>
                   </folder>
                   <folder name="inc">
                     <file name="rsi_adc.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/peripheral_drivers/inc/rsi_adc.h"/>
@@ -203,9 +205,31 @@
                   <folder name="clock_manager">
                     <folder name="src">
                       <file name="sl_si91x_clock_manager.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/clock_manager/src/sl_si91x_clock_manager.c"/>
+                      <file name="sli_si91x_clock_manager.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/clock_manager/src/sli_si91x_clock_manager.c"/>
                     </folder>
                     <folder name="inc">
                       <file name="sl_si91x_clock_manager.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/clock_manager/inc/sl_si91x_clock_manager.h"/>
+                      <file name="sli_si91x_clock_manager.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/clock_manager/inc/sli_si91x_clock_manager.h"/>
+                    </folder>
+                  </folder>
+                  <folder name="power_manager">
+                    <folder name="src">
+                      <file name="sl_si91x_power_manager.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/src/sl_si91x_power_manager.c"/>
+                      <file name="sli_si91x_power_manager.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/src/sli_si91x_power_manager.c"/>
+                      <file name="sli_si91x_power_manager_wakeup_init.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/src/sli_si91x_power_manager_wakeup_init.c"/>
+                    </folder>
+                    <folder name="inc">
+                      <file name="sl_si91x_power_manager.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/inc/sl_si91x_power_manager.h"/>
+                      <file name="sli_si91x_power_manager_board_config.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/inc/sli_si91x_power_manager_board_config.h"/>
+                      <file name="sli_si91x_power_manager.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/power_manager/inc/sli_si91x_power_manager.h"/>
+                    </folder>
+                  </folder>
+                  <folder name="sleeptimer">
+                    <folder name="src">
+                      <file name="sl_sleeptimer_hal_si91x_sysrtc.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/sleeptimer/src/sl_sleeptimer_hal_si91x_sysrtc.c"/>
+                    </folder>
+                    <folder name="inc">
+                      <file name="sli_sleeptimer_hal.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/service/sleeptimer/inc/sli_sleeptimer_hal.h"/>
                     </folder>
                   </folder>
                 </folder>
@@ -214,6 +238,7 @@
                     <file name="rsi_bod.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_bod.c"/>
                     <file name="rsi_ipmu.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_ipmu.c"/>
                     <file name="rsi_pll.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_pll.c"/>
+                    <file name="rsi_power_save.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_power_save.c"/>
                     <file name="rsi_rtc.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_rtc.c"/>
                     <file name="rsi_temp_sensor.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_temp_sensor.c"/>
                     <file name="rsi_time_period.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_time_period.c"/>
@@ -461,6 +486,15 @@
         </folder>
       </folder>
     </folder>
+    <folder name="third_party">
+      <folder name="silicon_labs">
+        <folder name="freertos">
+          <folder name="src">
+            <file name="sl_si91x_low_power_tickless_mode.c" linked="false" uri="studio:/sdk/extension/wiseconnect/third_party/silicon_labs/freertos/src/sl_si91x_low_power_tickless_mode.c"/>
+          </folder>
+        </folder>
+      </folder>
+    </folder>
     <folder name="resources">
       <folder name="certificates">
         <file name="aws_client_certificate.pem.crt.h" linked="false" uri="studio:/sdk/extension/wiseconnect/resources/certificates/aws_client_certificate.pem.crt.h"/>
@@ -559,6 +593,16 @@
             <file name="sl_system_kernel.h" linked="false" uri="studio:/sdk/platform/service/system/inc/sl_system_kernel.h"/>
           </folder>
         </folder>
+        <folder name="sleeptimer">
+          <folder name="src">
+            <file name="sl_sleeptimer.c" linked="false" uri="studio:/sdk/platform/service/sleeptimer/src/sl_sleeptimer.c"/>
+            <file name="sli_sleeptimer_hal.h" linked="false" uri="studio:/sdk/platform/service/sleeptimer/src/sli_sleeptimer_hal.h"/>
+          </folder>
+          <folder name="inc">
+            <file name="sl_sleeptimer.h" linked="false" uri="studio:/sdk/platform/service/sleeptimer/inc/sl_sleeptimer.h"/>
+            <file name="sli_sleeptimer.h" linked="false" uri="studio:/sdk/platform/service/sleeptimer/inc/sli_sleeptimer.h"/>
+          </folder>
+        </folder>
       </folder>
     </folder>
     <folder name="util">
@@ -651,6 +695,7 @@
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/core/common/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/unified_api/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/service/clock_manager/inc"/>
+  <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/service/power_manager/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/errno/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/sl_net/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/icmp"/>
@@ -659,6 +704,7 @@
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/socket/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/ahb_interface/inc"/>
+  <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/service/sleeptimer/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/systemlevel/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/resources/defaults"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/resources/certificates"/>
@@ -673,6 +719,7 @@
   <includePath uri="studio:/project/simplicity_sdk_2024.12.1/util/third_party/freertos/cmsis/Include"/>
   <includePath uri="studio:/project/simplicity_sdk_2024.12.1/util/third_party/freertos/kernel/portable/GCC/ARM_CM4F"/>
   <includePath uri="studio:/project/simplicity_sdk_2024.12.1/platform/service/system/inc"/>
+  <includePath uri="studio:/project/simplicity_sdk_2024.12.1/platform/service/sleeptimer/inc"/>
   <macroDefinition name="SLI_SI91X_CONFIG_WIFI6_PARAMS"/>
   <macroDefinition name="SLI_SI91X_EMBEDDED_MQTT_CLIENT"/>
   <macroDefinition name="SLI_SI91X_ENABLE_TWT_FEATURE"/>
@@ -703,7 +750,9 @@
   <macroDefinition name="DEBUG_UART" value="1"/>
   <macroDefinition name="ENABLE_DEBUG_MODULE" value="1"/>
   <macroDefinition name="SL_SI91X_SI917_RAM_MEM_CONFIG" value="1"/>
+  <macroDefinition name="SL_SI91X_TICKLESS_MODE"/>
   <macroDefinition name="UDMA_ROMDRIVER_PRESENT"/>
+  <macroDefinition name="SLI_WIRELESS_COMPONENT_PRESENT" value="1"/>
   <macroDefinition name="SLI_SI91X_OFFLOAD_NETWORK_STACK"/>
   <macroDefinition name="SI917"/>
   <macroDefinition name="SLI_SI91X_ENABLE_OS"/>
@@ -711,7 +760,12 @@
   <macroDefinition name="TA_DEEP_SLEEP_COMMON_FLASH"/>
   <macroDefinition name="SLI_SI91X_SOCKETS"/>
   <macroDefinition name="SLI_SI917"/>
+  <macroDefinition name="SI91X_PLATFORM" value="1"/>
+  <macroDefinition name="SI91X_SYSRTC_PRESENT" value="1"/>
+  <macroDefinition name="SL_SLEEP_TIMER"/>
+  <macroDefinition name="__WEAK" value="__attribute__((weak))"/>
   <macroDefinition name="PLL_ROMDRIVER_PRESENT"/>
+  <macroDefinition name="SL_SI91X_POWER_MANAGER_UC_AVAILABLE"/>
   <macroDefinition name="SL_WIFI_COMPONENT_INCLUDED"/>
   <macroDefinition name="SL_BOARD_NAME" value="&quot;BRD4002A&quot;"/>
   <macroDefinition name="SL_BOARD_REV" value="&quot;A07&quot;"/>
@@ -719,6 +773,7 @@
   <macroDefinition name="SL_COMPONENT_CATALOG_PRESENT"/>
   <macroDefinition name="SL_CODE_COMPONENT_FREERTOS_KERNEL" value="freertos_kernel"/>
   <macroDefinition name="SL_CODE_COMPONENT_CORE" value="core"/>
+  <macroDefinition name="SL_CODE_COMPONENT_SLEEPTIMER" value="sleeptimer"/>
   <libraryFile name="gcc"/>
   <libraryFile name="nosys"/>
   <libraryFile name="c"/>

@@ -32,7 +32,7 @@
  {
    rom   (rx)  : ORIGIN = 0x8202000, LENGTH = 0x1fe000
 
-   ram   (rwx) : ORIGIN = 0xc, LENGTH = 0x2fbf4
+   ram   (rwx) : ORIGIN = 0x400, LENGTH = 0x2f800
  }
  MEMORY
  {

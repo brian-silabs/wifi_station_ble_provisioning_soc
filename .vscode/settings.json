@@ -3,6 +3,8 @@
     "files.associations": {
         "sl_wifi_callback_framework.h": "c",
         "sl_status.h": "c",
-        "thread_safe_print.h": "c"
+        "thread_safe_print.h": "c",
+        "sl_wifi.h": "c",
+        "sl_net_si91x.h": "c"
     }
 }

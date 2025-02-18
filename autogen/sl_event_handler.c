@@ -5,7 +5,10 @@
 #include "sl_si91x_clock_manager.h"
 #include "sli_siwx917_soc.h"
 #include "rsi_board.h"
+#include "sl_si91x_power_manager.h"
 #include "rsi_debug.h"
+#include "sl_si91x_power_manager_init.h"
+#include "sl_sleeptimer.h"
 #include "cmsis_os2.h"
 
 void sl_platform_init(void)
@@ -30,6 +33,9 @@ void sl_driver_init(void)
 
 void sl_service_init(void)
 {
+  sl_si91x_power_manager_init();
+  sli_si91x_power_manager_configure_ram_and_peripheral();
+  sl_sleeptimer_init();
 }
 
 void sl_stack_init(void)

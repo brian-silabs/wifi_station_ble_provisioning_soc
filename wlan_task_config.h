@@ -106,4 +106,6 @@ static const sl_wifi_device_configuration_t
   #define TWT_DEFAULT_WAKE_DURATION_MS         8     // in milli seconds
   #define MAX_BEACON_WAKE_UP_AFTER_SP          2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
 
+  #define SL_WIFI_PERFORMANCE_PROFILE          ASSOCIATED_POWER_SAVE
+
 #endif // WLAN_TASK_CONFIG_H
