@@ -47,13 +47,15 @@ SECTIONS
 	.text :
 	{
 		KEEP(*(.isr_vector))
-		  *(EXCLUDE_FILE(*UDMA.o).text*)        
+		. = ALIGN(32);
+		  *(EXCLUDE_FILE(*UDMA.o *tasks.o).text*)        
 			 KEEP(*(.init))
 			 KEEP(*(.fini))
-    
-			
-     	  	
 		
+				
+        	     	  	
+
+			
 
 		/* .ctors */
 		*crtbegin.o(.ctors)
@@ -104,8 +106,12 @@ SECTIONS
 		_sdata = __data_start__;
 		*(.data*)
 		*UDMA.o(.text*)
+		*tasks.o(.text*)
 		
 		
+		
+		/* ipmu calibration data */
+		*(.common_ipmu_ram*)
 		
 		. = ALIGN(4);
 		/* preinit data */
@@ -177,5 +183,5 @@ SECTIONS
 	{
 		*(.udma_addr1*)		
 	} > udma1 AT> rom	
-   
+  /* nvm3 enable*/  /* Flash Present*/  /* littlefs_enable */  /* Flash Present */
 }

@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
   <descriptors name="wifi_station_ble_provisioning_soc">
-    <properties key="projectCommon.sdkId" value="com.silabs.sdk.stack.sisdk:2024.6.1._-206870106"/>
-    <properties key="universalConfig.relativeWorkspacePath" value="..\wifi_station_ble_provisioning_soc.slcw"/>
+    <properties key="projectCommon.sdkId" value="com.silabs.sdk.stack.sisdk:2024.12.1._-1208501503"/>
+    <properties key="universalConfig.relativeWorkspacePath" value="../wifi_station_ble_provisioning_soc.slcw"/>
     <properties key="universalConfig.generationDirectory" value=""/>
     <properties key="projectCommon.boardIds" value="brd4002a:0.0.0.A06 brd4338a:0.0.0.A11"/>
     <properties key="projectCommon.kitId" value=""/>
     <properties key="projectCommon.partId" value="mcu.arm.wfm.siwg917m111mgtba"/>
-    <properties key="universalConfig.toolchainCompatibility" value="gcc"/>
+    <properties key="universalConfig.toolchainCompatibility" value="iar gcc"/>
     <properties key="projectCommon.toolchainId" value="com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:12.2.1.20221205"/>
     <properties key="universalConfig.projectTypeIds" value="com.silabs.ss.framework.ide.project.core.cdtMbsProjectType"/>
     <properties key="projectCommon.importModeId" value="COPY"/>
     <properties key="universalConfig.compSelProjInstanceId" value="1727428240357"/>
+    <properties key="universalConfig.previousSdkId" value="com.silabs.sdk.stack.sisdk:2024.6.2._-1208501476"/>
+    <properties key="projectCommon.overwriteCopiedSources" value="false"/>
   </descriptors>
-</model:MDescriptors>
+</model:MDescriptors>
