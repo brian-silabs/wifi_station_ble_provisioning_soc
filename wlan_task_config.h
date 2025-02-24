@@ -27,25 +27,20 @@
 #ifndef WLAN_TASK_CONFIG_H
 #define WLAN_TASK_CONFIG_H
 
-#include "sl_si91x_constants.h"
-#include "sl_wifi_device.h"
+#define DHCP_HOST_NAME    NULL
+#define TIMEOUT_MS        15000
+#define WIFI_SCAN_TIMEOUT 15000
 
-  #define DHCP_HOST_NAME    NULL
-  #define TIMEOUT_MS        15000
-  #define WIFI_SCAN_TIMEOUT 15000
+#define TWT_AUTO_CONFIG  1
+#define TWT_SCAN_TIMEOUT 10000
 
-  #define TWT_AUTO_CONFIG  1
-  #define TWT_SCAN_TIMEOUT 10000
-
-  // Use case based TWT selection params
-  #define TWT_RX_LATENCY                       60000 // in milli seconds
-  #define DEVICE_AVERAGE_THROUGHPUT            20000 // Kbps
-  #define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT 0     // in percentage
-  #define TWT_TOLERABLE_DEVIATION              10    // in percentage
-  #define TWT_DEFAULT_WAKE_INTERVAL_MS         1024  // in milli seconds
-  #define TWT_DEFAULT_WAKE_DURATION_MS         8     // in milli seconds
-  #define MAX_BEACON_WAKE_UP_AFTER_SP          2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
-
-  #define SL_WIFI_PERFORMANCE_PROFILE          DEEP_SLEEP_WITH_RAM_RETENTION
+// Use case based TWT selection params
+#define TWT_RX_LATENCY                       60000 // in milli seconds
+#define DEVICE_AVERAGE_THROUGHPUT            20000 // Kbps
+#define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT 0     // in percentage
+#define TWT_TOLERABLE_DEVIATION              10    // in percentage
+#define TWT_DEFAULT_WAKE_INTERVAL_MS         1024  // in milli seconds
+#define TWT_DEFAULT_WAKE_DURATION_MS         8     // in milli seconds
+#define MAX_BEACON_WAKE_UP_AFTER_SP          2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
 
 #endif // WLAN_TASK_CONFIG_H

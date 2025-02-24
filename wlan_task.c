@@ -63,8 +63,6 @@ static volatile sl_status_t callback_status = SL_STATUS_OK;
 sl_wifi_client_configuration_t access_point = { 0 };
 sl_net_ip_configuration_t ip_address        = { 0 };
 
-static sl_wifi_performance_profile_t performance_profile_g = { .profile = SL_WIFI_PERFORMANCE_PROFILE };
-
 extern uint8_t coex_ssid[50], pwd[34], sec_type;
 //uint8_t coex_ssid[50], pwd[34], sec_type;
 
@@ -264,12 +262,6 @@ void wlan_task(void *argument)
         return; // Should be an assertion
     }
     memset(scan_result, 0, scanbuf_size);
-
-    status = sl_wifi_set_performance_profile(&performance_profile_g);
-    if(status != SL_STATUS_OK) {
-        THREAD_SAFE_PRINT("Failed to set performance profile, Error Code : 0x%lX\r\n", status);
-        return; // Should be an assertion
-    }
 
     THREAD_SAFE_PRINT("WLAN Releasing NWP Semaphore\r\n");
     status = nwp_access_release();

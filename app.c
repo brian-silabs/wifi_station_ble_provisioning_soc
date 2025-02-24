@@ -38,6 +38,9 @@
 #include "sl_constants.h"
 #include "app.h"
 #include "thread_safe_print.h"
+
+#include "nwp_task_config.h"
+
 #include "nwp_task.h"
 #include "wlan_task.h"
 #include "ble_task.h"
@@ -65,8 +68,21 @@ void startup_routine(void *argument)
 
   THREAD_SAFE_PRINT("Setting up application tasks\n");
   start_nwp_task_context();
-  start_wlan_task_context();
-  start_ble_task_context();
+
+
+  //If WLAN, init powersave mode. Should always pass
+  if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+      || (SL_SI91X_COEX_MODE == SL_SI91X_WLAN_ONLY_MODE))
+  {
+      start_wlan_task_context();
+  }
+
+  //If BLE, Init power save mode too
+  if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+      || (SL_SI91X_COEX_MODE == SL_SI91X_BLE_MODE))
+  {
+      start_ble_task_context();
+  }
 
   THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();

@@ -42,8 +42,6 @@ osSemaphoreId_t ble_thread_sem;
 
 // BLE Variables
 
-static sl_bt_performance_profile_t performance_profile_g = { .profile = SL_BT_PERFORMANCE_PROFILE };
-
 /*
  *********************************************************************************************************
  *                                         PRIVATE FUNCTIONS DECLARATIONS
@@ -76,7 +74,7 @@ sl_status_t start_ble_task_context(void)
     }
     THREAD_SAFE_PRINT("BLE Task Startup Complete\n");
     
-    THREAD_SAFE_PRINT("\nBLE Task Context Init Done\n");
+    THREAD_SAFE_PRINT("BLE Task Context Init Done\n\n");
     return ret;
 }
 
@@ -99,11 +97,7 @@ void ble_task(void *argument)
         return;
     }
 
-    //! initiating power save in BLE mode
-    status = sl_si91x_bt_set_performance_profile(&performance_profile_g);
-    if (status != SL_STATUS_OK) {
-        THREAD_SAFE_PRINT("Failed to set BLE performance profile, Error Code : 0x%lX\r\n", status);
-    }
+    // NWP related init should go here 
 
     THREAD_SAFE_PRINT("BLE Releasing NWP Semaphore\r\n");
     status = nwp_access_release();

@@ -4,14 +4,23 @@
 
 #include "sl_wifi_device.h"
 
+#define SL_SI91X_OPERATION_MODE                 SL_SI91X_CLIENT_MODE
+#define SL_SI91X_COEX_MODE                      SL_SI91X_WLAN_BLE_MODE
+
+#define SL_SI91X_WIFI_PERFORMANCE_PROFILE       DEEP_SLEEP_WITH_RAM_RETENTION
+#define SL_SI91X_BT_PERFORMANCE_PROFILE         ASSOCIATED_POWER_SAVE
+
+///////// Should not be modified
+/// // Check how to better deal with this config
+
 static const sl_wifi_device_configuration_t
   station_init_configuration = { .boot_option = LOAD_NWP_FW,
              .mac_address = NULL,
              .band        = SL_SI91X_WIFI_BAND_2_4GHZ,
              .region_code = US,
              .boot_config = {
-               .oper_mode       = SL_SI91X_CLIENT_MODE,
-               .coex_mode       = SL_SI91X_WLAN_BLE_MODE,
+               .oper_mode       = SL_SI91X_OPERATION_MODE,
+               .coex_mode       = SL_SI91X_COEX_MODE,
                .feature_bit_map = (SL_SI91X_FEAT_ULP_GPIO_BASED_HANDSHAKE | SL_SI91X_FEAT_DEV_TO_HOST_ULP_GPIO_1
 #ifdef SLI_SI91X_MCU_INTERFACE
                                    | SL_SI91X_FEAT_WPS_DISABLE

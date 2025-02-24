@@ -14,6 +14,8 @@
 #include "sl_constants.h"
 
 #include "sl_si91x_driver.h"
+#include "sl_si91x_ble.h"
+#include "sl_wifi.h"
 
 #define NWP_FLAGS_MSK  0x00001001U  // Define the flag mask
 
@@ -38,6 +40,9 @@ const osThreadAttr_t nwp_thread_attributes = {
 
 osSemaphoreId_t     nwp_thread_sem;
 osEventFlagsId_t    nwp_evt_flags_id;  // Event flags ID
+
+static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
+static sl_bt_performance_profile_t ble_performance_profile_g = { .profile = SL_SI91X_BT_PERFORMANCE_PROFILE };
 
 /*
  *********************************************************************************************************
@@ -146,9 +151,31 @@ void nwp_task(void *argument)
     THREAD_SAFE_PRINT("M4-NWP secure handshake is successful\r\n");
 #endif
 
-    //If WLAN, init powersave mode
+    //If WLAN, init powersave mode. Should always pass
+    // Note : Turns out that NWP - WiFi needs to always be set, even for BLE ONLY apps
+    if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+        || (SL_SI91X_COEX_MODE == SL_SI91X_WLAN_ONLY_MODE)
+        || (SL_SI91X_COEX_MODE == SL_SI91X_BLE_MODE))
+    {
+        THREAD_SAFE_PRINT("Setting Up NWP-WiFi Performance profile to %d\r\n", wifi_performance_profile_g.profile);
+        status = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+        if(status != SL_STATUS_OK) {
+            THREAD_SAFE_PRINT("Failed to set wifi performance profile, Error Code : 0x%lX\r\n", status);
+            return; // Should be an assertion
+        }
+    }
 
     //If BLE, Init power save mode too
+    if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+    || (SL_SI91X_COEX_MODE == SL_SI91X_BLE_MODE))
+    {
+        //! initiating power save in BLE mode
+        THREAD_SAFE_PRINT("Setting Up NWP-Ble Performance profile to %d\r\n", ble_performance_profile_g.profile);
+        status = sl_si91x_bt_set_performance_profile(&ble_performance_profile_g);
+        if (status != SL_STATUS_OK) {
+            THREAD_SAFE_PRINT("Failed to set BLE performance profile, Error Code : 0x%lX\r\n", status);
+        }
+    }
 
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
     status = nwp_access_release();
@@ -159,7 +186,6 @@ void nwp_task(void *argument)
 
      while (true)
     {
-
         if (event_id == -1) {
             osEventFlagsWait(nwp_evt_flags_id, NWP_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
             // if events are not received loop will be continued.

@@ -8,6 +8,8 @@
         "sl_net_si91x.h": "c",
         "sl_wifi_region_db_config.h": "c",
         "nwp_task.h": "c",
-        "ble_task_config.h": "c"
+        "ble_task_config.h": "c",
+        "nwp_task_config.h": "c",
+        "sl_wifi_device.h": "c"
     }
 }
