@@ -3,7 +3,7 @@
   "specVersion" : "1.6",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2025-02-18T16:12:11.476934Z",
+    "timestamp" : "2025-02-24T10:52:04.537857Z",
     "authors" : [ {
       "name" : "Silicon Laboratories, Inc."
     } ],
@@ -715,6 +715,24 @@
       "type" : "library",
       "bom-ref" : "wiseconnect3_sdk:3.4.1:rsilib_crc",
       "name" : "CRC",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:sl_calendar",
+      "name" : "Calendar",
+      "version" : "3.4.1",
+      "licenses" : [ {
+        "expression" : "Zlib"
+      } ]
+    }, {
+      "scope" : "required",
+      "type" : "library",
+      "bom-ref" : "wiseconnect3_sdk:3.4.1:calendar_ulp_component",
+      "name" : "PM UULP Calendar",
       "version" : "3.4.1",
       "licenses" : [ {
         "expression" : "Zlib"

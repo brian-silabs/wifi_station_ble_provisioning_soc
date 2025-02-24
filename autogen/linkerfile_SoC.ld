@@ -47,14 +47,12 @@ SECTIONS
 	.text :
 	{
 		KEEP(*(.isr_vector))
-		. = ALIGN(32);
-		  *(EXCLUDE_FILE(*UDMA.o *tasks.o).text*)        
-			 KEEP(*(.init))
-			 KEEP(*(.fini))
-		
-				
-        	     	  	
+		. = ALIGN(32);	     	  	
 
+		
+ 		  	
+		  *(EXCLUDE_FILE(  *cmsis_gcc.o *cmsis_os2.o *sl_wifi.o *timers.o *heap_4.o *list.o *sl_si91x_m4_ps.o *port.o *queue.o *sl_rsi_utility.o *tasks.o *rsi_hal_mcu_m4_ram.o *rsi_hal_mcu_m4_rom.o *clock_update.o *rsi_deepsleep_soc.o *rsi_egpio.o *rsi_ipmu.o *ipmu_apis.o *rsi_pll.o *rsi_power_save.o *rsi_ps_ram_func.o *rsi_system_config.o *rsi_time_period.o *rsi_ulpss_clk.o *system_si91x.o *sl_slist.o *strcmp.o *sl_si91x_power_manager.o *sli_si91x_power_manager.o *sl_si91x_power_manager_handler.o *sl_si91x_power_manager_debug.o *sli_si91x_power_manager_wakeup_init.o *sl_si91x_power_manager_wakeup_handler.o *sl_si91x_clock_manager.o *sli_si91x_clock_manager.o *sl_sleeptimer.o *sl_sleeptimer_hal_si91x_sysrtc.o *rsi_sysrtc.o *sl_si91x_low_power_tickless_mode.o *sl_core_cortexm.o *UDMA.o *sl_si91x_calendar.o *rsi_rtc.o ) .text*)
+			
 			
 
 		/* .ctors */
@@ -70,7 +68,6 @@ SECTIONS
 		*(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
 		*(SORT(.dtors.*))
 		*(.dtors)
-		*(.rodata*)
 		
 		KEEP(*(.eh_fram e*))			
 	} > rom	
@@ -104,10 +101,55 @@ SECTIONS
 		
 		/* _sdata is used in startup code */
 		_sdata = __data_start__;
+		KEEP(*(.ramVector))
 		*(.data*)
-		*UDMA.o(.text*)
-		*tasks.o(.text*)
+		*(.rodata*)
+		KEEP(*(.init))
+		KEEP(*(.fini))
 		
+		*cmsis_gcc.o(.text*)
+		*cmsis_os2.o(.text*)
+		*port.o(.text*)
+		*queue.o(.text*)
+		*sl_rsi_utility.o(.text*)
+		*tasks.o(.text*)
+		*clock_update.o(.text*)
+		*rsi_deepsleep_soc.o(.text*)
+		*rsi_hal_mcu_m4_rom.o(.text*)
+		*rsi_hal_mcu_m4_ram.o(.text*)
+		*rsi_egpio.o(.text*)
+		*rsi_ipmu.o(.text*)
+		*ipmu_apis.o(.text*)
+		*rsi_pll.o(.text*)
+		*rsi_power_save.o(.text*)
+		*rsi_ps_ram_func.o(.text*)
+		*rsi_system_config.o(.text*)
+		*rsi_time_period.o(.text*)
+		*rsi_ulpss_clk.o(.text*)
+		*system_si91x.o(.text*)
+		*sl_slist.o(.text*)
+		*strcmp.o(.text*)
+		*sl_wifi.o(.text*)
+		*timers.o(.text*)
+		*heap_4.o(.text*)
+		*list.o(.text*)
+		*sl_si91x_m4_ps.o(.text*)
+		*sl_si91x_power_manager.o(.text*)
+		*sli_si91x_power_manager.o(.text*)
+		*sl_si91x_power_manager_handler.o(.text*)
+		*sl_si91x_power_manager_debug.o(.text*)
+		*sli_si91x_power_manager_wakeup_init.o(.text*)
+		*sl_si91x_power_manager_wakeup_handler.o(.text*)
+		*sl_si91x_clock_manager.o(.text*)
+		*sli_si91x_clock_manager.o(.text*)
+		*sl_sleeptimer.o(.text*)
+		*sl_sleeptimer_hal_si91x_sysrtc.o(.text*) 
+		*rsi_sysrtc.o(.text*)
+		*sl_si91x_low_power_tickless_mode.o(.text*)
+		*sl_core_cortexm.o(.text*)
+		*UDMA.o(.text*)
+		*sl_si91x_calendar.o(.text*)
+		*rsi_rtc.o(.text*)
 		
 		
 		/* ipmu calibration data */

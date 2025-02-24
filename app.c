@@ -35,9 +35,10 @@
 //! SL Wi-Fi SDK includes
 #include "sl_board_configuration.h"
 #include "cmsis_os2.h"
-
+#include "sl_constants.h"
 #include "app.h"
 #include "thread_safe_print.h"
+#include "nwp_task.h"
 #include "wlan_task.h"
 #include "ble_task.h"
 // #include "mqtt_task.h"
@@ -45,7 +46,6 @@
 
 // APP version
 #define APP_FW_VERSION "0.1"
-
 
 const osThreadAttr_t startup_thread_attributes = {
   .name       = "startup_thread",
@@ -64,10 +64,11 @@ void startup_routine(void *argument)
   UNUSED_PARAMETER(argument);
 
   THREAD_SAFE_PRINT("Setting up application tasks\n");
+  start_nwp_task_context();
   start_wlan_task_context();
   start_ble_task_context();
 
-  THREAD_SAFE_PRINT("\nApplication tasks setup Done, killing startup routine\n");
+  THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();
 }
 

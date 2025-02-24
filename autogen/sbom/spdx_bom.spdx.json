@@ -5,7 +5,7 @@
   "name" : "Silicon-Laboratories",
   "documentNamespace" : "https://silabs.com",
   "creationInfo" : {
-    "created" : "2025-02-18T16:12:11.476934Z",
+    "created" : "2025-02-24T10:52:04.537857Z",
     "creators" : [ "Tool: Silicon Labs Configuration Tooling" ]
   },
   "comment" : "TERMS OF USE - SILICON LABORATORIES INC.\n(With respect to Silicon Labs software components, this Software Bill of Materials (SBOM) is based upon Silicon Labs'\nreview and analysis of the code version when released.  It is provided \"AS IS\" and does not modify, change or alter\nthe terms or conditions of your use of Silicon Labs' software and/or SDKs based upon license terms and/or agreements\nassociated with this software or SDKs when distributed to you, received by you, or installed by you.  Further, no\nwarranties or obligations are created by this SBOM.  It is your obligation to comply with the terms of licenses\nreferenced in this SBOM.)",
@@ -634,6 +634,22 @@
   }, {
     "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc",
     "name" : "CRC",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar",
+    "name" : "Calendar",
+    "versionInfo" : "3.4.1",
+    "primaryPackagePurpose" : "LIBRARY",
+    "downloadLocation" : "NOASSERTION",
+    "supplier" : "Organization: NOASSERTION",
+    "licenseConcluded" : "Zlib"
+  }, {
+    "SPDXID" : "SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component",
+    "name" : "PM UULP Calendar",
     "versionInfo" : "3.4.1",
     "primaryPackagePurpose" : "LIBRARY",
     "downloadLocation" : "NOASSERTION",
@@ -1318,6 +1334,14 @@
   }, {
     "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
     "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",
+    "relatedSpdxElement" : "SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component",
     "relationshipType" : "CONTAINS"
   }, {
     "spdxElementId" : "SPDXRef-wiseconnect3_sdk-3.4.1",

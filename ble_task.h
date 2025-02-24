@@ -10,4 +10,4 @@
  */
 sl_status_t start_ble_task_context(void);
 
-#endif // WLAN_TASK_H
+#endif // BLE_TASK_H

@@ -48,7 +48,7 @@
 #include <string.h>
 
 #include "ble_config.h"
-#include "wifi_config.h"
+#include "wlan_task.h"
 
 // BLE attribute service types uuid values
 #define RSI_BLE_CHAR_SERV_UUID   0x2803
@@ -659,11 +659,11 @@ void rsi_ble_configurator_init(void)
   rsi_ble_start_advertising();
   LOG_PRINT("\r\nBLE Advertising Started...\r\n");
 
-  //! initiating power save in BLE mode
-  LOG_PRINT("\r\nPutting BLE in Power Save mode...\r\n");
-  if (rsi_bt_power_save_profile(PSP_MODE, PSP_TYPE) != RSI_SUCCESS) {
-    LOG_PRINT("\r\n Failed to initiate power save in BLE mode \r\n");
-  }
+//  //! initiating power save in BLE mode
+//  LOG_PRINT("\r\nPutting BLE in Power Save mode...\r\n");
+//  if (rsi_bt_power_save_profile(PSP_MODE, PSP_TYPE) != RSI_SUCCESS) {
+//    LOG_PRINT("\r\n Failed to initiate power save in BLE mode \r\n");
+//  }
 }
 
 /*==============================================*/

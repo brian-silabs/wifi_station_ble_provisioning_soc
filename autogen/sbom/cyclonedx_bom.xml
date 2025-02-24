@@ -10,7 +10,7 @@ referenced in this SBOM.)
 -->
 <bom xmlns="http://cyclonedx.org/schema/bom/1.6" version="1">
   <metadata>
-    <timestamp>2025-02-18T16:12:11.476934Z</timestamp>
+    <timestamp>2025-02-24T10:52:04.537857Z</timestamp>
     <authors>
       <author>
         <name>Silicon Laboratories, Inc.</name>
@@ -566,6 +566,20 @@ referenced in this SBOM.)
         </component>
         <component bom-ref="wiseconnect3_sdk:3.4.1:rsilib_crc" type="library">
           <name>CRC</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:sl_calendar" type="library">
+          <name>Calendar</name>
+          <version>3.4.1</version>
+          <licenses>
+            <expression>Zlib</expression>
+          </licenses>
+        </component>
+        <component bom-ref="wiseconnect3_sdk:3.4.1:calendar_ulp_component" type="library">
+          <name>PM UULP Calendar</name>
           <version>3.4.1</version>
           <licenses>
             <expression>Zlib</expression>

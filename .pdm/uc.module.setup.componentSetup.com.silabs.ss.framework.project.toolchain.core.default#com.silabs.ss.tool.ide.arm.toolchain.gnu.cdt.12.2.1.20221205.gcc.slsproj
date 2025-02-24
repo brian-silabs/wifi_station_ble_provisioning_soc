@@ -193,11 +193,13 @@
                   <folder name="src">
                     <file name="sl_si91x_adc.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_adc.c"/>
                     <file name="sl_si91x_bjt_temperature_sensor.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_bjt_temperature_sensor.c"/>
+                    <file name="sl_si91x_calendar.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_calendar.c"/>
                     <file name="sl_si91x_dma.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_dma.c"/>
                   </folder>
                   <folder name="inc">
                     <file name="sl_si91x_adc.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_adc.h"/>
                     <file name="sl_si91x_bjt_temperature_sensor.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_bjt_temperature_sensor.h"/>
+                    <file name="sl_si91x_calendar.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_calendar.h"/>
                     <file name="sl_si91x_dma.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_dma.h"/>
                   </folder>
                 </folder>
@@ -664,7 +666,6 @@
   <file name="app.c" linked="false" uri="studio:/project/app.c"/>
   <file name="main.c" linked="false" uri="studio:/project/main.c"/>
   <file name="ble_app.c" linked="false" uri="studio:/project/ble_app.c"/>
-  <file name="wifi_app.c" linked="false" uri="studio:/project/wifi_app.c"/>
   <file name="app.h" linked="false" uri="studio:/project/app.h"/>
   <file name="ble_config.h" linked="false" uri="studio:/project/ble_config.h"/>
   <file name="wifi_config.h" linked="false" uri="studio:/project/wifi_config.h"/>

@@ -3,14 +3,18 @@
 #include <stdbool.h>
 
 #include "ble_task.h"
-#include "ble_config.h"
 #include "ble_task_config.h"
+
+#include "nwp_task_config.h"
+#include "nwp_task.h"
 
 #include "cmsis_os2.h"
 #include "sl_status.h"
 
 // Local utilities
 #include "thread_safe_print.h"
+
+#include "ble_config.h" // From WiseConnect template
 
 #include "sl_si91x_ble.h"
 #include "sl_constants.h"
@@ -88,10 +92,24 @@ void ble_task(void *argument)
     sl_status_t status                 = SL_STATUS_OK;
     int32_t event_id = -1;
 
+    status = nwp_access_request();
+    THREAD_SAFE_PRINT("BLE Acquiring NWP Semaphore\r\n");
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to acquire NWP semaphore: 0x%lx\r\n", status);
+        return;
+    }
+
     //! initiating power save in BLE mode
     status = sl_si91x_bt_set_performance_profile(&performance_profile_g);
     if (status != SL_STATUS_OK) {
         THREAD_SAFE_PRINT("Failed to set BLE performance profile, Error Code : 0x%lX\r\n", status);
+    }
+
+    THREAD_SAFE_PRINT("BLE Releasing NWP Semaphore\r\n");
+    status = nwp_access_release();
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+        return;
     }
 
     while (true)

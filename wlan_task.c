@@ -4,6 +4,9 @@
 #include "wlan_task.h"
 #include "wlan_task_config.h"
 
+#include "nwp_task_config.h"
+#include "nwp_task.h"
+
 #include "cmsis_os2.h"
 #include "sl_status.h"
 
@@ -17,6 +20,10 @@
 #include "sl_net.h"
 #include "sl_utility.h"
 #include "sl_net_si91x.h"
+
+#include "sl_si91x_driver.h"
+
+#include  "sl_si91x_power_manager.h"
 
 /*
  *********************************************************************************************************
@@ -32,7 +39,7 @@ const osThreadAttr_t wlan_thread_attributes = {
     .cb_size    = 0,
     .stack_mem  = 0,
     .stack_size = 3072,
-    .priority   = osPriorityHigh,
+    .priority   = osPriorityHigh1,
     .tz_module  = 0,
     .reserved   = 0,
   };
@@ -58,8 +65,8 @@ sl_net_ip_configuration_t ip_address        = { 0 };
 
 static sl_wifi_performance_profile_t performance_profile_g = { .profile = SL_WIFI_PERFORMANCE_PROFILE };
 
-//extern uint8_t coex_ssid[50], pwd[34], sec_type;
-uint8_t coex_ssid[50], pwd[34], sec_type;
+extern uint8_t coex_ssid[50], pwd[34], sec_type;
+//uint8_t coex_ssid[50], pwd[34], sec_type;
 
 sl_wifi_twt_request_t default_twt_setup_configuration = {
     .twt_enable              = 1,
@@ -124,7 +131,8 @@ static sl_status_t set_twt(void);
 sl_status_t start_wlan_task_context(void)
 {
     sl_status_t ret = SL_STATUS_OK;
-
+    
+    THREAD_SAFE_PRINT("WLAN Task Context Init Start\n");
     wlan_thread_sem = osSemaphoreNew(1, 0, NULL);
     if (wlan_thread_sem == NULL) {
       THREAD_SAFE_PRINT("Failed to create wlan_thread_sem\n");
@@ -141,7 +149,7 @@ sl_status_t start_wlan_task_context(void)
     }
     THREAD_SAFE_PRINT("WLAN Task Startup Complete\n");
     
-    THREAD_SAFE_PRINT("\nWLAN Task Context Init Done\n");
+    THREAD_SAFE_PRINT("WLAN Task Context Init Done\n\n");
     return ret;
 }
 
@@ -217,13 +225,29 @@ void wlan_task(void *argument)
 
     int32_t wlan_event_id = 0;
 
-    //! Wi-Fi initialization
-    status = sl_wifi_init(&config, NULL, sl_wifi_default_event_handler);
+    // //! Wi-Fi initialization
+    // status = sl_wifi_init(&config, NULL, sl_wifi_default_event_handler);
+    // if (status != SL_STATUS_OK) {
+    //     THREAD_SAFE_PRINT("\r\nWi-Fi Initialization Failed, Error Code : 0x%lX\r\n", status);
+    //     return; // Should be an assertion
+    // }
+    // THREAD_SAFE_PRINT("\r\nWi-Fi initialization is successful\n");
+
+    status = nwp_access_request();
+    THREAD_SAFE_PRINT("WLAN Acquiring NWP Semaphore\r\n");
     if (status != SL_STATUS_OK) {
-        THREAD_SAFE_PRINT("\r\nWi-Fi Initialization Failed, Error Code : 0x%lX\r\n", status);
-        return; // Should be an assertion
+        THREAD_SAFE_PRINT("\r\nFailed to acquire NWP semaphore: 0x%lx\r\n", status);
+        return;
     }
-    THREAD_SAFE_PRINT("\r\nWi-Fi initialization is successful\n");
+
+    //TODO check how this can be better managed vs nwp task
+    status = sl_net_init(SL_NET_WIFI_CLIENT_INTERFACE, &station_init_configuration, NULL, NULL);
+    if ((status != SL_STATUS_OK)
+        && (status != SL_STATUS_ALREADY_INITIALIZED)){
+      printf("\r\nFailed to bring Wi-Fi client interface up: 0x%lX\r\n", status);
+      return;
+    }
+    printf("\r\nWi-Fi client interface init success or already initialized\r\n");
 
     //! Firmware version Prints
     status = sl_wifi_get_firmware_version(&version);
@@ -245,6 +269,13 @@ void wlan_task(void *argument)
     if(status != SL_STATUS_OK) {
         THREAD_SAFE_PRINT("Failed to set performance profile, Error Code : 0x%lX\r\n", status);
         return; // Should be an assertion
+    }
+
+    THREAD_SAFE_PRINT("WLAN Releasing NWP Semaphore\r\n");
+    status = nwp_access_release();
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+        return;
     }
 
     while (true)
@@ -483,7 +514,7 @@ void wlan_task(void *argument)
     }//while(1)
 }
 
-//SL_ADDITIONAL_STATUS_ERRORS
+// components/common/inc/SL_ADDITIONAL_STATUS.h
 static sl_status_t set_twt(void){
     sl_wifi_performance_profile_t performance_profile = { 0 };
     sl_status_t status                                = SL_STATUS_OK;

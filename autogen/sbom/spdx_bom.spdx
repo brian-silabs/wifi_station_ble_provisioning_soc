@@ -13,7 +13,7 @@ DocumentNamespace: https://silabs.com
 
 ## Creation Information
 Creator: Organization: Silicon Laboratories, Inc.
-Created: 2025-02-18T16:12:11.476934Z
+Created: 2025-02-24T10:52:04.537857Z
 ## Relationships
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-wiseconnect3_sdk-3.4.1
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-simplicity_sdk-2024.12.1
@@ -102,6 +102,8 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_usart_driver
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_ulpss
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
@@ -961,6 +963,28 @@ PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Calendar
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: PM UULP Calendar
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: Power Manager
