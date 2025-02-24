@@ -68,7 +68,6 @@ sl_status_t start_nwp_task_context(void)
     }
     THREAD_SAFE_PRINT("NWP Semaphore Creation Complete\n");
 
-
     nwp_evt_flags_id = osEventFlagsNew(NULL);
     if (nwp_evt_flags_id == NULL) {
     THREAD_SAFE_PRINT("Failed to create nwp_evt_flags_id\n");

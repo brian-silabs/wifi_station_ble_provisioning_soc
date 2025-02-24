@@ -31,16 +31,29 @@
 #define TIMEOUT_MS        15000
 #define WIFI_SCAN_TIMEOUT 15000
 
+// TWT Related Configuration
+
 #define TWT_AUTO_CONFIG  1
 #define TWT_SCAN_TIMEOUT 10000
 
-// Use case based TWT selection params
-#define TWT_RX_LATENCY                       60000 // in milli seconds
-#define DEVICE_AVERAGE_THROUGHPUT            20000 // Kbps
-#define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT 0     // in percentage
-#define TWT_TOLERABLE_DEVIATION              10    // in percentage
-#define TWT_DEFAULT_WAKE_INTERVAL_MS         1024  // in milli seconds
-#define TWT_DEFAULT_WAKE_DURATION_MS         8     // in milli seconds
-#define MAX_BEACON_WAKE_UP_AFTER_SP          2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
+// AUTO TWT based TWT selection params
+#define TWT_RX_LATENCY                          60000 // in milli seconds
+#define DEVICE_AVERAGE_THROUGHPUT               20000 // Kbps
+#define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT    0     // in percentage
+#define TWT_TOLERABLE_DEVIATION                 10    // in percentage
+#define TWT_DEFAULT_WAKE_INTERVAL_MS            1024  // in milli seconds
+#define TWT_DEFAULT_WAKE_DURATION_MS            8     // in milli seconds
+#define MAX_BEACON_WAKE_UP_AFTER_SP             2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
+
+// MANUAL TWT based TWT selection params, only used wwhen TWT_AUTO_CONFIG is set to 0
+#define TWT_WAKE_DURATION                       0x60
+#define TWT_WAKE_DURATION_UNIT                  0
+#define TWT_WAKE_DURATION_TOL                   0x60
+#define TWT_WAKE_INT_EXP                        13
+#define TWT_WAKE_INT_EXP_TOL                    13
+#define TWT_WAKE_INT_MANTISSA                   0x1D4C
+#define TWT_WAKE_INT_MANTISSA_TOL               0x1D4C
+#define TWT_WAKE_RETRY_LIMIT                    6
+#define TWT_WAKE_RETRY_INTERVAL                 10
 
 #endif // WLAN_TASK_CONFIG_H
