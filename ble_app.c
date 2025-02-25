@@ -523,7 +523,7 @@ static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t
         LOG_PRINT("Received scan request\n");
         retry = 0;
         memset(data, 0, sizeof(data));
-        wifi_app_set_event(WIFI_APP_SCAN_STATE);
+        //wifi_app_set_event(WIFI_APP_SCAN_STATE);
       } break;
 
       // Sending SSID
@@ -550,7 +550,7 @@ static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t
         memset(data, 0, sizeof(data));
         strcpy((char *)pwd, (const char *)&rsi_ble_write->att_value[3]);
         LOG_PRINT("PWD from ble app\n");
-        wifi_app_set_event(WIFI_APP_JOIN_STATE);
+        //wifi_app_set_event(WIFI_APP_JOIN_STATE);
       } break;
 
       // WLAN Status Request
@@ -570,7 +570,7 @@ static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t
       {
         LOG_PRINT("WLAN disconnect request received\n");
         memset(data, 0, sizeof(data));
-        wifi_app_set_event(WIFI_APP_DISCONN_NOTIFY_STATE);
+        //wifi_app_set_event(WIFI_APP_DISCONN_NOTIFY_STATE);
       } break;
 
       // FW version request
@@ -807,7 +807,7 @@ void rsi_ble_configurator_task(void *argument)
       case RSI_SECTYPE: {
         rsi_ble_app_clear_event(RSI_SECTYPE);
         if (sec_type == 0) {
-          wifi_app_set_event(WIFI_APP_JOIN_STATE);
+          //wifi_app_set_event(WIFI_APP_JOIN_STATE);
         }
       } break;
 
@@ -922,26 +922,30 @@ void rsi_ble_configurator_task(void *argument)
  */
 void wifi_app_send_to_ble(uint16_t msg_type, uint8_t *data, uint16_t data_len)
 {
-  switch (msg_type) {
-    case WIFI_APP_SCAN_RESP:
-      memset(scanresult, 0, data_len);
-      memcpy(scanresult, (sl_wifi_scan_result_t *)data, data_len);
+  UNUSED_PARAMETER(msg_type);
+  UNUSED_PARAMETER(data);
+  UNUSED_PARAMETER(data_len);
 
-      rsi_ble_app_set_event(RSI_BLE_WLAN_SCAN_RESP);
-      break;
-    case WIFI_APP_CONNECTION_STATUS:
-      rsi_ble_app_set_event(RSI_BLE_WLAN_JOIN_STATUS);
-      break;
-    case WIFI_APP_DISCONNECTION_STATUS:
-      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONNECT_STATUS);
-      break;
-    case WIFI_APP_DISCONNECTION_NOTIFY:
-      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONN_NOTIFY);
-      break;
-    case WIFI_APP_TIMEOUT_NOTIFY:
-      rsi_ble_app_set_event(RSI_BLE_WLAN_TIMEOUT_NOTIFY);
-      break;
-    default:
-      break;
-  }
+//  switch (msg_type) {
+//    case WIFI_APP_SCAN_RESP:
+//      memset(scanresult, 0, data_len);
+//      memcpy(scanresult, (sl_wifi_scan_result_t *)data, data_len);
+//
+//      rsi_ble_app_set_event(RSI_BLE_WLAN_SCAN_RESP);
+//      break;
+//    case WIFI_APP_CONNECTION_STATUS:
+//      rsi_ble_app_set_event(RSI_BLE_WLAN_JOIN_STATUS);
+//      break;
+//    case WIFI_APP_DISCONNECTION_STATUS:
+//      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONNECT_STATUS);
+//      break;
+//    case WIFI_APP_DISCONNECTION_NOTIFY:
+//      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONN_NOTIFY);
+//      break;
+//    case WIFI_APP_TIMEOUT_NOTIFY:
+//      rsi_ble_app_set_event(RSI_BLE_WLAN_TIMEOUT_NOTIFY);
+//      break;
+//    default:
+//      break;
+//  }
 }
