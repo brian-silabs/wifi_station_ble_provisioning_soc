@@ -113,20 +113,21 @@ sl_wifi_twt_request_t default_twt_setup_configuration = {
  *********************************************************************************************************
  */
 void wlan_task(void *argument);
-sl_status_t twt_callback_handler(sl_wifi_event_t event,
-    sl_si91x_twt_response_t *result,    
-    uint32_t result_length,
-    void *arg);
+static void wlan_wait_event(wlan_event_msg_t *event_msg);
+
+sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t result_length, void *arg);
 
 static void show_scan_results(void);
-sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t result_length, void *arg);
 sl_status_t wlan_app_scan_callback_handler(sl_wifi_event_t event,
     sl_wifi_scan_result_t *result,
     uint32_t result_length,
     void *arg);
 
 static sl_status_t set_twt(void);
-static void wlan_wait_event(wlan_event_msg_t *event_msg);
+sl_status_t twt_callback_handler(sl_wifi_event_t event,
+    sl_si91x_twt_response_t *result,
+    uint32_t result_length,
+    void *arg);
 
 /*
  *********************************************************************************************************
@@ -136,14 +137,8 @@ static void wlan_wait_event(wlan_event_msg_t *event_msg);
 sl_status_t start_wlan_task_context(void)
 {
     sl_status_t ret = SL_STATUS_OK;
-    
+
     THREAD_SAFE_PRINT("WLAN Task Context Init Start\n");
-    // wlan_evt_flags_id = osEventFlagsNew(NULL);
-    // if (wlan_evt_flags_id == NULL) {
-    //     THREAD_SAFE_PRINT("Failed to create wlan_evt_flags_id\n");
-    //     return SL_STATUS_FAIL;
-    // }
-    // THREAD_SAFE_PRINT("WLAN Flags Creation Complete\n");
 
     wlan_evt_queue_id = osMessageQueueNew(  SL_WLAN_EVENT_QUEUE_SIZE, 
                                             sizeof(wlan_event_msg_t), 
@@ -203,7 +198,6 @@ void wlan_set_event(uint32_t event_id, void *event_data, uint32_t event_data_len
         wlan_evt_queue_seq_num_g++;
     }
 }
-
 
 static void wlan_wait_event(wlan_event_msg_t *event_msg)
 {
@@ -316,8 +310,11 @@ void wlan_task(void *argument)
             } break;
 
             case WLAN_SCAN_COMPLETE_EVENT: {
-                THREAD_SAFE_PRINT("WLAN Scan Complete with status %d\n", (int)scan_status);
-                //TODO
+                THREAD_SAFE_PRINT("WLAN Scan Complete with status %lX\n", (uint32_t)scan_status);
+                if(scan_status == SL_STATUS_OK) {
+                    // TODO : JEROME IDEA TO DEFINE A Callback to app
+                    //wifi_app_send_to_ble(WIFI_APP_SCAN_RESP, (uint8_t *)scan_result, scanbuf_size);
+                }
             } break;
 
             // case WIFI_APP_JOIN_STATE: {
@@ -577,7 +574,7 @@ sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t 
   // When this bit is set, the `data` parameter will be of type `sl_status_t`, and the `data_length` parameter can be ignored.
 
     if((event & SL_WIFI_EVENT_FAIL_INDICATION) == SL_WIFI_EVENT_FAIL_INDICATION) {
-        THREAD_SAFE_PRINT("Join failed with status: %d\n", (int)(*(sl_status_t *)result));
+        THREAD_SAFE_PRINT("Join failed with status: %lX\n", (uint32_t)(*(sl_status_t *)result));
 
         // update wlan application state
         disconnected = 1;
