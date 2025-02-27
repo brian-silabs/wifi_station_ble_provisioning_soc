@@ -23,4 +23,6 @@
 #define RSI_BLE_ATT_PROPERTY_WRITE 0x08
 #define RSI_BLE_ATT_PROPERTY_NOTIFY 0x10
 
+void rsi_ble_configurator_init(void);
+
 #endif // BLE_GATT_H

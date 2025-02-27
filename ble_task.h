@@ -10,14 +10,17 @@
 
 typedef enum ble_event_id_e
 {
-  BLE_BOOT_EVENT =               (1 << 1),
-  BLE_UNCONNECTED_EVENT =        (1 << 2),
-  BLE_CONNECTED_EVENT =          (1 << 3),
-  BLE_IPCONFIG_DONE_EVENT =      (1 << 4),
-  BLE_SCAN_COMPLETE_EVENT =      (1 << 5),
-  BLE_JOIN_EVENT =               (1 << 6),
-  BLE_DISCONNECT_REQUEST_EVENT = (1 << 7)
-} ble_event_id_t;
+  BLE_SYSTEM_BOOT_EVENT =                   (1 << 1),
+  BLE_SYSTEM_EXTERNAL_SIGNAL_EVENT =        (1 << 2),
+  BLE_CONNECTION_OPENED_EVENT =             (1 << 3),
+  BLE_CONNECTION_CLOSED_EVENT =             (1 << 4),
+  BLE_CONNECTION_UPDATE_EVENT =             (1 << 5),
+  BLE_CONNECTION_REMOTE_FEATURES_EVENT =    (1 << 6),
+  BLE_CONNECTION_MTU_EVENT =                (1 << 7),
+  BLE_GATT_WRITE_REQUEST_EVENT =            (1 << 8),
+  BLE_GATT_READ_REQUEST_EVENT =             (1 << 9),
+  BLE_GATT_DATALEN_CHANGE_EVENT =           (1 << 10)
+} ble_event_id_t;   
 
 typedef struct ble_event_msg_s{
   ble_event_id_t event_id;

@@ -302,7 +302,7 @@ void wlan_task(void *argument)
                     // If not, start a scan 
                     status = sl_wifi_start_scan(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, NULL, &wifi_scan_configuration);
                     if (  (status != SL_STATUS_OK)
-                        ||(status != SL_STATUS_IN_PROGRESS))
+                        &&(status != SL_STATUS_IN_PROGRESS))
                     {
                         THREAD_SAFE_PRINT("Failed to start scan: 0x%lX\r\n", status);
                     }
