@@ -10,6 +10,8 @@
         "nwp_task.h": "c",
         "ble_task_config.h": "c",
         "nwp_task_config.h": "c",
-        "sl_wifi_device.h": "c"
+        "sl_wifi_device.h": "c",
+        "__locale": "c",
+        "ios": "c"
     }
 }
