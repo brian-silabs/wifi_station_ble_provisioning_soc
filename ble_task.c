@@ -234,7 +234,11 @@ void ble_task(void *argument)
             } break;
 
             case BLE_GATT_DATALEN_CHANGE_EVENT: {
-                THREAD_SAFE_PRINT("Data Lenght changed\n");
+                THREAD_SAFE_PRINT("Data Length changed\n");
+            } break;
+
+            case BLE_GATT_WRITE_REQUEST_EVENT: {
+                THREAD_SAFE_PRINT("Gatt Write Request\n");
             } break;
 
             // case RSI_APP_FW_VERSION: {
@@ -379,7 +383,6 @@ void ble_task(void *argument)
                       THREAD_SAFE_PRINT("\n set data length cmd failed with error code = "
                                 "%d \n",
                                 bt_status);
-                        
                     }
                   }
             } break;
