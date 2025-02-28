@@ -3,12 +3,19 @@
 #define NWP_TASK_CONFIG_H
 
 #include "sl_wifi_device.h"
+#include "ble_config.h"
 
 #define SL_SI91X_OPERATION_MODE                 SL_SI91X_CLIENT_MODE
 #define SL_SI91X_COEX_MODE                      SL_SI91X_WLAN_BLE_MODE
 
 #define SL_SI91X_WIFI_PERFORMANCE_PROFILE       DEEP_SLEEP_WITH_RAM_RETENTION
 #define SL_SI91X_BT_PERFORMANCE_PROFILE         ASSOCIATED_POWER_SAVE
+
+#define EFR32_GATT_DB_COMPAT_ENABLED            1
+
+#if EFR32_GATT_DB_COMPAT_ENABLED
+#define BLE_SIMPLE_GATT                         1
+#endif
 
 ///////// Should not be modified
 /// // Check how to better deal with this config
@@ -38,37 +45,37 @@ static const sl_wifi_device_configuration_t
                .bt_feature_bit_map         = (SL_SI91X_BT_RF_TYPE | SL_SI91X_ENABLE_BLE_PROTOCOL),
                .ext_tcp_ip_feature_bit_map = (SL_SI91X_CONFIG_FEAT_EXTENTION_VALID | SL_SI91X_EXT_EMB_MQTT_ENABLE),
                //!ENABLE_BLE_PROTOCOL in bt_feature_bit_map
-//               .ble_feature_bit_map =
-//                 ((SL_SI91X_BLE_MAX_NBR_PERIPHERALS(RSI_BLE_MAX_NBR_PERIPHERALS)
-//                   | SL_SI91X_BLE_MAX_NBR_CENTRALS(RSI_BLE_MAX_NBR_CENTRALS)
-//                   | SL_SI91X_BLE_MAX_NBR_ATT_SERV(RSI_BLE_MAX_NBR_ATT_SERV)
-//                   | SL_SI91X_BLE_MAX_NBR_ATT_REC(RSI_BLE_MAX_NBR_ATT_REC))
-//                  | SL_SI91X_FEAT_BLE_CUSTOM_FEAT_EXTENTION_VALID | SL_SI91X_BLE_PWR_INX(RSI_BLE_PWR_INX)
-//                  | SL_SI91X_BLE_PWR_SAVE_OPTIONS(RSI_BLE_PWR_SAVE_OPTIONS) | SL_SI91X_916_BLE_COMPATIBLE_FEAT_ENABLE
-//#if RSI_BLE_GATT_ASYNC_ENABLE
-//                  | SL_SI91X_BLE_GATT_ASYNC_ENABLE
-//#endif
-//                  ),
-//
-//               .ble_ext_feature_bit_map =
-//                 ((SL_SI91X_BLE_NUM_CONN_EVENTS(RSI_BLE_NUM_CONN_EVENTS)
-//                   | SL_SI91X_BLE_NUM_REC_BYTES(RSI_BLE_NUM_REC_BYTES))
-//#if RSI_BLE_INDICATE_CONFIRMATION_FROM_HOST
-//                  | SL_SI91X_BLE_INDICATE_CONFIRMATION_FROM_HOST //indication response from app
-//#endif
-//#if RSI_BLE_MTU_EXCHANGE_FROM_HOST
-//                  | SL_SI91X_BLE_MTU_EXCHANGE_FROM_HOST //MTU Exchange request initiation from app
-//#endif
-//#if RSI_BLE_SET_SCAN_RESP_DATA_FROM_HOST
-//                  | (SL_SI91X_BLE_SET_SCAN_RESP_DATA_FROM_HOST) //Set SCAN Resp Data from app
-//#endif
-//#if RSI_BLE_DISABLE_CODED_PHY_FROM_HOST
-//                  | (SL_SI91X_BLE_DISABLE_CODED_PHY_FROM_HOST) //Disable Coded PHY from app
-//#endif
-//#if BLE_SIMPLE_GATT
-//                  | SL_SI91X_BLE_GATT_INIT
-//#endif
-//                  ),
+              .ble_feature_bit_map =
+                ((SL_SI91X_BLE_MAX_NBR_PERIPHERALS(RSI_BLE_MAX_NBR_PERIPHERALS)
+                  | SL_SI91X_BLE_MAX_NBR_CENTRALS(RSI_BLE_MAX_NBR_CENTRALS)
+                  | SL_SI91X_BLE_MAX_NBR_ATT_SERV(RSI_BLE_MAX_NBR_ATT_SERV)
+                  | SL_SI91X_BLE_MAX_NBR_ATT_REC(RSI_BLE_MAX_NBR_ATT_REC))
+                 | SL_SI91X_FEAT_BLE_CUSTOM_FEAT_EXTENTION_VALID | SL_SI91X_BLE_PWR_INX(RSI_BLE_PWR_INX)
+                 | SL_SI91X_BLE_PWR_SAVE_OPTIONS(RSI_BLE_PWR_SAVE_OPTIONS) | SL_SI91X_916_BLE_COMPATIBLE_FEAT_ENABLE
+#if RSI_BLE_GATT_ASYNC_ENABLE
+                 | SL_SI91X_BLE_GATT_ASYNC_ENABLE
+#endif
+                 ),
+
+              .ble_ext_feature_bit_map =
+                ((SL_SI91X_BLE_NUM_CONN_EVENTS(RSI_BLE_NUM_CONN_EVENTS)
+                  | SL_SI91X_BLE_NUM_REC_BYTES(RSI_BLE_NUM_REC_BYTES))
+#if RSI_BLE_INDICATE_CONFIRMATION_FROM_HOST
+                 | SL_SI91X_BLE_INDICATE_CONFIRMATION_FROM_HOST //indication response from app
+#endif
+#if RSI_BLE_MTU_EXCHANGE_FROM_HOST
+                 | SL_SI91X_BLE_MTU_EXCHANGE_FROM_HOST //MTU Exchange request initiation from app
+#endif
+#if RSI_BLE_SET_SCAN_RESP_DATA_FROM_HOST
+                 | (SL_SI91X_BLE_SET_SCAN_RESP_DATA_FROM_HOST) //Set SCAN Resp Data from app
+#endif
+#if RSI_BLE_DISABLE_CODED_PHY_FROM_HOST
+                 | (SL_SI91X_BLE_DISABLE_CODED_PHY_FROM_HOST) //Disable Coded PHY from app
+#endif
+#if BLE_SIMPLE_GATT
+                 | SL_SI91X_BLE_GATT_INIT
+#endif
+                 ),
                .config_feature_bit_map = (SL_SI91X_FEAT_SLEEP_GPIO_SEL_BITMAP| SL_SI91X_ENABLE_ENHANCED_MAX_PSP) } };
 
 #endif // NWP_TASK_CONFIG_H
