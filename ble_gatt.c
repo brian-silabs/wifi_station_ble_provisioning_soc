@@ -48,9 +48,6 @@
 #define RSI_BLE_CHAR_SERV_UUID 0x2803
 #define RSI_BLE_CLIENT_CHAR_UUID 0x2902
 
-// max data length
-#define RSI_BLE_MAX_DATA_LEN 66
-
 // attribute properties
 #define RSI_BLE_ATT_PROPERTY_READ 0x02
 #define RSI_BLE_ATT_PROPERTY_WRITE 0x08

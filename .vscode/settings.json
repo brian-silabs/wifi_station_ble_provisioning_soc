@@ -24,6 +24,7 @@
         "string": "c",
         "string_view": "c",
         "unordered_map": "c",
-        "vector": "c"
+        "vector": "c",
+        "sl_si91x_power_manager.h": "c"
     }
 }

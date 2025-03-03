@@ -4,7 +4,7 @@
 #include "sl_status.h"
 
 #define SL_WLAN_EVENT_QUEUE_SIZE        20
-#define SL_WLAN_EVENT_MAX_PAYLOAD_SIZE  64
+#define SL_WLAN_EVENT_MAX_PAYLOAD_SIZE  1024
 
 #define wlan_set_dataless_event(x) wlan_set_event(x, NULL, 0)
 

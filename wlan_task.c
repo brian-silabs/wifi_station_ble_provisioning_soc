@@ -53,11 +53,6 @@ static uint8_t      wlan_evt_queue_seq_num_g = 0;
 // WLAN Variables
 
 // WLAN Scan Configuration variables
-sl_wifi_scan_result_t *scan_result          = NULL;
-sl_wifi_scan_configuration_t wifi_scan_configuration = { 0 };
-uint16_t scanbuf_size = (sizeof(sl_wifi_scan_result_t) + (SL_WIFI_MAX_SCANNED_AP * sizeof(scan_result->scan_info[0])));
-sl_status_t scan_status = SL_STATUS_OK; // TODO make it an argument of flags
-
 uint8_t connected = 0;
 uint8_t timeout = 0;
 uint8_t disconnected = 0;
@@ -66,11 +61,7 @@ uint8_t a = 0;//TODO  what is it ? Cleanup required as this seems to be used for
 uint8_t retry = 1; //TODO what retry 
 uint8_t conn_status;
 
-sl_wifi_client_configuration_t access_point = { 0 };
 sl_net_ip_configuration_t ip_address        = { 0 };
-
-extern uint8_t coex_ssid[50], pwd[34], sec_type;
-//uint8_t coex_ssid[50], pwd[34], sec_type;
 
 sl_wifi_twt_request_t default_twt_setup_configuration = {
     .twt_enable              = 1,
@@ -117,7 +108,7 @@ static void wlan_wait_event(wlan_event_msg_t *event_msg);
 
 sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t result_length, void *arg);
 
-static void show_scan_results(void);
+static void show_scan_results(sl_wifi_scan_result_t *result);
 sl_status_t wlan_app_scan_callback_handler(sl_wifi_event_t event,
     sl_wifi_scan_result_t *result,
     uint32_t result_length,
@@ -249,14 +240,6 @@ void wlan_task(void *argument)
         print_firmware_version(&version);
     }
 
-    // Allocate memory for scan buffer
-    scan_result = (sl_wifi_scan_result_t *)malloc(scanbuf_size);
-    if (scan_result == NULL) {
-        THREAD_SAFE_PRINT("Failed to allocate memory for scan result\n");
-        return; // Should be an assertion
-    }
-    memset(scan_result, 0, scanbuf_size);
-
     THREAD_SAFE_PRINT("WLAN Releasing NWP Semaphore\r\n");
     status = nwp_access_release();
     if (status != SL_STATUS_OK) {
@@ -282,39 +265,10 @@ void wlan_task(void *argument)
 
                 // Initialize scan callback
                 sl_wifi_set_scan_callback(wlan_app_scan_callback_handler, NULL);
-
-                //Use default scan configuration
-                wifi_scan_configuration = default_wifi_scan_configuration;
-
-                // Did we join and saved credentials?
-                // If so, rejoin
-                if(0){//TODO
-                    THREAD_SAFE_PRINT("WLAN Connect to known AP\n");
-                    status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, TIMEOUT_MS);
-                    if (status != SL_STATUS_OK) {
-                        THREAD_SAFE_PRINT("Failed to connect to AP: 0x%lX\r\n", status);
-                    } else {
-                        THREAD_SAFE_PRINT("Connected to AP\n");
-                        wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
-                    }
-                } else {
-                    THREAD_SAFE_PRINT("WLAN Start Scan\n");
-                    // If not, start a scan 
-                    status = sl_wifi_start_scan(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, NULL, &wifi_scan_configuration);
-                    if (  (status != SL_STATUS_OK)
-                        &&(status != SL_STATUS_IN_PROGRESS))
-                    {
-                        THREAD_SAFE_PRINT("Failed to start scan: 0x%lX\r\n", status);
-                    }
-                }
             } break;
 
             case WLAN_SCAN_COMPLETE_EVENT: {
-                THREAD_SAFE_PRINT("WLAN Scan Complete with status %lX\n", (uint32_t)scan_status);
-                if(scan_status == SL_STATUS_OK) {
-                    // TODO : JEROME IDEA TO DEFINE A Callback to app
-                    //wifi_app_send_to_ble(WIFI_APP_SCAN_RESP, (uint8_t *)scan_result, scanbuf_size);
-                }
+                THREAD_SAFE_PRINT("WLAN Scan Complete\n");
             } break;
 
             // case WIFI_APP_JOIN_STATE: {
@@ -589,21 +543,21 @@ sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t 
   return ret;
 }
 
-static void show_scan_results(void)
+static void show_scan_results(sl_wifi_scan_result_t *result)
 {
   uint8_t *bssid = NULL;
-  THREAD_SAFE_PRINT("%lu Scan results:\n", scan_result->scan_count);
+  THREAD_SAFE_PRINT("%lu Scan results:\n", result->scan_count);
 
-  if (scan_result->scan_count) {
+  if (result->scan_count) {
     THREAD_SAFE_PRINT("\n   %s %24s %s", "SSID", "SECURITY", "NETWORK");
     THREAD_SAFE_PRINT("%12s %12s %s\n", "BSSID", "CHANNEL", "RSSI");
 
-    for (int a = 0; a < (int)scan_result->scan_count; ++a) {
-      bssid = (uint8_t *)&scan_result->scan_info[a].bssid;
+    for (int a = 0; a < (int)result->scan_count; ++a) {
+      bssid = (uint8_t *)&result->scan_info[a].bssid;
       THREAD_SAFE_PRINT("%-24s %4u,  %4u, ",
-                scan_result->scan_info[a].ssid,
-                scan_result->scan_info[a].security_mode,
-                scan_result->scan_info[a].network_type);
+                result->scan_info[a].ssid,
+                result->scan_info[a].security_mode,
+                result->scan_info[a].network_type);
       THREAD_SAFE_PRINT("  %02x:%02x:%02x:%02x:%02x:%02x, %4u,  -%u\n",
                 bssid[0],
                 bssid[1],
@@ -611,8 +565,8 @@ static void show_scan_results(void)
                 bssid[3],
                 bssid[4],
                 bssid[5],
-                scan_result->scan_info[a].rf_channel,
-                scan_result->scan_info[a].rssi_val);
+                result->scan_info[a].rf_channel,
+                result->scan_info[a].rssi_val);
     }
   }
 }
@@ -623,21 +577,13 @@ sl_status_t wlan_app_scan_callback_handler( sl_wifi_event_t event,
                                             void *arg)
 {
     UNUSED_PARAMETER(arg);
-    UNUSED_PARAMETER(result_length);
 
     if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
-        scan_status = *(sl_status_t *)result;
         return SL_STATUS_FAIL;
     }
 
-    SL_VERIFY_POINTER_OR_RETURN(scan_result, SL_STATUS_NULL_POINTER);
-    memset(scan_result, 0, scanbuf_size);
-    memcpy(scan_result, result, scanbuf_size);
-
-    show_scan_results();
-
-    wlan_set_dataless_event(WLAN_SCAN_COMPLETE_EVENT);
-
+    show_scan_results(result);
+    wlan_set_event(WLAN_SCAN_COMPLETE_EVENT, result, result_length);
     return SL_STATUS_OK;
 }
 

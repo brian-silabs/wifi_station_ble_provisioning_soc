@@ -49,11 +49,19 @@
 
 #include "sl_si91x_power_manager.h"
 
+#include "ble_gatt.h"
 #include "gatt_db.h"
 #include "rsi_ble_apis.h"
 
+#include "sl_wifi.h"
+#include "sl_utility.h"
+
 // APP version
 #define APP_FW_VERSION "0.1"
+#define APP_NWP_OPERATION_TIMEOUT_MS  15000
+
+
+sl_wifi_client_configuration_t access_point = { 0 };
 
 const osThreadAttr_t startup_thread_attributes = {
   .name       = "startup_thread",
@@ -66,6 +74,12 @@ const osThreadAttr_t startup_thread_attributes = {
   .tz_module  = 0,
   .reserved   = 0,
 };
+
+uint8_t coex_ssid[50], pwd[34], sec_type;
+uint8_t connected_to_ap = 0;
+
+static void app_start_wlan_scan(void);
+static void process_ble_attr1_command(uint8_t *att_value);
 
 void startup_routine(void *argument)
 {
@@ -116,8 +130,8 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
 {
 
   switch (event->event_id) {
-    case BLE_SYSTEM_BOOT_EVENT :
-    break;
+    case BLE_SYSTEM_BOOT_EVENT : {
+    } break;
 
     case BLE_CONNECTION_OPENED_EVENT: {
     } break;
@@ -135,6 +149,7 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
         switch (attr_handle) {
           case gattdb_attribute_1:
             THREAD_SAFE_PRINT("gattdb_attribute_1 handle\n");
+            process_ble_attr1_command(ble_write_event->att_value);
             break;
           case gattdb_attribute_2:
             THREAD_SAFE_PRINT("gattdb_attribute_2 handle\n");
@@ -149,21 +164,167 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
     } break;
     default:
       break;
-  }//switch(event_id)
+  }//switch(ble_event_id)
 
   return SL_STATUS_OK;
 }
 
 sl_status_t wlan_on_event(wlan_event_msg_t* event)
 {
+  sl_status_t status                 = SL_STATUS_OK;
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
 
   switch (event->event_id) {
     case WLAN_BOOT_EVENT :
+
+      // Did we join and saved credentials?
+      // If so, rejoin
+      if(0){//TODO
+          THREAD_SAFE_PRINT("WLAN Connect to known AP\n");
+          status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, APP_NWP_OPERATION_TIMEOUT_MS);
+          if (status != SL_STATUS_OK) {
+              THREAD_SAFE_PRINT("Failed to connect to AP: 0x%lX\r\n", status);
+          } else {
+              THREAD_SAFE_PRINT("Connected to AP\n");
+              wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
+          }
+      }
     break;
+
+    case WLAN_SCAN_COMPLETE_EVENT: {
+      //TODO This was weirdly coded as it pushes all SSIDs with a task blocking delay in attribute 3
+      sl_wifi_scan_result_t *scanresult = (sl_wifi_scan_result_t *)(event->payload);
+      uint8_t scan_ix, length;
+
+      memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+      data[0] = 0x03;
+      data[1] = scanresult->scan_count;
+      rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+
+      for (scan_ix = 0; scan_ix < scanresult->scan_count; scan_ix++) {
+        memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+        data[0] = scanresult->scan_info[scan_ix].security_mode;
+        data[1] = ',';
+        strcpy((char *)data + 2, (const char *)scanresult->scan_info[scan_ix].ssid);
+        length = strlen((char *)data + 2);
+        length = length + 2;
+
+        rsi_ble_set_local_att_value(gattdb_attribute_3, RSI_BLE_MAX_DATA_LEN, data);
+        //osDelay(10);// TODO I do not like delaying the loop of wifi events
+      }
+    } break;
 
     default:
       break;
-  }//switch(event_id)
+  }//switch(wlan_event_id)
 
   return SL_STATUS_OK;
+}
+
+// Legacy compatibility with old RS Code si SI Connect works
+static void process_ble_attr1_command(uint8_t *att_value)
+{
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+  uint8_t cmdid = att_value[0];
+
+  switch (cmdid) {
+        // Scan command request
+        case '3': //else if(rsi_ble_write->att_value[0] == '3')
+        {
+          THREAD_SAFE_PRINT("Received scan request\n");
+          app_start_wlan_scan();
+        } break;
+
+        // Sending SSID
+        case '2': //else if(rsi_ble_write->att_value[0] == '2')
+        {
+          THREAD_SAFE_PRINT("[APP] Received SSID\n");
+          memset(coex_ssid, 0, sizeof(coex_ssid));
+          strcpy((char *)coex_ssid, (const char *)&att_value[3]);
+          THREAD_SAFE_PRINT("[APP] %s\n", coex_ssid);
+        } break;
+
+        // Sending Security type
+        case '5': //else if(rsi_ble_write->att_value[0] == '5')
+        {
+          sec_type = ((att_value[3]) - '0');
+          THREAD_SAFE_PRINT("[APP] In Security Request\n");
+          if (sec_type == 0) {
+            THREAD_SAFE_PRINT("[APP] Join Request\n");
+          }
+        } break;
+
+        // Sending PSK
+        case '6': //else if(rsi_ble_write->att_value[0] == '6')
+        {
+          THREAD_SAFE_PRINT("[APP] Received PWD\n");
+          strcpy((char *)pwd, (const char *)&att_value[3]);
+          THREAD_SAFE_PRINT("[APP] %s\n", pwd);
+          THREAD_SAFE_PRINT("[APP] Join Request\n");
+        } break;
+
+        // WLAN Status Request
+        case '7': //else if(rsi_ble_write->att_value[0] == '7')
+        {
+          THREAD_SAFE_PRINT("[APP] WLAN status request received\n");
+          if (connected_to_ap) {
+            memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+
+            data[1] = connected_to_ap; /*This index will indicate wlan AP connect or disconnect status to Android app*/
+            data[0] = 0x07;
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+          } else {
+            memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+            data[0] = 0x07;
+            data[1] = 0x00;
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+          }
+        } break;
+
+        // WLAN disconnect request
+        case '4': //else if(rsi_ble_write->att_value[0] == '4')
+        {
+          THREAD_SAFE_PRINT("[APP] WLAN disconnect request received\n");
+        } break;
+
+        // FW version request
+        case '8': {
+          THREAD_SAFE_PRINT("[APP] FW version request\n");
+          sl_status_t status = SL_STATUS_OK;
+          sl_wifi_firmware_version_t firmware_version = { 0 };
+          memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+
+          status = sl_wifi_get_firmware_version(&firmware_version);
+          if (status == SL_STATUS_OK) {
+            data[0] = 0x08;
+            data[1] = sizeof(sl_wifi_firmware_version_t);
+            memcpy(&data[2], &firmware_version, sizeof(sl_wifi_firmware_version_t));
+
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+            print_firmware_version(&firmware_version);
+          }
+        } break;
+
+        default:
+          THREAD_SAFE_PRINT("Default command case \n\n");
+          break;
+      }
+}
+
+static void app_start_wlan_scan(void)
+{
+  sl_status_t status = SL_STATUS_OK;
+  sl_wifi_scan_configuration_t wifi_scan_configuration = { 0 };
+
+  //Use default scan configuration
+  wifi_scan_configuration = default_wifi_scan_configuration;
+
+  THREAD_SAFE_PRINT("WLAN Start Scan\n");
+  // If not, start a scan
+  status = sl_wifi_start_scan(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, NULL, &wifi_scan_configuration);
+  if (  (status != SL_STATUS_OK)
+      &&(status != SL_STATUS_IN_PROGRESS))
+  {
+      THREAD_SAFE_PRINT("Failed to start scan: 0x%lX\r\n", status);
+  }
 }
