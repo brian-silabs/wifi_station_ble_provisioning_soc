@@ -63,11 +63,19 @@
 #define RSI_BLE_ATT_PROPERTY_NOTIFY 0x10
 // TODO Make this module consume EFR32 Gatt DB .h/.c files
 
+typedef enum gattdb_init_state_e {
+    GATTDB_INIT_REGISTER_START = 0,
+    GATTDB_INIT_REGISTER_SERVICE = 1,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC = 2,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE = 3,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG = 4,
+} gattdb_init_state_t;
+
 // BLE Variables
 uint8_t remote_dev_addr[18] = { 0 };
-
 rsi_ble_event_mtu_t app_ble_mtu_event;
-
+gattdb_init_state_t gattdb_init_state_g = GATTDB_INIT_REGISTER_START;
+gattdb_init_state_t gattdb_init_next_state_g = GATTDB_INIT_REGISTER_START;
 //static uint8_t rsi_ble_att1_val_hndl;
 //static uint16_t rsi_ble_att2_val_hndl;
 //static uint16_t rsi_ble_att3_val_hndl;
@@ -85,6 +93,9 @@ static void rsi_ble_add_char_val_att(void *serv_handler,
     uint8_t *data,
     uint8_t data_len);
 
+    static void rsi_ble_add_char_val_att_client(void *serv_handler,
+        uint16_t handle);
+
 //static uint32_t rsi_ble_add_configurator_serv(void);
 
 static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t *rsi_ble_write);
@@ -94,7 +105,6 @@ static void rsi_ble_on_read_resp(uint16_t resp_status,
                                     rsi_ble_resp_att_value_t *rsi_ble_resp_att_val);
 static void rsi_ble_on_write_resp(uint16_t resp_status, uint16_t resp_id);
 static void rsi_ble_on_read_req_event(uint16_t event_id, rsi_ble_read_req_t *rsi_ble_read_req);
-
 
 // Forward declarations
 static void add_ad_element(uint8_t *ad_data, uint8_t *ad_len, uint8_t ad_type, uint8_t *data, uint8_t data_len);
@@ -401,10 +411,14 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
 static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 {
     int rsi_ble_status = RSI_SUCCESS;
-    uint8_t lastRegisteredServiceHandle = 0xFF;
+    static uint8_t gattdb_init_index = 0;
 
-    uint16_t nextExpectedCharUuid = 0xFFFF;
-    uint16_t nextExpectedCharHandle = 0xFFFF;
+
+    uint8_t lastRegisteredServiceHandle = 0xFF;
+    
+    uint16_t expectedCharValueUuid = 0xFFFF;
+    uint16_t expectedCharValueHandle = 0xFFFF;
+    uint8_t currentCharacteristicProperties = 0x00;
 
     uuid_t new_serv_uuid                        = { 0 };
     uuid_t new_char_uuid                        = { 0 };
@@ -413,14 +427,17 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = NULL;
     //sli_bt_gattdb_value_t *const_char_data = NULL;
 
-
     uint8_t char_data_type = 0xFF;
 
-    for (uint16_t i = 0; i < gatt_db->attribute_table_size; i++)
+    gattdb_init_index = 0;
+    do
     {
-        const sli_bt_gattdb_attribute_t *attr = &(gatt_db->attributes[i]);
+        const sli_bt_gattdb_attribute_t *attr = &(gatt_db->attributes[gattdb_init_index]);
+
         if ((attr->uuid == 0x0000) && (attr->handle != lastRegisteredServiceHandle) && (attr->datatype == 0x00))
         {
+            gattdb_init_state_g = GATTDB_INIT_REGISTER_SERVICE;
+
             new_serv_uuid.size      = attr->constdata->len;
             new_serv_uuid.val.val16 = attr->constdata->data[0] | (attr->constdata->data[1] << 8);
 
@@ -432,56 +449,93 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 
             if(attr->handle == new_serv_resp.start_handle)
             {
-                // Means gatt DB Handles are aligned with 917's
+                // Means gatt DB .handle fields are aligned with 917's
                 lastRegisteredServiceHandle = attr->handle;
             } else
             {
+                // Otherwise this means the NWP has been performing gattdb init
+                // Using EFR32 Gatt db, this is not what we want 
                 return SL_STATUS_FAIL;
             }
         } else if((attr->uuid == 0x0002) && (attr->handle != 0xFF))
         {
-            
+            gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC;
+
             new_char_uuid.val.val16 = gatt_db->uuid16[attr->characteristic.char_uuid];
             new_char_uuid.size      = 2;
 
-            nextExpectedCharUuid = attr->characteristic.char_uuid;
+            //char_uuid holds the BG Tool uuid for the characteristic value
+            expectedCharValueUuid = attr->characteristic.char_uuid;
+            expectedCharValueHandle = attr->handle + 1;
+            currentCharacteristicProperties = attr->characteristic.properties;
 
-            characteristic_value_lookup(gatt_db, nextExpectedCharUuid, false, NULL, &nextExpectedCharHandle, NULL, NULL);
+            // //We gather the characteristic handle data from the gatt db
+            // characteristic_value_lookup(gatt_db, nextExpectedCharUuid, false, NULL, &nextExpectedCharHandle, NULL, NULL);
 
             rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
                                       attr->handle,
-                                      attr->characteristic.properties,
-                                      nextExpectedCharHandle,
+                                      currentCharacteristicProperties,
+                                      expectedCharValueHandle,
                                       new_char_uuid);
+
+            gattdb_init_next_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE;
 
         }  else if((attr->uuid == 0x000b) && (attr->handle != 0xFF))
         {
-
-        } else {
-            //Attribute Values uuids
-            if((attr->uuid == nextExpectedCharUuid) && (attr->handle == nextExpectedCharHandle) && (attr->handle != 0xFF))
+            gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG;
+            // Sanity check, in case gatt db were to not be "contiguous"
+            if(     (attr->handle == expectedCharValueHandle) 
+                &&  (attr->handle != 0xFF)
+                &&  (gattdb_init_state_g == gattdb_init_next_state_g))
             {
                 //Falling here means we are expected to register an attribute value
+                expectedCharValueUuid = 0xFFFF;
+                expectedCharValueHandle = 0xFFFF;
 
-               nextExpectedCharUuid = 0xFFFF;
-               nextExpectedCharHandle = 0xFFFF;
+                gattdb_init_next_state_g = 0;
 
-               new_char_uuid.val.val16 = gatt_db->uuid16[attr->uuid];
-               new_char_uuid.size      = 2;
+                rsi_ble_add_char_val_att_client(new_serv_resp.serv_handler,
+                                                attr->handle);
+            }
+        } else {
+            if(gattdb_init_next_state_g == GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE)
+            {
+                gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE;
+                gattdb_init_next_state_g = 0;
+                //Sanity check, in case gatt db were to not be "contiguous"
+                if(     (attr->uuid == expectedCharValueUuid) 
+                    &&  (attr->handle == expectedCharValueHandle) 
+                    &&  (attr->handle != 0xFF))
+                {
+                    //Falling here means we are expected to register an attribute value
+                    expectedCharValueUuid = 0xFFFF;
+                    expectedCharValueHandle = 0xFFFF;
 
-               characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&dyn_char_data), &char_data_type);
+                    new_char_uuid.val.val16 = gatt_db->uuid16[attr->uuid];
+                    new_char_uuid.size      = 2;
 
-               rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
-                                        attr->handle,
-                                        new_char_uuid,
-                                        attr->characteristic.properties,
-                                        dyn_char_data->data,
-                                        RSI_BLE_MAX_DATA_LEN);
+                    characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&dyn_char_data), &char_data_type);
 
-                //Register attribute value
+                    rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
+                                                attr->handle,
+                                                new_char_uuid,
+                                                currentCharacteristicProperties,
+                                                dyn_char_data->data,
+                                                RSI_BLE_MAX_DATA_LEN);// TODO check
+
+                    // If we expect to register a client config attribute (notify, indicate)
+                    // we need to register the client config attribute next
+                    // Simply set the next expected state and handle to ensure gatt_db is still properly generated
+                    if(currentCharacteristicProperties & 0x20)
+                    {
+                        expectedCharValueHandle = attr->handle + 1;
+                        gattdb_init_next_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG;
+                    }
+                }
             }
         }
-    }
+        gattdb_init_index++;
+    } while (gattdb_init_index  < gatt_db->attribute_table_size);
 
     return SL_STATUS_OK;
 }
@@ -539,6 +593,26 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
         // add attribute to the service
         rsi_ble_add_attribute(&new_att);
     }
+
+    return;
+ }
+
+ static void rsi_ble_add_char_val_att_client(void *serv_handler,
+    uint16_t handle)
+ {
+    rsi_ble_req_add_att_t new_att = { 0 };
+
+    // if notification property supports then we need to add client characteristic service.
+    new_att.serv_handler       = serv_handler;
+    new_att.handle             = handle;
+    new_att.att_uuid.size      = 2;
+    new_att.att_uuid.val.val16 = RSI_BLE_CLIENT_CHAR_UUID;
+    // Should these be the flags from the client config?
+    new_att.property           = RSI_BLE_ATT_PROPERTY_READ | RSI_BLE_ATT_PROPERTY_WRITE;
+    new_att.data_len           = 2;
+
+    // add attribute to the service
+    rsi_ble_add_attribute(&new_att);
 
     return;
  }
