@@ -51,6 +51,7 @@ osMessageQueueId_t  wlan_evt_queue_id;  // Event flags ID
 static uint8_t      wlan_evt_queue_seq_num_g = 0;
 
 // WLAN Variables
+sl_wifi_client_configuration_t access_point = { 0 };//Retained AP
 
 // WLAN Scan Configuration variables
 uint8_t connected = 0;
@@ -107,6 +108,11 @@ void wlan_task(void *argument);
 static void wlan_wait_event(wlan_event_msg_t *event_msg);
 
 sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t result_length, void *arg);
+
+sl_status_t wlan_net_event_handler(sl_net_event_t event,
+    sl_status_t status,
+    void *data,
+    uint32_t data_length);
 
 static void show_scan_results(sl_wifi_scan_result_t *result);
 sl_status_t wlan_app_scan_callback_handler(sl_wifi_event_t event,
@@ -202,6 +208,48 @@ static void wlan_wait_event(wlan_event_msg_t *event_msg)
     }
 }
 
+sl_status_t start_wlan_access_point_join(const void *ssid,
+                                         uint32_t ssid_length,
+                                         sl_wifi_credential_type_t type,
+                                         const void *credential,
+                                         uint32_t credential_length,
+                                         uint8_t sec_type,
+                                         uint32_t timeout_ms)
+{
+  sl_status_t status = SL_STATUS_OK;
+  sl_wifi_credential_t cred  = { 0 };
+  sl_wifi_credential_id_t id = SL_NET_DEFAULT_WIFI_CLIENT_CREDENTIAL_ID;
+
+  THREAD_SAFE_PRINT("WLAN Connect to AP\n");
+  memset(&access_point, 0, sizeof(sl_wifi_client_configuration_t));
+
+  cred.type = type;
+  memcpy(cred.psk.value, credential, credential_length);
+
+  status = sl_net_set_credential(id, SL_NET_WIFI_PSK, credential, credential_length);
+  if (SL_STATUS_OK == status) {
+    THREAD_SAFE_PRINT("Credentials set, id : %lu\n", id);
+
+    access_point.ssid.length = ssid_length;
+    memcpy(access_point.ssid.value, ssid, ssid_length);
+    access_point.security      = sec_type;
+    access_point.encryption    = SL_WIFI_DEFAULT_ENCRYPTION;
+    access_point.credential_id = id;
+
+    THREAD_SAFE_PRINT("SSID=%s\n", access_point.ssid.value);
+    status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, timeout_ms);
+  }
+
+  if (SL_STATUS_OK == status) {
+    THREAD_SAFE_PRINT("\n WLAN AP connection is successful\n");
+    wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
+  } else {
+    THREAD_SAFE_PRINT("\n WLAN connection failed\n");
+  }
+
+  return status;
+}
+
 /*
  *********************************************************************************************************
  *                                         PRIVATE FUNCTIONS DEFINITIONS
@@ -224,7 +272,7 @@ void wlan_task(void *argument)
     }
 
     //TODO check how this can be better managed vs nwp task
-    status = sl_net_init(SL_NET_WIFI_CLIENT_INTERFACE, &station_init_configuration, NULL, NULL);
+    status = sl_net_init(SL_NET_WIFI_CLIENT_INTERFACE, &station_init_configuration, NULL, wlan_net_event_handler);
     if ((status != SL_STATUS_OK)
         && (status != SL_STATUS_ALREADY_INITIALIZED)){
       printf("\r\nFailed to bring Wi-Fi client interface up: 0x%lX\r\n", status);
@@ -265,51 +313,25 @@ void wlan_task(void *argument)
 
                 // Initialize scan callback
                 sl_wifi_set_scan_callback(wlan_app_scan_callback_handler, NULL);
+
+                //TODO join existing AP if found
+                // Did we join and saved credentials?
+                // If so, rejoin
+                if(0){
+                    THREAD_SAFE_PRINT("WLAN Connect to known AP\n");
+                    status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, TIMEOUT_MS);
+                    if (status != SL_STATUS_OK) {
+                        THREAD_SAFE_PRINT("Failed to connect to AP: 0x%lX\r\n", status);
+                    } else {
+                        THREAD_SAFE_PRINT("Connected to AP\n");// TODO
+                        wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
+                    }
+                }
             } break;
 
             case WLAN_SCAN_COMPLETE_EVENT: {
                 THREAD_SAFE_PRINT("WLAN Scan Complete\n");
             } break;
-
-            // case WIFI_APP_JOIN_STATE: {
-            //     sl_wifi_credential_t cred  = { 0 };
-            //     sl_wifi_credential_id_t id = SL_NET_DEFAULT_WIFI_CLIENT_CREDENTIAL_ID;
-            //     memset(&access_point, 0, sizeof(sl_wifi_client_configuration_t));
-
-            //     cred.type = SL_WIFI_PSK_CREDENTIAL;
-            //     memcpy(cred.psk.value, pwd, strlen((char *)pwd));
-
-            //     status = sl_net_set_credential(id, SL_NET_WIFI_PSK, pwd, strlen((char *)pwd));
-            //     if (SL_STATUS_OK == status) {
-            //         THREAD_SAFE_PRINT("Credentials set, id : %lu\n", id);
-
-            //         access_point.ssid.length = strlen((char *)coex_ssid);
-            //         memcpy(access_point.ssid.value, coex_ssid, access_point.ssid.length);
-            //         access_point.security      = sec_type;
-            //         access_point.encryption    = SL_WIFI_DEFAULT_ENCRYPTION;
-            //         access_point.credential_id = id;
-
-            //         THREAD_SAFE_PRINT("SSID=%s\n", access_point.ssid.value);
-            //         status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, TIMEOUT_MS);
-            //     }
-            //     if (status != RSI_SUCCESS) {
-            //         timeout = 1;
-            //         //wifi_app_send_to_ble(WIFI_APP_TIMEOUT_NOTIFY, (uint8_t *)&timeout, 1);
-            //         wifi_app_clear_event(WIFI_APP_JOIN_STATE);
-            //         THREAD_SAFE_PRINT("\r\nWLAN Connect Failed, Error Code : 0x%lX\r\n", status);
-
-            //         // update wlan application state
-            //         disconnected = 1;
-            //         connected    = 0;
-            //     } else {
-            //         THREAD_SAFE_PRINT("\n WLAN connection is successful\n");
-            //         // update wlan application state
-            //         wifi_app_clear_event(WIFI_APP_JOIN_STATE);
-            //         wifi_app_set_event(WIFI_APP_CONNECTED_STATE);
-            //     }
-            //     osSemaphoreRelease(wlan_thread_sem);
-            //     THREAD_SAFE_PRINT("WIFI App Join State\n");
-            // } break;
 
             case WLAN_CONNECTED_EVENT: {
 
@@ -525,6 +547,7 @@ sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t 
 
   sl_status_t ret = SL_STATUS_OK;
 
+  THREAD_SAFE_PRINT("Join callback\n");
   // In case of event failure, the `SL_WIFI_EVENT_FAIL_INDICATION` bit is set in the `event` parameter.
   // When this bit is set, the `data` parameter will be of type `sl_status_t`, and the `data_length` parameter can be ignored.
 
@@ -584,6 +607,21 @@ sl_status_t wlan_app_scan_callback_handler( sl_wifi_event_t event,
 
     show_scan_results(result);
     wlan_set_event(WLAN_SCAN_COMPLETE_EVENT, result, result_length);
+    return SL_STATUS_OK;
+}
+
+sl_status_t wlan_net_event_handler(sl_net_event_t event,
+    sl_status_t status,
+    void *data,
+    uint32_t data_length)
+{
+    UNUSED_PARAMETER(event);
+    UNUSED_PARAMETER(status);
+    UNUSED_PARAMETER(data); 
+    UNUSED_PARAMETER(data_length);
+
+    THREAD_SAFE_PRINT("wlan_net_event_handler\n");
+
     return SL_STATUS_OK;
 }
 

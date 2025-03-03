@@ -2,6 +2,7 @@
 #define WLAN_TASK_H
 
 #include "sl_status.h"
+#include "sl_net_constants.h"
 
 #define SL_WLAN_EVENT_QUEUE_SIZE        20
 #define SL_WLAN_EVENT_MAX_PAYLOAD_SIZE  1024
@@ -33,6 +34,14 @@ typedef struct wlan_event_msg_s{
  * @return SL_STATUS_OK if the WLAN task context was started successfully, or an appropriate error code otherwise.
  */
 sl_status_t start_wlan_task_context(void);
+
+sl_status_t start_wlan_access_point_join(const void *ssid,
+                                         uint32_t ssid_length,
+                                         sl_wifi_credential_type_t type,
+                                         const void *credential,
+                                         uint32_t credential_length,
+                                         uint8_t sec_type,
+                                         uint32_t timeout_ms);
 
 void wlan_set_event(uint32_t event_id, void *event_data, uint32_t event_data_len);
 

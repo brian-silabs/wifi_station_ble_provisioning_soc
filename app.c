@@ -55,13 +55,13 @@
 
 #include "sl_wifi.h"
 #include "sl_utility.h"
+#include "sl_net_constants.h"
+#include "sl_net.h"
 
 // APP version
 #define APP_FW_VERSION "0.1"
 #define APP_NWP_OPERATION_TIMEOUT_MS  15000
 
-
-sl_wifi_client_configuration_t access_point = { 0 };
 
 const osThreadAttr_t startup_thread_attributes = {
   .name       = "startup_thread",
@@ -79,7 +79,10 @@ uint8_t coex_ssid[50], pwd[34], sec_type;
 uint8_t connected_to_ap = 0;
 
 static void app_start_wlan_scan(void);
+static void app_wlan_connect_to_ap(void);
 static void process_ble_attr1_command(uint8_t *att_value);
+//static void app_wlan_disconnect_ble_notification(void);
+static void app_wlan_timeout_ble_notification(void);
 
 void startup_routine(void *argument)
 {
@@ -176,23 +179,10 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
 
   switch (event->event_id) {
     case WLAN_BOOT_EVENT :
-
-      // Did we join and saved credentials?
-      // If so, rejoin
-      if(0){//TODO
-          THREAD_SAFE_PRINT("WLAN Connect to known AP\n");
-          status = sl_wifi_connect(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, &access_point, APP_NWP_OPERATION_TIMEOUT_MS);
-          if (status != SL_STATUS_OK) {
-              THREAD_SAFE_PRINT("Failed to connect to AP: 0x%lX\r\n", status);
-          } else {
-              THREAD_SAFE_PRINT("Connected to AP\n");
-              wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
-          }
-      }
     break;
 
     case WLAN_SCAN_COMPLETE_EVENT: {
-      //TODO This was weirdly coded as it pushes all SSIDs with a task blocking delay in attribute 3
+      //DONE Removing the osDelay works fine as long as notifications are enabled
       sl_wifi_scan_result_t *scanresult = (sl_wifi_scan_result_t *)(event->payload);
       uint8_t scan_ix, length;
 
@@ -210,7 +200,6 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
         length = length + 2;
 
         rsi_ble_set_local_att_value(gattdb_attribute_3, RSI_BLE_MAX_DATA_LEN, data);
-        //osDelay(10);// TODO I do not like delaying the loop of wifi events
       }
     } break;
 
@@ -218,7 +207,7 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
       break;
   }//switch(wlan_event_id)
 
-  return SL_STATUS_OK;
+  return status;
 }
 
 // Legacy compatibility with old RS Code si SI Connect works
@@ -251,6 +240,7 @@ static void process_ble_attr1_command(uint8_t *att_value)
           THREAD_SAFE_PRINT("[APP] In Security Request\n");
           if (sec_type == 0) {
             THREAD_SAFE_PRINT("[APP] Join Request\n");
+            app_wlan_connect_to_ap();
           }
         } break;
 
@@ -261,6 +251,7 @@ static void process_ble_attr1_command(uint8_t *att_value)
           strcpy((char *)pwd, (const char *)&att_value[3]);
           THREAD_SAFE_PRINT("[APP] %s\n", pwd);
           THREAD_SAFE_PRINT("[APP] Join Request\n");
+          app_wlan_connect_to_ap();
         } break;
 
         // WLAN Status Request
@@ -327,4 +318,43 @@ static void app_start_wlan_scan(void)
   {
       THREAD_SAFE_PRINT("Failed to start scan: 0x%lX\r\n", status);
   }
+}
+
+static void app_wlan_connect_to_ap(void)
+{
+
+  sl_status_t status = SL_STATUS_OK;
+
+  status = start_wlan_access_point_join(  (char *)coex_ssid,
+                                          strlen((char *)coex_ssid),
+                                          SL_WIFI_PSK_CREDENTIAL,
+                                          (char *)pwd,
+                                          strlen((char *)pwd),
+                                          sec_type,
+                                          APP_NWP_OPERATION_TIMEOUT_MS);
+
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("WLAN Connect Failed, Error Code : 0x%lX\r\n", status);
+    app_wlan_timeout_ble_notification();
+  }
+}
+
+//static void app_wlan_disconnect_ble_notification(void)
+//{
+//  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+//
+//  memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+//  data[1] = 0x01;
+//  data[0] = 0x04;
+//  rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+//}
+
+static void app_wlan_timeout_ble_notification(void)
+{
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+  
+  memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+  data[0] = 0x02;
+  data[1] = 0x00;
+  rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
 }
