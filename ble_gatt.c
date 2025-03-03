@@ -416,6 +416,12 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 
     uint8_t char_data_type = 0xFF;
 
+
+    if(RSI_BLE_MAX_NBR_ATT_REC < gatt_db->attribute_num)
+    {
+        return SL_STATUS_FAIL;// Not enough records
+    }
+
     gattdb_init_index = 0;
     do
     {
@@ -513,7 +519,7 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
                     // If we expect to register a client config attribute (notify, indicate)
                     // we need to register the client config attribute next
                     // Simply set the next expected state and handle to ensure gatt_db is still properly generated
-                    if(currentCharacteristicProperties & 0x20)
+                    if(currentCharacteristicProperties & 0x30)
                     {
                         expectedCharValueHandle = attr->handle + 1;
                         gattdb_init_next_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG;
@@ -571,6 +577,7 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     uint16_t handle)
  {
     rsi_ble_req_add_att_t new_att = { 0 };
+    int rsi_status = RSI_SUCCESS;
 
     // if notification property supports then we need to add client characteristic service.
     new_att.serv_handler       = serv_handler;
@@ -582,7 +589,11 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     new_att.data_len           = 2;
 
     // add attribute to the service
-    rsi_ble_add_attribute(&new_att);
+    rsi_status = rsi_ble_add_attribute(&new_att);
+    if(rsi_status != RSI_SUCCESS)
+      {
+        THREAD_SAFE_PRINT("ERROR att : %d\n", rsi_status);
+      }
 
     return;
  }

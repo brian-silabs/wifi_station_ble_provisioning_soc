@@ -32,7 +32,6 @@
     <characteristic const="false" id="attribute_1" name="Custom Characteristic" sourceId="" uuid="1aa1">
       <value length="0" type="user" variable_length="false">00</value>
       <properties>
-        <read authenticated="false" bonded="false" encrypted="false"/>
         <write authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
