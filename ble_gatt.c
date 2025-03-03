@@ -96,8 +96,6 @@ static void rsi_ble_add_char_val_att(void *serv_handler,
     static void rsi_ble_add_char_val_att_client(void *serv_handler,
         uint16_t handle);
 
-//static uint32_t rsi_ble_add_configurator_serv(void);
-
 static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t *rsi_ble_write);
 static void rsi_ble_on_mtu_event(rsi_ble_event_mtu_t *rsi_ble_mtu);
 static void rsi_ble_on_read_resp(uint16_t resp_status,
@@ -329,9 +327,11 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
     sli_bt_gattdb_attribute_chrvalue_t *char_data;
     uint8_t char_data_type = 0;
 
+#if 0 // This is done by NWP on 917, may be a config value to dismiss but not documented
     // 1. Add a flags field to advertising data
     uint8_t flags = ADV_FLAGS;
     add_ad_element(adv_data, &ad_len, AD_TYPE_FLAGS, &flags, sizeof(flags));
+#endif
 
     // Lookup the Device Name
     if (lookup_device_name(gatt_db, &device_name, &device_name_len) != SL_STATUS_OK) {
@@ -655,48 +655,6 @@ static void rsi_ble_add_char_serv_att(void *serv_handler,
 
    return;
 }
-
-// /**
-//  * @fn         rsi_ble_simple_chat_add_new_serv
-//  * @brief      this function is used to add new service i.e., simple chat service.
-//  * @param[in]  none.
-//  * @return     int32_t
-//  *             0  =  success
-//  *             !0 = failure
-//  * @section description
-//  * This function is used at application to create new service.
-//  */
-// static uint32_t rsi_ble_add_configurator_serv(void)
-// {
-//   uuid_t new_uuid                       = { 0 };
-//   rsi_ble_resp_add_serv_t new_serv_resp = { 0 };
-//   uint8_t data[RSI_BLE_MAX_DATA_LEN]    = { 0 };
-
-//   new_uuid.size      = 2; // adding new service
-//   new_uuid.val.val16 = RSI_BLE_NEW_SERVICE_UUID;
-
-//   rsi_ble_add_service(new_uuid, &new_serv_resp);
-
-//   new_uuid.size      = 2; // adding characteristic service attribute to the service
-//   new_uuid.val.val16 = RSI_BLE_ATTRIBUTE_1_UUID;
-//   rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
-//                             new_serv_resp.start_handle + 1,
-//                             RSI_BLE_ATT_PROPERTY_WRITE,
-//                             new_serv_resp.start_handle + 2,
-//                             new_uuid);
-
-//   rsi_ble_att1_val_hndl = new_serv_resp.start_handle + 2; // adding characteristic value attribute to the service
-//   new_uuid.size         = 2;
-//   new_uuid.val.val16    = RSI_BLE_ATTRIBUTE_1_UUID;
-//   rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
-//                            new_serv_resp.start_handle + 2,
-//                            new_uuid,
-//                            RSI_BLE_ATT_PROPERTY_WRITE,
-//                            data,
-//                            RSI_BLE_MAX_DATA_LEN);
-
-//   return 0;
-// }
 
 /**
  * @fn         rsi_ble_app_init
