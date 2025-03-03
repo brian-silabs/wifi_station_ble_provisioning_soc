@@ -4,7 +4,7 @@
 #include "sl_status.h"
 
 #define SL_BLE_EVENT_QUEUE_SIZE        20
-#define SL_BLE_EVENT_MAX_PAYLOAD_SIZE  64
+#define SL_BLE_EVENT_MAX_PAYLOAD_SIZE  254
 
 #define ble_set_dataless_event(x) ble_set_event(x, NULL, 0)
 

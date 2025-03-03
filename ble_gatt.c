@@ -48,12 +48,6 @@
 #define RSI_BLE_CHAR_SERV_UUID 0x2803
 #define RSI_BLE_CLIENT_CHAR_UUID 0x2902
 
-// BLE characteristic service uuid
-#define RSI_BLE_NEW_SERVICE_UUID 0xAABB
-#define RSI_BLE_ATTRIBUTE_1_UUID 0x1AA1
-#define RSI_BLE_ATTRIBUTE_2_UUID 0x1BB1
-#define RSI_BLE_ATTRIBUTE_3_UUID 0x1CC1
-
 // max data length
 #define RSI_BLE_MAX_DATA_LEN 66
 
@@ -61,7 +55,6 @@
 #define RSI_BLE_ATT_PROPERTY_READ 0x02
 #define RSI_BLE_ATT_PROPERTY_WRITE 0x08
 #define RSI_BLE_ATT_PROPERTY_NOTIFY 0x10
-// TODO Make this module consume EFR32 Gatt DB .h/.c files
 
 typedef enum gattdb_init_state_e {
     GATTDB_INIT_REGISTER_START = 0,
@@ -76,9 +69,6 @@ uint8_t remote_dev_addr[18] = { 0 };
 rsi_ble_event_mtu_t app_ble_mtu_event;
 gattdb_init_state_t gattdb_init_state_g = GATTDB_INIT_REGISTER_START;
 gattdb_init_state_t gattdb_init_next_state_g = GATTDB_INIT_REGISTER_START;
-//static uint8_t rsi_ble_att1_val_hndl;
-//static uint16_t rsi_ble_att2_val_hndl;
-//static uint16_t rsi_ble_att3_val_hndl;
 
 static void rsi_ble_add_char_serv_att(void *serv_handler,
    uint16_t handle,
@@ -577,23 +567,6 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     // add attribute to the service
     rsi_ble_add_attribute(&new_att);
 
-    // check the attribute property with notification
-    if (val_prop & RSI_BLE_ATT_PROPERTY_NOTIFY) {
-        // if notification property supports then we need to add client characteristic service.
-
-        // preparing the client characteristic attribute & values
-        memset(&new_att, 0, sizeof(rsi_ble_req_add_att_t));
-        new_att.serv_handler       = serv_handler;
-        new_att.handle             = handle + 1;
-        new_att.att_uuid.size      = 2;
-        new_att.att_uuid.val.val16 = RSI_BLE_CLIENT_CHAR_UUID;
-        new_att.property           = RSI_BLE_ATT_PROPERTY_READ | RSI_BLE_ATT_PROPERTY_WRITE;
-        new_att.data_len           = 2;
-
-        // add attribute to the service
-        rsi_ble_add_attribute(&new_att);
-    }
-
     return;
  }
 
@@ -767,82 +740,6 @@ static void rsi_ble_on_mtu_event(rsi_ble_event_mtu_t *rsi_ble_mtu)
 static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t *rsi_ble_write)
 {
   UNUSED_PARAMETER(event_id);
-  UNUSED_PARAMETER(rsi_ble_write);
 
-  ble_set_event(BLE_GATT_WRITE_REQUEST_EVENT, NULL, 0);
-//  uint8_t cmdid;
-
-//   //  Requests will come from Mobile app
-//   if ((rsi_ble_att1_val_hndl) == *((uint16_t *)rsi_ble_write->handle)) {
-//     cmdid = rsi_ble_write->att_value[0];
-
-//     switch (cmdid) {
-//       // Scan command request
-//       case '3': //else if(rsi_ble_write->att_value[0] == '3')
-//       {
-//         LOG_PRINT("Received scan request\n");
-//         retry = 0;
-//         memset(data, 0, sizeof(data));
-//         //wifi_app_set_event(WIFI_APP_SCAN_STATE);
-//       } break;
-
-//       // Sending SSID
-//       case '2': //else if(rsi_ble_write->att_value[0] == '2')
-//       {
-//         memset(coex_ssid, 0, sizeof(coex_ssid));
-//         strcpy((char *)coex_ssid, (const char *)&rsi_ble_write->att_value[3]);
-
-//         rsi_ble_app_set_event(RSI_SSID);
-//       } break;
-
-//       // Sending Security type
-//       case '5': //else if(rsi_ble_write->att_value[0] == '5')
-//       {
-//         sec_type = ((rsi_ble_write->att_value[3]) - '0');
-//         LOG_PRINT("In Security Request\n");
-
-//         rsi_ble_app_set_event(RSI_SECTYPE);
-//       } break;
-
-//       // Sending PSK
-//       case '6': //else if(rsi_ble_write->att_value[0] == '6')
-//       {
-//         memset(data, 0, sizeof(data));
-//         strcpy((char *)pwd, (const char *)&rsi_ble_write->att_value[3]);
-//         LOG_PRINT("PWD from ble app\n");
-//         //wifi_app_set_event(WIFI_APP_JOIN_STATE);
-//       } break;
-
-//       // WLAN Status Request
-//       case '7': //else if(rsi_ble_write->att_value[0] == '7')
-//       {
-//         LOG_PRINT("WLAN status request received\n");
-//         memset(data, 0, sizeof(data));
-//         if (connected) {
-//           rsi_ble_app_set_event(RSI_WLAN_ALREADY);
-//         } else {
-//           rsi_ble_app_set_event(RSI_WLAN_NOT_ALREADY);
-//         }
-//       } break;
-
-//       // WLAN disconnect request
-//       case '4': //else if(rsi_ble_write->att_value[0] == '4')
-//       {
-//         LOG_PRINT("WLAN disconnect request received\n");
-//         memset(data, 0, sizeof(data));
-//         //wifi_app_set_event(WIFI_APP_DISCONN_NOTIFY_STATE);
-//       } break;
-
-//       // FW version request
-//       case '8': {
-//         memset(data, 0, sizeof(data));
-//         rsi_ble_app_set_event(RSI_APP_FW_VERSION);
-//         LOG_PRINT("FW version request\n");
-//       } break;
-
-//       default:
-//         LOG_PRINT("Default command case \n\n");
-//         break;
-//     }
-//   }
+  ble_set_event(BLE_GATT_WRITE_REQUEST_EVENT, rsi_ble_write, sizeof(rsi_ble_event_write_t));
 }

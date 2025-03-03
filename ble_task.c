@@ -21,6 +21,8 @@
 #include "sl_constants.h"
 #include "rsi_ble_apis.h"
 
+#include "gatt_db.h"
+
 /*
  *********************************************************************************************************
  *                                         LOCAL GLOBAL VARIABLES
@@ -239,6 +241,17 @@ void ble_task(void *argument)
 
             case BLE_GATT_WRITE_REQUEST_EVENT: {
                 THREAD_SAFE_PRINT("Gatt Write Request\n");
+                rsi_ble_event_write_t *ble_write_event = (rsi_ble_event_write_t *)ble_event_msg.payload;
+                uint16_t attr_handle = (ble_write_event->handle[1] << 8) | ble_write_event->handle[0];
+
+                switch (attr_handle) {
+                  case gattdb_attribute_1:
+                    THREAD_SAFE_PRINT("gattdb_attribute_1 handle\n");
+                    break;
+                  default:
+                    break;
+                }
+
             } break;
 
             // case RSI_APP_FW_VERSION: {
