@@ -437,6 +437,7 @@ void wlan_task(void *argument)
             default:
                 break;
         }//switch(wlan_event_id)
+        wlan_on_event(&wlan_event_msg);
     }//while(1)
 }
 
@@ -639,3 +640,17 @@ sl_status_t wlan_app_scan_callback_handler( sl_wifi_event_t event,
 
     return SL_STATUS_OK;
 }
+
+/*
+ *********************************************************************************************************
+ *                                   APP CALLBACK FUNCTIONS DEFINITIONS
+ *********************************************************************************************************
+ */
+
+SL_WEAK sl_status_t wlan_on_event(wlan_event_msg_t* event)
+{
+
+  UNUSED_PARAMETER(event);
+  return SL_STATUS_OK;
+}
+

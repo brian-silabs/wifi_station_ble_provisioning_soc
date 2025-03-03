@@ -21,8 +21,6 @@
 #include "sl_constants.h"
 #include "rsi_ble_apis.h"
 
-#include "gatt_db.h"
-
 /*
  *********************************************************************************************************
  *                                         LOCAL GLOBAL VARIABLES
@@ -241,153 +239,8 @@ void ble_task(void *argument)
 
             case BLE_GATT_WRITE_REQUEST_EVENT: {
                 THREAD_SAFE_PRINT("Gatt Write Request\n");
-                rsi_ble_event_write_t *ble_write_event = (rsi_ble_event_write_t *)ble_event_msg.payload;
-                uint16_t attr_handle = (ble_write_event->handle[1] << 8) | ble_write_event->handle[0];
-
-                switch (attr_handle) {
-                  case gattdb_attribute_1:
-                    THREAD_SAFE_PRINT("gattdb_attribute_1 handle\n");
-                    break;
-                  default:
-                    break;
-                }
-
             } break;
 
-            // case RSI_APP_FW_VERSION: {
-            // sl_wifi_firmware_version_t firmware_version = { 0 };
-    
-            // rsi_ble_app_clear_event(RSI_APP_FW_VERSION);
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-    
-            // status = sl_wifi_get_firmware_version(&firmware_version);
-            // if (status == SL_STATUS_OK) {
-            //     data[0] = 0x08;
-            //     data[1] = sizeof(sl_wifi_firmware_version_t);
-            //     memcpy(&data[2], &firmware_version, sizeof(sl_wifi_firmware_version_t));
-    
-            //     rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            //     print_firmware_version(&firmware_version);
-            // }
-            // } break;
-    
-            // // Connected SSID name (response to '7' command if connection is already established)
-            // case RSI_WLAN_ALREADY: {
-            // rsi_ble_app_clear_event(RSI_WLAN_ALREADY);
-    
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-    
-            // data[1] = connected; /*This index will indicate wlan AP connect or disconnect status to Android app*/
-            // data[0] = 0x07;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            // } break;
-    
-            // // NO WLAN connection (response to '7' command if connection is there already)
-            // case RSI_WLAN_NOT_ALREADY: {
-            // rsi_ble_app_clear_event(RSI_WLAN_NOT_ALREADY);
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[0] = 0x07;
-            // data[1] = 0x00;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            // } break;
-    
-            // case RSI_BLE_WLAN_DISCONN_NOTIFY: {
-            // rsi_ble_app_clear_event(RSI_BLE_WLAN_DISCONN_NOTIFY);
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[1] = 0x01;
-            // data[0] = 0x04;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            // } break;
-    
-            // case RSI_BLE_WLAN_TIMEOUT_NOTIFY: {
-            // rsi_ble_app_clear_event(RSI_BLE_WLAN_TIMEOUT_NOTIFY);
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[0] = 0x02;
-            // data[1] = 0x00;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            // } break;
-    
-            // case RSI_BLE_WLAN_DISCONNECT_STATUS: {
-            // rsi_ble_app_clear_event(RSI_BLE_WLAN_DISCONNECT_STATUS);
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[0] = 0x01;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            // } break;
-    
-            // case RSI_SSID: {
-            // rsi_ble_app_clear_event(RSI_SSID);
-            // } break;
-    
-            // case RSI_SECTYPE: {
-            // rsi_ble_app_clear_event(RSI_SECTYPE);
-            // if (sec_type == 0) {
-            //     //wifi_app_set_event(WIFI_APP_JOIN_STATE);
-            // }
-            // } break;
-    
-            // // Scan results from device (response to '3' command)
-            // case RSI_BLE_WLAN_SCAN_RESP: //Send the SSID data to mobile ble application WYZBEE CONFIGURATOR
-            // {
-            // rsi_ble_app_clear_event(RSI_BLE_WLAN_SCAN_RESP); // clear the served event
-    
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[0] = 0x03;
-            // data[1] = scanresult->scan_count;
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-    
-            // for (scan_ix = 0; scan_ix < scanresult->scan_count; scan_ix++) {
-            //     memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            //     data[0] = scanresult->scan_info[scan_ix].security_mode;
-            //     data[1] = ',';
-            //     strcpy((char *)data + 2, (const char *)scanresult->scan_info[scan_ix].ssid);
-            //     length = strlen((char *)data + 2);
-            //     length = length + 2;
-    
-            //     rsi_ble_set_local_att_value(rsi_ble_att3_val_hndl, RSI_BLE_MAX_DATA_LEN, data);
-            //     osDelay(10);
-            // }
-    
-            // LOG_PRINT("Displayed scan list in Silabs app\n\n");
-            // } break;
-    
-            // // WLAN connection response status (response to '2' command)
-            // case RSI_BLE_WLAN_JOIN_STATUS: //Send the connected status to mobile ble application WYZBEE CONFIGURATOR
-            // {
-            // sl_mac_address_t mac_addr = { 0 };
-    
-            // sl_ip_address_t ip = { 0 };
-            // ip.type            = ip_address.type;
-            // ip.ip.v4.value     = ip_address.ip.v4.ip_address.value;
-    
-            // // clear the served event
-            // rsi_ble_app_clear_event(RSI_BLE_WLAN_JOIN_STATUS);
-    
-            // memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-            // data[0] = 0x02;
-            // data[1] = 0x01;
-            // data[2] = ',';
-    
-            // // Copy the MAC address
-            // status = sl_wifi_get_mac_address(SL_WIFI_CLIENT_INTERFACE, &mac_addr);
-            // if (status == SL_STATUS_OK) {
-            //     for (k = 0; k < 6; k++) {
-            //     data[k + 3] = mac_addr.octet[k];
-            //     }
-            // } else {
-            //     k = 6;
-            // }
-            // data[k + 3] = ',';
-    
-            // // IP Address
-            // for (int i = 0; k < 10; k++, i++) {
-            //     data[k + 4] = ip.ip.v4.bytes[i];
-            // }
-    
-            // rsi_ble_set_local_att_value(rsi_ble_att2_val_hndl,
-            //                             RSI_BLE_MAX_DATA_LEN,
-            //                             data); // set the local attribute value.
-            // LOG_PRINT("AP joined successfully\n\n");
-            // } break;
             case BLE_CONNECTION_REMOTE_FEATURES_EVENT: {
                 THREAD_SAFE_PRINT("BLE_CONNECTION_REMOTE_FEATURES_EVENT\n");
                 if (remote_dev_feature.remote_features[0] & 0x20) {
@@ -402,29 +255,13 @@ void ble_task(void *argument)
 
             case BLE_SYSTEM_EXTERNAL_SIGNAL_EVENT: {
                 THREAD_SAFE_PRINT("BLE_SYSTEM_EXTERNAL_SIGNAL_EVENT\n");
-//                switch (msg_type) {// Check for WIFI SIGNAL ID
-//                    case WIFI_APP_SCAN_RESP:
-//                      rsi_ble_app_set_event(RSI_BLE_WLAN_SCAN_RESP);
-//                      break;
-//                    case WIFI_APP_CONNECTION_STATUS:
-//                      rsi_ble_app_set_event(RSI_BLE_WLAN_JOIN_STATUS);
-//                      break;
-//                    case WIFI_APP_DISCONNECTION_STATUS:
-//                      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONNECT_STATUS);
-//                      break;
-//                    case WIFI_APP_DISCONNECTION_NOTIFY:
-//                      rsi_ble_app_set_event(RSI_BLE_WLAN_DISCONN_NOTIFY);
-//                      break;
-//                    case WIFI_APP_TIMEOUT_NOTIFY:
-//                      rsi_ble_app_set_event(RSI_BLE_WLAN_TIMEOUT_NOTIFY);
-//                      break;
-//                    default:
-//                      break;
-//                  }
             } break;
             default:
             break;
         }//switch(event_id)
+
+        bt_on_event(&ble_event_msg);
+
     }//while(1)
 }
 
@@ -529,4 +366,17 @@ static void rsi_ble_data_length_change_event(rsi_ble_event_data_length_update_t 
 {
   memcpy(&updated_data_len_params, rsi_ble_data_length_update, sizeof(rsi_ble_event_data_length_update_t));
   ble_set_event(BLE_GATT_DATALEN_CHANGE_EVENT, NULL, 0);
+}
+
+/*
+ *********************************************************************************************************
+ *                                   APP CALLBACK FUNCTIONS DEFINITIONS
+ *********************************************************************************************************
+ */
+
+SL_WEAK sl_status_t bt_on_event(ble_event_msg_t* event)
+{
+
+  UNUSED_PARAMETER(event);
+  return SL_STATUS_OK;
 }

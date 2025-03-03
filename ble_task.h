@@ -37,4 +37,12 @@ void ble_set_event(uint32_t event_id, void *event_data, uint32_t event_data_len)
  */
 sl_status_t start_ble_task_context(void);
 
+/**
+ * @brief BLE Event handler.
+ *        Executes in the context of the BLE Task
+ *
+ * @return sl_status_t The status of the operation.
+ */
+sl_status_t bt_on_event(ble_event_msg_t* event);
+
 #endif // BLE_TASK_H

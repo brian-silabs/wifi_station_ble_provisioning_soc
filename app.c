@@ -49,6 +49,9 @@
 
 #include "sl_si91x_power_manager.h"
 
+#include "gatt_db.h"
+#include "rsi_ble_apis.h"
+
 // APP version
 #define APP_FW_VERSION "0.1"
 
@@ -106,4 +109,61 @@ void app_init(void)
   if (startup_thread_id == NULL) {
     THREAD_SAFE_PRINT("Failed to create startup_routine\n");
   }
+}
+
+
+sl_status_t bt_on_event(ble_event_msg_t* event)
+{
+
+  switch (event->event_id) {
+    case BLE_SYSTEM_BOOT_EVENT :
+    break;
+
+    case BLE_CONNECTION_OPENED_EVENT: {
+    } break;
+
+    case BLE_CONNECTION_CLOSED_EVENT: {
+    } break;
+
+    case BLE_GATT_DATALEN_CHANGE_EVENT: {
+    } break;
+
+    case BLE_GATT_WRITE_REQUEST_EVENT: {
+        rsi_ble_event_write_t *ble_write_event = (rsi_ble_event_write_t *)event->payload;
+        uint16_t attr_handle = (ble_write_event->handle[1] << 8) | ble_write_event->handle[0];
+
+        switch (attr_handle) {
+          case gattdb_attribute_1:
+            THREAD_SAFE_PRINT("gattdb_attribute_1 handle\n");
+            break;
+          case gattdb_attribute_2:
+            THREAD_SAFE_PRINT("gattdb_attribute_2 handle\n");
+            break;
+          case gattdb_attribute_3:
+            THREAD_SAFE_PRINT("gattdb_attribute_3 handle\n");
+            break;
+          default:
+            break;
+        }
+
+    } break;
+    default:
+      break;
+  }//switch(event_id)
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t wlan_on_event(wlan_event_msg_t* event)
+{
+
+  switch (event->event_id) {
+    case WLAN_BOOT_EVENT :
+    break;
+
+    default:
+      break;
+  }//switch(event_id)
+
+  return SL_STATUS_OK;
 }

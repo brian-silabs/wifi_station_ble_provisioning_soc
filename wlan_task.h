@@ -36,4 +36,12 @@ sl_status_t start_wlan_task_context(void);
 
 void wlan_set_event(uint32_t event_id, void *event_data, uint32_t event_data_len);
 
+/**
+ * @brief WLAN Event handler.
+ *        Executes in the context of the WLAN Task
+ *
+ * @return sl_status_t The status of the operation.
+ */
+sl_status_t wlan_on_event(wlan_event_msg_t* event);
+
 #endif // WLAN_TASK_H
