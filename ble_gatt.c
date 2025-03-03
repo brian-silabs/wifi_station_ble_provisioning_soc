@@ -14,7 +14,7 @@
 #include "rsi_utils.h"
 #include "rsi_bt_common_apis.h"
 
-#include "gatt_db.h"
+#include "autogen/gatt_db.h"
 
 // Define constants for AD types
 #define AD_TYPE_FLAGS 0x01
