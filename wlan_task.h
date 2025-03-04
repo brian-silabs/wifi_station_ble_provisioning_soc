@@ -12,12 +12,11 @@
 typedef enum wlan_event_id_e
 {
   WLAN_BOOT_EVENT =               (1 << 1),
-  WLAN_UNCONNECTED_EVENT =        (1 << 2),
+  WLAN_DISCONNECTED_EVENT =       (1 << 2),
   WLAN_CONNECTED_EVENT =          (1 << 3),
   WLAN_IPCONFIG_DONE_EVENT =      (1 << 4),
   WLAN_SCAN_COMPLETE_EVENT =      (1 << 5),
-  WLAN_JOIN_COMPLETE_EVENT =      (1 << 6),
-  WLAN_DISCONNECT_REQUEST_EVENT = (1 << 7)
+  WLAN_JOIN_COMPLETE_EVENT =      (1 << 6)
 } wlan_event_id_t;
 
 typedef struct wlan_event_msg_s{
@@ -42,6 +41,8 @@ sl_status_t start_wlan_access_point_join(const void *ssid,
                                          uint32_t credential_length,
                                          uint8_t sec_type,
                                          uint32_t timeout_ms);
+
+void start_wlan_access_point_disconnect(void);
 
 void wlan_set_event(uint32_t event_id, void *event_data, uint32_t event_data_len);
 

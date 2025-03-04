@@ -208,6 +208,12 @@ static void wlan_wait_event(wlan_event_msg_t *event_msg)
     }
 }
 
+/*
+ *********************************************************************************************************
+ *                                         AF LIKE FUNCTIONS DEFINITIONS
+ *********************************************************************************************************
+ */
+
 sl_status_t start_wlan_access_point_join(const void *ssid,
                                          uint32_t ssid_length,
                                          sl_wifi_credential_type_t type,
@@ -248,6 +254,18 @@ sl_status_t start_wlan_access_point_join(const void *ssid,
   }
 
   return status;
+}
+
+void start_wlan_access_point_disconnect(void)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  status = sl_wifi_disconnect(SL_WIFI_CLIENT_INTERFACE);
+  if (status == SL_STATUS_OK) {
+      wlan_set_dataless_event(WLAN_DISCONNECTED_EVENT);
+  } else {
+      THREAD_SAFE_PRINT("\r\nWIFI Disconnect Failed, Error Code : 0x%lX\r\n", status);
+  }
 }
 
 /*
@@ -378,7 +396,7 @@ void wlan_task(void *argument)
             } break;
 
             case WLAN_IPCONFIG_DONE_EVENT: {
-                THREAD_SAFE_PRINT("WIFI App IPCONFIG Done State, setting up TWT\n");
+                THREAD_SAFE_PRINT("WIFI IPCONFIG Done\n");
                 wlan_set_dataless_event(WLAN_JOIN_COMPLETE_EVENT);
             } break;
 
@@ -386,25 +404,8 @@ void wlan_task(void *argument)
                 THREAD_SAFE_PRINT("WIFI Joining complete\n");
             } break;
 
-            case WLAN_UNCONNECTED_EVENT: {
-                THREAD_SAFE_PRINT("WIFI App Disconnected State\n");
-                retry = 1;
-            } break;
-
-            case WLAN_DISCONNECT_REQUEST_EVENT: {
-                THREAD_SAFE_PRINT("WIFI App Disconnect Request\n");
-                status = sl_wifi_disconnect(SL_WIFI_CLIENT_INTERFACE);
-                if (status == RSI_SUCCESS) {
-#if RSI_WISE_MCU_ENABLE
-                    rsi_flash_erase((uint32_t)FLASH_ADDR_TO_STORE_AP_DETAILS);
-#endif
-                    THREAD_SAFE_PRINT("\r\nWLAN Disconnected\r\n");
-                    disassosiated = 1;
-                    connected     = 0;
-                    wlan_set_dataless_event(WLAN_UNCONNECTED_EVENT);
-                } else {
-                    THREAD_SAFE_PRINT("\r\nWIFI Disconnect Failed, Error Code : 0x%lX\r\n", status);
-                }
+            case WLAN_DISCONNECTED_EVENT: {
+                THREAD_SAFE_PRINT("WIFI Disconnected\n");
             } break;
 
             default:

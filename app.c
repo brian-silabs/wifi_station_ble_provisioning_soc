@@ -75,15 +75,30 @@ const osThreadAttr_t startup_thread_attributes = {
   .reserved   = 0,
 };
 
-uint8_t coex_ssid[50], pwd[34], sec_type;
-uint8_t connected_to_ap = 0;
-sl_ip_address_t ip_address = { 0 };
+static sl_ip_address_t  ip_address = { 0 };
+static uint8_t          coex_ssid[50], pwd[34], sec_type;
+static uint8_t          connected_to_ap = 0;
+
+void startup_routine(void *argument);
 
 static void app_start_wlan_scan(void);
 static void app_wlan_connect_to_ap(void);
 static void process_ble_attr1_command(uint8_t *att_value);
-//static void app_wlan_disconnect_ble_notification(void);
 static void app_wlan_timeout_ble_notification(void);
+
+void app_init(void)
+{
+  sl_status_t status = thread_safe_print_init();
+  if(SL_STATUS_OK != status)
+  {
+    while(1); // Count on WDOG for the sample app
+  }
+
+  osThreadId_t startup_thread_id = osThreadNew((osThreadFunc_t)startup_routine, NULL, &startup_thread_attributes);
+  if (startup_thread_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create startup_routine\n");
+  }
+}
 
 void startup_routine(void *argument)
 {
@@ -114,21 +129,6 @@ void startup_routine(void *argument)
   THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();
 }
-
-void app_init(void)
-{
-  sl_status_t status = thread_safe_print_init();
-  if(SL_STATUS_OK != status)
-  {
-    while(1); // Count on WDOG for the sample app
-  }
-
-  osThreadId_t startup_thread_id = osThreadNew((osThreadFunc_t)startup_routine, NULL, &startup_thread_attributes);
-  if (startup_thread_id == NULL) {
-    THREAD_SAFE_PRINT("Failed to create startup_routine\n");
-  }
-}
-
 
 sl_status_t bt_on_event(ble_event_msg_t* event)
 {
@@ -213,6 +213,8 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
       sl_mac_address_t mac_addr = { 0 };
       uint8_t k;
 
+      connected_to_ap = 1;
+
       memset(data, 0, RSI_BLE_MAX_DATA_LEN);
       data[0] = 0x02;
       data[1] = 0x01;
@@ -238,6 +240,14 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
                                   RSI_BLE_MAX_DATA_LEN,
                                   data); // set the local attribute value.
       THREAD_SAFE_PRINT("AP joined successfully\n\n");
+    } break;
+
+    case WLAN_DISCONNECTED_EVENT: {
+        THREAD_SAFE_PRINT("WIFI App Disconnected State\n");
+        memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+        data[1] = 0x01;
+        data[0] = 0x04;
+        rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
     } break;
 
     default:
@@ -313,6 +323,7 @@ static void process_ble_attr1_command(uint8_t *att_value)
         case '4': //else if(rsi_ble_write->att_value[0] == '4')
         {
           THREAD_SAFE_PRINT("[APP] WLAN disconnect request received\n");
+          start_wlan_access_point_disconnect();
         } break;
 
         // FW version request
@@ -359,7 +370,6 @@ static void app_start_wlan_scan(void)
 
 static void app_wlan_connect_to_ap(void)
 {
-
   sl_status_t status = SL_STATUS_OK;
 
   status = start_wlan_access_point_join(  (char *)coex_ssid,
@@ -375,16 +385,6 @@ static void app_wlan_connect_to_ap(void)
     app_wlan_timeout_ble_notification();
   }
 }
-
-//static void app_wlan_disconnect_ble_notification(void)
-//{
-//  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
-//
-//  memset(data, 0, RSI_BLE_MAX_DATA_LEN);
-//  data[1] = 0x01;
-//  data[0] = 0x04;
-//  rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
-//}
 
 static void app_wlan_timeout_ble_notification(void)
 {
