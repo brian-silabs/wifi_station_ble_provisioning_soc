@@ -47,8 +47,9 @@ const osThreadAttr_t wlan_thread_attributes = {
     .reserved   = 0,
   };
 
-osMessageQueueId_t  wlan_evt_queue_id;  // Event flags ID
-static uint8_t      wlan_evt_queue_seq_num_g = 0;
+osMessageQueueId_t                wlan_evt_queue_id;  // Event flags ID
+static uint8_t                    wlan_evt_queue_seq_num_g = 0;
+static sl_net_ip_configuration_t  ip_address        = { 0 };
 
 // WLAN Variables
 sl_wifi_client_configuration_t access_point = { 0 };//Retained AP
@@ -62,7 +63,6 @@ uint8_t a = 0;//TODO  what is it ? Cleanup required as this seems to be used for
 uint8_t retry = 1; //TODO what retry 
 uint8_t conn_status;
 
-sl_net_ip_configuration_t ip_address        = { 0 };
 
 sl_wifi_twt_request_t default_twt_setup_configuration = {
     .twt_enable              = 1,
@@ -120,7 +120,7 @@ sl_status_t wlan_app_scan_callback_handler(sl_wifi_event_t event,
     uint32_t result_length,
     void *arg);
 
-static sl_status_t set_twt(void);
+//static sl_status_t set_twt(void);
 sl_status_t twt_callback_handler(sl_wifi_event_t event,
     sl_si91x_twt_response_t *result,
     uint32_t result_length,
@@ -334,6 +334,7 @@ void wlan_task(void *argument)
             } break;
 
             case WLAN_CONNECTED_EVENT: {
+                THREAD_SAFE_PRINT("WIFI Interface Connected \n");
 
                 ip_address.type      = SL_IPV4;
                 ip_address.mode      = SL_IP_MANAGEMENT_DHCP;
@@ -347,7 +348,7 @@ void wlan_task(void *argument)
                         a       = 0;
                         timeout = 1;
                         status  = sl_wifi_disconnect(SL_WIFI_CLIENT_INTERFACE);
-                        if (status == RSI_SUCCESS) {
+                        if (status == SL_STATUS_OK) {//TODO should be event driven
                             connected     = 0;
                             disassosiated = 1;
                             //wifi_app_send_to_ble(WIFI_APP_TIMEOUT_NOTIFY, (uint8_t *)&timeout, 1);
@@ -372,21 +373,17 @@ void wlan_task(void *argument)
                     THREAD_SAFE_PRINT("\r\n");
 #endif
                     // update wlan application state
-                    wlan_set_dataless_event(WLAN_IPCONFIG_DONE_EVENT);
-                    //wifi_app_send_to_ble(WIFI_APP_CONNECTION_STATUS, (uint8_t *)&connected, 1);
+                    wlan_set_event(WLAN_IPCONFIG_DONE_EVENT, &ip, sizeof(sl_ip_address_t));
                 }
-                THREAD_SAFE_PRINT("WIFI App Connected State\n");
             } break;
 
             case WLAN_IPCONFIG_DONE_EVENT: {
                 THREAD_SAFE_PRINT("WIFI App IPCONFIG Done State, setting up TWT\n");
+                wlan_set_dataless_event(WLAN_JOIN_COMPLETE_EVENT);
+            } break;
 
-                status = set_twt();
-                if (status != SL_STATUS_OK) {
-                printf("\r\nError while configuring TWT parameters: 0x%lx \r\n", status);
-                return;
-                }
-                printf("\r\nTWT Config Done\r\n");
+            case WLAN_JOIN_COMPLETE_EVENT: {
+                THREAD_SAFE_PRINT("WIFI Joining complete\n");
             } break;
 
             case WLAN_UNCONNECTED_EVENT: {
@@ -408,8 +405,8 @@ void wlan_task(void *argument)
                 } else {
                     THREAD_SAFE_PRINT("\r\nWIFI Disconnect Failed, Error Code : 0x%lX\r\n", status);
                 }
-
             } break;
+
             default:
                 break;
         }//switch(wlan_event_id)
@@ -417,42 +414,42 @@ void wlan_task(void *argument)
     }//while(1)
 }
 
-// components/common/inc/SL_ADDITIONAL_STATUS.h
-static sl_status_t set_twt(void){
-    sl_wifi_performance_profile_t performance_profile = { 0 };
-    sl_status_t status                                = SL_STATUS_OK;
-  
-    THREAD_SAFE_PRINT("\r\nSetting up TWT\n");
-    //! Set TWT Config
-    sl_wifi_set_twt_config_callback(twt_callback_handler, NULL);
-    if (TWT_AUTO_CONFIG == 1) {
-      performance_profile.twt_selection = default_twt_selection_configuration;
-      status                            = sl_wifi_target_wake_time_auto_selection(&performance_profile.twt_selection);
-    } else {
-      performance_profile.twt_request = default_twt_setup_configuration;
-      status                          = sl_wifi_enable_target_wake_time(&performance_profile.twt_request);
-    }
-  
-    VERIFY_STATUS_AND_RETURN(status);
-    // A small delay is added so that the asynchronous response from TWT is printed in correct format.
-    osDelay(100);
-  
-    //! Enable Broadcast data filter
-    status = sl_wifi_filter_broadcast(5000, 1, 1);
-  
-    VERIFY_STATUS_AND_RETURN(status);
-  
-    //! Apply power save profile
-    performance_profile.profile = ASSOCIATED_POWER_SAVE;
-    status                      = sl_wifi_set_performance_profile(&performance_profile);
-    if (status != SL_STATUS_OK) {
-      printf("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
-      return status;
-    }
-  
-    THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
-    return SL_STATUS_OK;
-  }
+//// components/common/inc/SL_ADDITIONAL_STATUS.h
+//static sl_status_t set_twt(void){
+//    sl_wifi_performance_profile_t performance_profile = { 0 };
+//    sl_status_t status                                = SL_STATUS_OK;
+//
+//    THREAD_SAFE_PRINT("\r\nSetting up TWT\n");
+//    //! Set TWT Config
+//    sl_wifi_set_twt_config_callback(twt_callback_handler, NULL);
+//    if (TWT_AUTO_CONFIG == 1) {
+//      performance_profile.twt_selection = default_twt_selection_configuration;
+//      status                            = sl_wifi_target_wake_time_auto_selection(&performance_profile.twt_selection);
+//    } else {
+//      performance_profile.twt_request = default_twt_setup_configuration;
+//      status                          = sl_wifi_enable_target_wake_time(&performance_profile.twt_request);
+//    }
+//
+//    VERIFY_STATUS_AND_RETURN(status);
+//    // A small delay is added so that the asynchronous response from TWT is printed in correct format.
+//    osDelay(100);
+//
+//    //! Enable Broadcast data filter
+//    status = sl_wifi_filter_broadcast(5000, 1, 1);
+//
+//    VERIFY_STATUS_AND_RETURN(status);
+//
+//    //! Apply power save profile
+//    performance_profile.profile = ASSOCIATED_POWER_SAVE;
+//    status                      = sl_wifi_set_performance_profile(&performance_profile);
+//    if (status != SL_STATUS_OK) {
+//      printf("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
+//      return status;
+//    }
+//
+//    THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
+//    return SL_STATUS_OK;
+//  }
 
 /*
  *********************************************************************************************************
@@ -561,7 +558,7 @@ sl_status_t join_callback_handler(sl_wifi_event_t event, char *result, uint32_t 
         ret = SL_STATUS_FAIL;
     }
 
-    wlan_set_dataless_event(WLAN_JOIN_EVENT);
+    wlan_set_dataless_event(WLAN_JOIN_COMPLETE_EVENT);
 
   return ret;
 }

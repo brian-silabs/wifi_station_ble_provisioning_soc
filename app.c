@@ -77,6 +77,7 @@ const osThreadAttr_t startup_thread_attributes = {
 
 uint8_t coex_ssid[50], pwd[34], sec_type;
 uint8_t connected_to_ap = 0;
+sl_ip_address_t ip_address = { 0 };
 
 static void app_start_wlan_scan(void);
 static void app_wlan_connect_to_ap(void);
@@ -175,7 +176,7 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
 sl_status_t wlan_on_event(wlan_event_msg_t* event)
 {
   sl_status_t status                 = SL_STATUS_OK;
-  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 }; //Generic Buffer for data sent over BLE
 
   switch (event->event_id) {
     case WLAN_BOOT_EVENT :
@@ -201,6 +202,42 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
 
         rsi_ble_set_local_att_value(gattdb_attribute_3, RSI_BLE_MAX_DATA_LEN, data);
       }
+    } break;
+
+    case WLAN_IPCONFIG_DONE_EVENT: {
+      sl_ip_address_t *ip = (sl_ip_address_t *)(event->payload);
+      memcpy(&ip_address, ip, sizeof(sl_ip_address_t));
+    } break;
+
+    case WLAN_JOIN_COMPLETE_EVENT : {
+      sl_mac_address_t mac_addr = { 0 };
+      uint8_t k;
+
+      memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+      data[0] = 0x02;
+      data[1] = 0x01;
+      data[2] = ',';
+
+      // Copy the MAC address
+      status = sl_wifi_get_mac_address(SL_WIFI_CLIENT_INTERFACE, &mac_addr);
+      if (status == SL_STATUS_OK) {
+        for (k = 0; k < 6; k++) {
+          data[k + 3] = mac_addr.octet[k];
+        }
+      } else {
+        k = 6;
+      }
+      data[k + 3] = ',';
+
+      // IP Address
+      for (int i = 0; k < 10; k++, i++) {
+        data[k + 4] = ip_address.ip.v4.bytes[i];
+      }
+
+      rsi_ble_set_local_att_value(gattdb_attribute_2,
+                                  RSI_BLE_MAX_DATA_LEN,
+                                  data); // set the local attribute value.
+      THREAD_SAFE_PRINT("AP joined successfully\n\n");
     } break;
 
     default:
