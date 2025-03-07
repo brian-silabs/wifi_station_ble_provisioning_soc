@@ -44,8 +44,7 @@
 #include "nwp_task.h"
 #include "wlan_task.h"
 #include "ble_task.h"
-// #include "mqtt_task.h"
-// #include "host_task.h"
+#include "mqtt_task.h"
 
 #include "sl_si91x_power_manager.h"
 
@@ -107,7 +106,6 @@ void startup_routine(void *argument)
   THREAD_SAFE_PRINT("Setting up application tasks\n");
   start_nwp_task_context();
 
-
   //If WLAN, init powersave mode. Should always pass
   if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
       || (SL_SI91X_COEX_MODE == SL_SI91X_WLAN_ONLY_MODE))
@@ -121,6 +119,8 @@ void startup_routine(void *argument)
   {
       start_ble_task_context();
   }
+
+  start_mqtt_task_context();
 
   THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
   //Add PS4 Power State Requirement, to prevent M4 going to Sleep

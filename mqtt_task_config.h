@@ -1,0 +1,4 @@
+#ifndef MQTT_TASK_CONFIG_H
+#define MQTT_TASK_CONFIG_H
+
+#endif // MQTT_TASK_CONFIG_H
