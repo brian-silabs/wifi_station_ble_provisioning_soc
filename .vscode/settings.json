@@ -26,6 +26,7 @@
         "unordered_map": "c",
         "vector": "c",
         "sl_si91x_power_manager.h": "c",
-        "sl_constants.h": "c"
+        "sl_constants.h": "c",
+        "sl_mqtt_client.h": "c"
     }
 }

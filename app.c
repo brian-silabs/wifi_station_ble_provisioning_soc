@@ -239,6 +239,13 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
       rsi_ble_set_local_att_value(gattdb_attribute_2,
                                   RSI_BLE_MAX_DATA_LEN,
                                   data); // set the local attribute value.
+
+
+      status = mqtt_connect_to_broker();
+      if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("Failed to connect to MQTT broker : 0x%lX\n", status);
+      }
+
       THREAD_SAFE_PRINT("AP joined successfully\n\n");
     } break;
 

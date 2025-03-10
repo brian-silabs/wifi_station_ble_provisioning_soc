@@ -1,4 +1,24 @@
 #ifndef MQTT_TASK_CONFIG_H
 #define MQTT_TASK_CONFIG_H
 
+
+#define MQTT_BROKER_PORT 1883
+#define ENCRYPT_CONNECTION   0
+#define KEEP_ALIVE_INTERVAL  2000 // in seconds
+#define MQTT_CONNECT_TIMEOUT 5000 // in milli seconds
+
+#define LAST_WILL_TOPIC       "WiFiSDK-MQTT-CLIENT-LAST-WILL"
+#define LAST_WILL_MESSAGE     "WiFiSDK-MQTT-CLIENT has been disconnect from network"
+#define QOS_OF_LAST_WILL      1
+#define IS_LAST_WILL_RETAINED 1
+
+#define CLIENT_ID "WIFI-SDK-MQTT-CLIENT"
+#define CLIENT_PORT 1
+
+#define CLIENT_IS_CLEAN_SESSION 1
+
+#define QOS_OF_PUBLISH_MESSAGE  0
+#define PUBLISH_MESSAGE_RETAINED 0
+#define PUBLISH_MESSAGE_DUPLICATE 0
+
 #endif // MQTT_TASK_CONFIG_H
