@@ -57,12 +57,11 @@
 #include "sl_net_constants.h"
 #include "sl_net.h"
 
-#include "sl_sleeptimer.h"
-
 // APP version
 #define APP_FW_VERSION "0.1"
 #define APP_NWP_OPERATION_TIMEOUT_MS  15000
 
+#define THERMOSTAT_FLAGS_MSK 0x00000001U  // Define the flag mask
 
 const osThreadAttr_t startup_thread_attributes = {
   .name       = "startup_thread",
@@ -70,25 +69,37 @@ const osThreadAttr_t startup_thread_attributes = {
   .cb_mem     = 0,
   .cb_size    = 0,
   .stack_mem  = 0,
-  .stack_size = 3072,
+  .stack_size = 2048,
   .priority   = osPriorityRealtime,
   .tz_module  = 0,
   .reserved   = 0,
 };
 
+const osThreadAttr_t thermostat_thread_attributes = {
+  .name       = "thermostat_thread",
+  .attr_bits  = 0,
+  .cb_mem     = 0,
+  .cb_size    = 0,
+  .stack_mem  = 0,
+  .stack_size = 2048,
+  .priority   = osPriorityNormal,
+  .tz_module  = 0,
+  .reserved   = 0,
+};
+
+osEventFlagsId_t    thermostat_evt_flags_id;  // Event flags ID
+
 static sl_ip_address_t  ip_address = { 0 };
 static uint8_t          coex_ssid[50], pwd[34], sec_type;
 static uint8_t          connected_to_ap = 0;
-// Timer handle
-sl_sleeptimer_timer_handle_t timer_handle;
 
 void startup_routine(void *argument);
+void thermostat_routine(void *argument);
 
 static void app_start_wlan_scan(void);
 static void app_wlan_connect_to_ap(void);
 static void process_ble_attr1_command(uint8_t *att_value);
 static void app_wlan_timeout_ble_notification(void);
-void timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data);
 
 void app_init(void)
 {
@@ -102,6 +113,18 @@ void app_init(void)
   if (startup_thread_id == NULL) {
     THREAD_SAFE_PRINT("Failed to create startup_routine\n");
   }
+
+  osThreadId_t thermostat_thread_id = osThreadNew((osThreadFunc_t)thermostat_routine, NULL, &thermostat_thread_attributes);
+  if (thermostat_thread_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create thermostat_routine\n");
+  }
+
+  thermostat_evt_flags_id = osEventFlagsNew(NULL);
+  if (thermostat_evt_flags_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create thermostat_evt_flags_id\n");
+    while(1); // Count on WDOG for the sample app
+  }
+
 }
 
 void startup_routine(void *argument)
@@ -127,12 +150,32 @@ void startup_routine(void *argument)
 
   start_mqtt_task_context();
 
-  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
-  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
-  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
+//  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
+//  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
+//  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
 
   THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();
+}
+
+void thermostat_routine(void *argument)
+{
+  UNUSED_PARAMETER(argument);
+
+  sl_status_t status = SL_STATUS_OK;
+
+  osEventFlagsWait(thermostat_evt_flags_id, THERMOSTAT_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
+  THREAD_SAFE_PRINT("Thermostat start event received\n");
+
+  while(1)
+  {
+    osDelay(5000);
+    status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
+    if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
+    }
+  }
+
 }
 
 sl_status_t bt_on_event(ble_event_msg_t* event)
@@ -410,24 +453,10 @@ static void app_wlan_timeout_ble_notification(void)
 
 sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
 {
-  sl_status_t status = SL_STATUS_OK;
-
   switch (event->event_id) {
     case MQTT_CONNECTION_EVENT:{
-      THREAD_SAFE_PRINT("APP mqtt connected, publishing\n");
-      // Create a periodic timer that triggers every 5000 ms (5 second)
-      status = sl_sleeptimer_start_periodic_timer_ms(&timer_handle,
-        5000,
-        timer_callback,
-        NULL,
-        0,
-        0);
-
-      if(status != SL_STATUS_OK)
-      {
-        THREAD_SAFE_PRINT("Failed to start timer : 0x%lX\n", status);
-      }
-
+      THREAD_SAFE_PRINT("APP mqtt connected, start thermostat operations\n");
+      osEventFlagsSet(thermostat_evt_flags_id, 0x00000001);
     } break;
 
     default:
@@ -435,17 +464,4 @@ sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
   }//switch(mqtt_event_id)
 
   return SL_STATUS_OK;
-}
-
-// Timer callback function
-void timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
-{
-  (void)handle;
-  (void)data;
-
-  sl_status_t status = SL_STATUS_OK;
-  status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
-  if (status != SL_STATUS_OK) {
-    THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
-  }
 }

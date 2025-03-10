@@ -275,7 +275,7 @@ static void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event
     }
 
     case SL_MQTT_CLIENT_MESSAGE_PUBLISHED_EVENT: {
-      THREAD_SAFE_PRINT("Published message successfully on topic");
+      THREAD_SAFE_PRINT("Publish success\n");
       break;
     }
 
