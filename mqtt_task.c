@@ -74,9 +74,6 @@ sl_mqtt_client_configuration_t mqtt_client_configuration = { .is_clean_session =
  */
 void mqtt_task(void *argument);
 static void mqtt_wait_event(mqtt_event_msg_t *event_msg);
-
-static void print_char_buffer(char *buffer, uint32_t buffer_length);
-
 //static void mqtt_client_message_handler(void *client, sl_mqtt_client_message_t *message, void *context);
 static void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event, void *event_data, void *context);
 
@@ -258,15 +255,6 @@ void mqtt_task(void *argument)
     }//while(1)
 }
 
-static void print_char_buffer(char *buffer, uint32_t buffer_length)
-{
-  for (uint32_t index = 0; index < buffer_length; index++) {
-    THREAD_SAFE_PRINT("%c", buffer[index]);
-  }
-
-  THREAD_SAFE_PRINT("\r\n");
-}
-
 
 /*
  *********************************************************************************************************
@@ -287,9 +275,7 @@ static void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event
     }
 
     case SL_MQTT_CLIENT_MESSAGE_PUBLISHED_EVENT: {
-      sl_mqtt_client_message_t *published_message = (sl_mqtt_client_message_t *)context;
-      THREAD_SAFE_PRINT("Published message successfully on topic: ");
-      print_char_buffer((char *)published_message->topic, published_message->topic_length);
+      THREAD_SAFE_PRINT("Published message successfully on topic");
       break;
     }
 

@@ -57,6 +57,8 @@
 #include "sl_net_constants.h"
 #include "sl_net.h"
 
+#include "sl_sleeptimer.h"
+
 // APP version
 #define APP_FW_VERSION "0.1"
 #define APP_NWP_OPERATION_TIMEOUT_MS  15000
@@ -77,6 +79,8 @@ const osThreadAttr_t startup_thread_attributes = {
 static sl_ip_address_t  ip_address = { 0 };
 static uint8_t          coex_ssid[50], pwd[34], sec_type;
 static uint8_t          connected_to_ap = 0;
+// Timer handle
+sl_sleeptimer_timer_handle_t timer_handle;
 
 void startup_routine(void *argument);
 
@@ -84,6 +88,7 @@ static void app_start_wlan_scan(void);
 static void app_wlan_connect_to_ap(void);
 static void process_ble_attr1_command(uint8_t *att_value);
 static void app_wlan_timeout_ble_notification(void);
+void timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data);
 
 void app_init(void)
 {
@@ -410,10 +415,19 @@ sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
   switch (event->event_id) {
     case MQTT_CONNECTION_EVENT:{
       THREAD_SAFE_PRINT("APP mqtt connected, publishing\n");
-      status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
-      if (status != SL_STATUS_OK) {
-        THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
+      // Create a periodic timer that triggers every 5000 ms (5 second)
+      status = sl_sleeptimer_start_periodic_timer_ms(&timer_handle,
+        5000,
+        timer_callback,
+        NULL,
+        0,
+        0);
+
+      if(status != SL_STATUS_OK)
+      {
+        THREAD_SAFE_PRINT("Failed to start timer : 0x%lX\n", status);
       }
+
     } break;
 
     default:
@@ -421,4 +435,17 @@ sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
   }//switch(mqtt_event_id)
 
   return SL_STATUS_OK;
+}
+
+// Timer callback function
+void timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
+{
+  (void)handle;
+  (void)data;
+
+  sl_status_t status = SL_STATUS_OK;
+  status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
+  }
 }
