@@ -1,0 +1,6 @@
+#CRC Codes for initially generated config files -- do not modify!
+sl_si91x_dma_config.h=-700984439
+sl_si91x_power_manager_config_1.h=-1546355835
+sl_si91x_power_manager_wakeup_source_config.h=-2135543166
+sl_sleeptimer_config.h=847044378
+sl_wifi_region_db_config.h=855217909

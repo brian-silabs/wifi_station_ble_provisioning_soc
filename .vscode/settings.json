@@ -2,6 +2,32 @@
     "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
         "sl_wifi_callback_framework.h": "c",
-        "sl_status.h": "c"
+        "sl_status.h": "c",
+        "thread_safe_print.h": "c",
+        "sl_wifi.h": "c",
+        "sl_net_si91x.h": "c",
+        "sl_wifi_region_db_config.h": "c",
+        "nwp_task.h": "c",
+        "ble_task_config.h": "c",
+        "nwp_task_config.h": "c",
+        "sl_wifi_device.h": "c",
+        "__locale": "c",
+        "ios": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "array": "c",
+        "bitset": "c",
+        "deque": "c",
+        "initializer_list": "c",
+        "queue": "c",
+        "stack": "c",
+        "string": "c",
+        "string_view": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "sl_si91x_power_manager.h": "c",
+        "sl_constants.h": "c",
+        "sl_mqtt_client.h": "c",
+        "sl_sleeptimer.h": "c"
     }
 }

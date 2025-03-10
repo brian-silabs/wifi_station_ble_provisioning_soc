@@ -34,106 +34,49 @@
  **/
 //! SL Wi-Fi SDK includes
 #include "sl_board_configuration.h"
-#include "sl_wifi.h"
-#include "sl_wifi_callback_framework.h"
 #include "cmsis_os2.h"
-#include "sl_utility.h"
-
-//BLE Specific inclusions
-#include <rsi_ble_apis.h>
-#include "ble_config.h"
-#include "rsi_ble_common_config.h"
-
-#include <rsi_common_apis.h>
-
+#include "sl_constants.h"
 #include "app.h"
+#include "thread_safe_print.h"
+
+#include "nwp_task_config.h"
+
+#include "nwp_task.h"
+#include "wlan_task.h"
+#include "ble_task.h"
+#include "mqtt_task.h"
+
+#include "sl_si91x_power_manager.h"
+
+#include "ble_gatt.h"
+#include "gatt_db.h"
+#include "rsi_ble_apis.h"
+
+#include "sl_wifi.h"
+#include "sl_utility.h"
+#include "sl_net_constants.h"
+#include "sl_net.h"
 
 // APP version
-#define APP_FW_VERSION "0.4"
+#define APP_FW_VERSION "0.1"
+#define APP_NWP_OPERATION_TIMEOUT_MS  15000
 
-// Function prototypes
-extern void wifi_app_task(void);
-extern void rsi_ble_configurator_task(void *argument);
-extern void mqtt_client_task(void *argument);
-void rsi_ble_configurator_init(void);
-uint8_t magic_word;
+#define THERMOSTAT_FLAGS_MSK 0x00000001U  // Define the flag mask
 
-osSemaphoreId_t wlan_thread_sem;
-osSemaphoreId_t ble_thread_sem;
-osSemaphoreId_t mqtt_thread_sem;
-
-static const sl_wifi_device_configuration_t
-  config = { .boot_option = LOAD_NWP_FW,
-             .mac_address = NULL,
-             .band        = SL_SI91X_WIFI_BAND_2_4GHZ,
-             .region_code = US,
-             .boot_config = {
-               .oper_mode       = SL_SI91X_CLIENT_MODE,
-               .coex_mode       = SL_SI91X_WLAN_BLE_MODE,
-               .feature_bit_map = (SL_SI91X_FEAT_ULP_GPIO_BASED_HANDSHAKE | SL_SI91X_FEAT_DEV_TO_HOST_ULP_GPIO_1
-#ifdef SLI_SI91X_MCU_INTERFACE
-                                   | SL_SI91X_FEAT_WPS_DISABLE
-#endif
-                                   ),
-               .tcp_ip_feature_bit_map = (SL_SI91X_TCP_IP_FEAT_DHCPV4_CLIENT | SL_SI91X_TCP_IP_FEAT_EXTENSION_VALID
-                                          | SL_SI91X_TCP_IP_FEAT_SSL),
-               .custom_feature_bit_map = (SL_SI91X_CUSTOM_FEAT_EXTENTION_VALID | SL_SI91X_CUSTOM_FEAT_EXTENTION_VALID),
-               .ext_custom_feature_bit_map =
-                 (SL_SI91X_EXT_FEAT_LOW_POWER_MODE | SL_SI91X_EXT_FEAT_XTAL_CLK | MEMORY_CONFIG
-#ifdef SLI_SI917
-                  | SL_SI91X_EXT_FEAT_FRONT_END_SWITCH_PINS_ULP_GPIO_4_5_0
-#endif // SLI_SI917
-                  | SL_SI91X_EXT_FEAT_BT_CUSTOM_FEAT_ENABLE),
-               .bt_feature_bit_map         = (SL_SI91X_BT_RF_TYPE | SL_SI91X_ENABLE_BLE_PROTOCOL),
-               .ext_tcp_ip_feature_bit_map = (SL_SI91X_CONFIG_FEAT_EXTENTION_VALID | SL_SI91X_EXT_EMB_MQTT_ENABLE),
-               //!ENABLE_BLE_PROTOCOL in bt_feature_bit_map
-               .ble_feature_bit_map =
-                 ((SL_SI91X_BLE_MAX_NBR_PERIPHERALS(RSI_BLE_MAX_NBR_PERIPHERALS)
-                   | SL_SI91X_BLE_MAX_NBR_CENTRALS(RSI_BLE_MAX_NBR_CENTRALS)
-                   | SL_SI91X_BLE_MAX_NBR_ATT_SERV(RSI_BLE_MAX_NBR_ATT_SERV)
-                   | SL_SI91X_BLE_MAX_NBR_ATT_REC(RSI_BLE_MAX_NBR_ATT_REC))
-                  | SL_SI91X_FEAT_BLE_CUSTOM_FEAT_EXTENTION_VALID | SL_SI91X_BLE_PWR_INX(RSI_BLE_PWR_INX)
-                  | SL_SI91X_BLE_PWR_SAVE_OPTIONS(RSI_BLE_PWR_SAVE_OPTIONS) | SL_SI91X_916_BLE_COMPATIBLE_FEAT_ENABLE
-#if RSI_BLE_GATT_ASYNC_ENABLE
-                  | SL_SI91X_BLE_GATT_ASYNC_ENABLE
-#endif
-                  ),
-
-               .ble_ext_feature_bit_map =
-                 ((SL_SI91X_BLE_NUM_CONN_EVENTS(RSI_BLE_NUM_CONN_EVENTS)
-                   | SL_SI91X_BLE_NUM_REC_BYTES(RSI_BLE_NUM_REC_BYTES))
-#if RSI_BLE_INDICATE_CONFIRMATION_FROM_HOST
-                  | SL_SI91X_BLE_INDICATE_CONFIRMATION_FROM_HOST //indication response from app
-#endif
-#if RSI_BLE_MTU_EXCHANGE_FROM_HOST
-                  | SL_SI91X_BLE_MTU_EXCHANGE_FROM_HOST //MTU Exchange request initiation from app
-#endif
-#if RSI_BLE_SET_SCAN_RESP_DATA_FROM_HOST
-                  | (SL_SI91X_BLE_SET_SCAN_RESP_DATA_FROM_HOST) //Set SCAN Resp Data from app
-#endif
-#if RSI_BLE_DISABLE_CODED_PHY_FROM_HOST
-                  | (SL_SI91X_BLE_DISABLE_CODED_PHY_FROM_HOST) //Disable Coded PHY from app
-#endif
-#if BLE_SIMPLE_GATT
-                  | SL_SI91X_BLE_GATT_INIT
-#endif
-                  ),
-               .config_feature_bit_map = (SL_SI91X_FEAT_SLEEP_GPIO_SEL_BITMAP| SL_SI91X_ENABLE_ENHANCED_MAX_PSP) } };
-
-const osThreadAttr_t thread_attributes = {
-  .name       = "application_thread",
+const osThreadAttr_t startup_thread_attributes = {
+  .name       = "startup_thread",
   .attr_bits  = 0,
   .cb_mem     = 0,
   .cb_size    = 0,
   .stack_mem  = 0,
-  .stack_size = 3072,
-  .priority   = osPriorityNormal,
+  .stack_size = 2048,
+  .priority   = osPriorityRealtime,
   .tz_module  = 0,
   .reserved   = 0,
 };
 
-const osThreadAttr_t ble_thread_attributes = {
-  .name       = "ble_thread",
+const osThreadAttr_t thermostat_thread_attributes = {
+  .name       = "thermostat_thread",
   .attr_bits  = 0,
   .cb_mem     = 0,
   .cb_size    = 0,
@@ -144,77 +87,381 @@ const osThreadAttr_t ble_thread_attributes = {
   .reserved   = 0,
 };
 
-const osThreadAttr_t mqtt_thread_attributes = {
-  .name       = "mqtt_thread",
-  .attr_bits  = 0,
-  .cb_mem     = 0,
-  .cb_size    = 0,
-  .stack_mem  = 0,
-  .stack_size = 3072,
-  .priority   = osPriorityNormal,
-  .tz_module  = 0,
-  .reserved   = 0,
-};
+osEventFlagsId_t    thermostat_evt_flags_id;  // Event flags ID
 
-void application(void *argument)
-{
-  UNUSED_PARAMETER(argument);
+static sl_ip_address_t  ip_address = { 0 };
+static uint8_t          coex_ssid[50], pwd[34], sec_type;
+static uint8_t          connected_to_ap = 0;
 
-  int32_t status                     = RSI_SUCCESS;
-  sl_wifi_firmware_version_t version = { 0 };
+void startup_routine(void *argument);
+void thermostat_routine(void *argument);
 
-  //! Wi-Fi initialization
-  status = sl_wifi_init(&config, NULL, sl_wifi_default_event_handler);
-  if (status != SL_STATUS_OK) {
-    LOG_PRINT("\r\nWi-Fi Initialization Failed, Error Code : 0x%lX\r\n", status);
-    return;
-  }
-  LOG_PRINT("\r\n Wi-Fi initialization is successful\n");
-
-  //! Firmware version Prints
-  status = sl_wifi_get_firmware_version(&version);
-  if (status != SL_STATUS_OK) {
-    LOG_PRINT("\r\nFirmware version Failed, Error Code : 0x%lX\r\n", status);
-  } else {
-    print_firmware_version(&version);
-  }
-
-  wlan_thread_sem = osSemaphoreNew(1, 0, NULL);
-  if (wlan_thread_sem == NULL) {
-    LOG_PRINT("Failed to create wlan_thread_sem\n");
-    return;
-  }
-
-   ble_thread_sem = osSemaphoreNew(1, 0, NULL);
-   if (ble_thread_sem == NULL) {
-     LOG_PRINT("Failed to create ble_thread_sem\n");
-     return;
-   }
-
-   if (osThreadNew((osThreadFunc_t)rsi_ble_configurator_task, NULL, &ble_thread_attributes) == NULL) {
-     LOG_PRINT("Failed to create BLE thread\n");
-   }
-
-   mqtt_thread_sem = osSemaphoreNew(1, 0, NULL);
-   if (mqtt_thread_sem == NULL) {
-     LOG_PRINT("Failed to create mqtt_thread_sem\n");
-     return;
-   }
-
-   if (osThreadNew((osThreadFunc_t)mqtt_client_task, NULL, &mqtt_thread_attributes) == NULL) {
-     LOG_PRINT("Failed to create MQTT thread\n");
-   }
-
-   // BLE initialization
-   rsi_ble_configurator_init();
-
-   // Remains running as the WiFi Task
-   wifi_app_task();
-
-  return;
-}
+static void app_start_wlan_scan(void);
+static void app_wlan_connect_to_ap(void);
+static void process_ble_attr1_command(uint8_t *att_value);
+static void app_wlan_timeout_ble_notification(void);
 
 void app_init(void)
 {
-  osThreadNew((osThreadFunc_t)application, NULL, &thread_attributes);
+  sl_status_t status = thread_safe_print_init();
+  if(SL_STATUS_OK != status)
+  {
+    while(1); // Count on WDOG for the sample app
+  }
+
+  osThreadId_t startup_thread_id = osThreadNew((osThreadFunc_t)startup_routine, NULL, &startup_thread_attributes);
+  if (startup_thread_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create startup_routine\n");
+  }
+
+  osThreadId_t thermostat_thread_id = osThreadNew((osThreadFunc_t)thermostat_routine, NULL, &thermostat_thread_attributes);
+  if (thermostat_thread_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create thermostat_routine\n");
+  }
+
+  thermostat_evt_flags_id = osEventFlagsNew(NULL);
+  if (thermostat_evt_flags_id == NULL) {
+    THREAD_SAFE_PRINT("Failed to create thermostat_evt_flags_id\n");
+    while(1); // Count on WDOG for the sample app
+  }
+
+}
+
+void startup_routine(void *argument)
+{
+  UNUSED_PARAMETER(argument);
+
+  THREAD_SAFE_PRINT("Setting up application tasks\n");
+  start_nwp_task_context();
+
+  //If WLAN, init powersave mode. Should always pass
+  if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+      || (SL_SI91X_COEX_MODE == SL_SI91X_WLAN_ONLY_MODE))
+  {
+      start_wlan_task_context();
+  }
+
+  //If BLE, Init power save mode too
+  if((SL_SI91X_COEX_MODE == SL_SI91X_WLAN_BLE_MODE)
+      || (SL_SI91X_COEX_MODE == SL_SI91X_BLE_MODE))
+  {
+      start_ble_task_context();
+  }
+
+  start_mqtt_task_context();
+
+//  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
+//  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
+//  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
+
+  THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
+  osThreadExit();
+}
+
+void thermostat_routine(void *argument)
+{
+  UNUSED_PARAMETER(argument);
+
+  sl_status_t status = SL_STATUS_OK;
+
+  osEventFlagsWait(thermostat_evt_flags_id, THERMOSTAT_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
+  THREAD_SAFE_PRINT("Thermostat start event received\n");
+
+  while(1)
+  {
+    osDelay(5000);
+    status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
+    if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
+    }
+  }
+
+}
+
+sl_status_t bt_on_event(ble_event_msg_t* event)
+{
+
+  switch (event->event_id) {
+    case BLE_SYSTEM_BOOT_EVENT : {
+    } break;
+
+    case BLE_CONNECTION_OPENED_EVENT: {
+    } break;
+
+    case BLE_CONNECTION_CLOSED_EVENT: {
+    } break;
+
+    case BLE_GATT_DATALEN_CHANGE_EVENT: {
+    } break;
+
+    case BLE_GATT_WRITE_REQUEST_EVENT: {
+        rsi_ble_event_write_t *ble_write_event = (rsi_ble_event_write_t *)event->payload;
+        uint16_t attr_handle = (ble_write_event->handle[1] << 8) | ble_write_event->handle[0];
+
+        switch (attr_handle) {
+          case gattdb_attribute_1:
+            THREAD_SAFE_PRINT("gattdb_attribute_1 handle\n");
+            process_ble_attr1_command(ble_write_event->att_value);
+            break;
+          case gattdb_attribute_2:
+            THREAD_SAFE_PRINT("gattdb_attribute_2 handle\n");
+            break;
+          case gattdb_attribute_3:
+            THREAD_SAFE_PRINT("gattdb_attribute_3 handle\n");
+            break;
+          default:
+            break;
+        }
+
+    } break;
+    default:
+      break;
+  }//switch(ble_event_id)
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t wlan_on_event(wlan_event_msg_t* event)
+{
+  sl_status_t status                 = SL_STATUS_OK;
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 }; //Generic Buffer for data sent over BLE
+
+  switch (event->event_id) {
+    case WLAN_BOOT_EVENT :
+    break;
+
+    case WLAN_SCAN_COMPLETE_EVENT: {
+      //DONE Removing the osDelay works fine as long as notifications are enabled
+      sl_wifi_scan_result_t *scanresult = (sl_wifi_scan_result_t *)(event->payload);
+      uint8_t scan_ix, length;
+
+      memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+      data[0] = 0x03;
+      data[1] = scanresult->scan_count;
+      rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+
+      for (scan_ix = 0; scan_ix < scanresult->scan_count; scan_ix++) {
+        memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+        data[0] = scanresult->scan_info[scan_ix].security_mode;
+        data[1] = ',';
+        strcpy((char *)data + 2, (const char *)scanresult->scan_info[scan_ix].ssid);
+        length = strlen((char *)data + 2);
+        length = length + 2;
+
+        rsi_ble_set_local_att_value(gattdb_attribute_3, RSI_BLE_MAX_DATA_LEN, data);
+      }
+    } break;
+
+    case WLAN_IPCONFIG_DONE_EVENT: {
+      sl_ip_address_t *ip = (sl_ip_address_t *)(event->payload);
+      memcpy(&ip_address, ip, sizeof(sl_ip_address_t));
+    } break;
+
+    case WLAN_JOIN_COMPLETE_EVENT : {
+      sl_mac_address_t mac_addr = { 0 };
+      uint8_t k;
+
+      connected_to_ap = 1;
+
+      memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+      data[0] = 0x02;
+      data[1] = 0x01;
+      data[2] = ',';
+
+      // Copy the MAC address
+      status = sl_wifi_get_mac_address(SL_WIFI_CLIENT_INTERFACE, &mac_addr);
+      if (status == SL_STATUS_OK) {
+        for (k = 0; k < 6; k++) {
+          data[k + 3] = mac_addr.octet[k];
+        }
+      } else {
+        k = 6;
+      }
+      data[k + 3] = ',';
+
+      // IP Address
+      for (int i = 0; k < 10; k++, i++) {
+        data[k + 4] = ip_address.ip.v4.bytes[i];
+      }
+
+      rsi_ble_set_local_att_value(gattdb_attribute_2,
+                                  RSI_BLE_MAX_DATA_LEN,
+                                  data); // set the local attribute value.
+
+
+      status = mqtt_connect_to_broker();
+      if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("Failed to connect to MQTT broker : 0x%lX\n", status);
+      }
+
+      THREAD_SAFE_PRINT("AP joined successfully\n\n");
+    } break;
+
+    case WLAN_DISCONNECTED_EVENT: {
+        THREAD_SAFE_PRINT("WIFI App Disconnected State\n");
+        memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+        data[1] = 0x01;
+        data[0] = 0x04;
+        rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+    } break;
+
+    default:
+      break;
+  }//switch(wlan_event_id)
+
+  return status;
+}
+
+// Legacy compatibility with old RS Code si SI Connect works
+static void process_ble_attr1_command(uint8_t *att_value)
+{
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+  uint8_t cmdid = att_value[0];
+
+  switch (cmdid) {
+        // Scan command request
+        case '3': //else if(rsi_ble_write->att_value[0] == '3')
+        {
+          THREAD_SAFE_PRINT("Received scan request\n");
+          app_start_wlan_scan();
+        } break;
+
+        // Sending SSID
+        case '2': //else if(rsi_ble_write->att_value[0] == '2')
+        {
+          THREAD_SAFE_PRINT("[APP] Received SSID\n");
+          memset(coex_ssid, 0, sizeof(coex_ssid));
+          strcpy((char *)coex_ssid, (const char *)&att_value[3]);
+          THREAD_SAFE_PRINT("[APP] %s\n", coex_ssid);
+        } break;
+
+        // Sending Security type
+        case '5': //else if(rsi_ble_write->att_value[0] == '5')
+        {
+          sec_type = ((att_value[3]) - '0');
+          THREAD_SAFE_PRINT("[APP] In Security Request\n");
+          if (sec_type == 0) {
+            THREAD_SAFE_PRINT("[APP] Join Request\n");
+            app_wlan_connect_to_ap();
+          }
+        } break;
+
+        // Sending PSK
+        case '6': //else if(rsi_ble_write->att_value[0] == '6')
+        {
+          THREAD_SAFE_PRINT("[APP] Received PWD\n");
+          strcpy((char *)pwd, (const char *)&att_value[3]);
+          THREAD_SAFE_PRINT("[APP] %s\n", pwd);
+          THREAD_SAFE_PRINT("[APP] Join Request\n");
+          app_wlan_connect_to_ap();
+        } break;
+
+        // WLAN Status Request
+        case '7': //else if(rsi_ble_write->att_value[0] == '7')
+        {
+          THREAD_SAFE_PRINT("[APP] WLAN status request received\n");
+          if (connected_to_ap) {
+            memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+
+            data[1] = connected_to_ap; /*This index will indicate wlan AP connect or disconnect status to Android app*/
+            data[0] = 0x07;
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+          } else {
+            memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+            data[0] = 0x07;
+            data[1] = 0x00;
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+          }
+        } break;
+
+        // WLAN disconnect request
+        case '4': //else if(rsi_ble_write->att_value[0] == '4')
+        {
+          THREAD_SAFE_PRINT("[APP] WLAN disconnect request received\n");
+          start_wlan_access_point_disconnect();
+        } break;
+
+        // FW version request
+        case '8': {
+          THREAD_SAFE_PRINT("[APP] FW version request\n");
+          sl_status_t status = SL_STATUS_OK;
+          sl_wifi_firmware_version_t firmware_version = { 0 };
+          memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+
+          status = sl_wifi_get_firmware_version(&firmware_version);
+          if (status == SL_STATUS_OK) {
+            data[0] = 0x08;
+            data[1] = sizeof(sl_wifi_firmware_version_t);
+            memcpy(&data[2], &firmware_version, sizeof(sl_wifi_firmware_version_t));
+
+            rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+            print_firmware_version(&firmware_version);
+          }
+        } break;
+
+        default:
+          THREAD_SAFE_PRINT("Default command case \n\n");
+          break;
+      }
+}
+
+static void app_start_wlan_scan(void)
+{
+  sl_status_t status = SL_STATUS_OK;
+  sl_wifi_scan_configuration_t wifi_scan_configuration = { 0 };
+
+  //Use default scan configuration
+  wifi_scan_configuration = default_wifi_scan_configuration;
+
+  THREAD_SAFE_PRINT("WLAN Start Scan\n");
+  // If not, start a scan
+  status = sl_wifi_start_scan(SL_WIFI_CLIENT_2_4GHZ_INTERFACE, NULL, &wifi_scan_configuration);
+  if (  (status != SL_STATUS_OK)
+      &&(status != SL_STATUS_IN_PROGRESS))
+  {
+      THREAD_SAFE_PRINT("Failed to start scan: 0x%lX\r\n", status);
+  }
+}
+
+static void app_wlan_connect_to_ap(void)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  status = start_wlan_access_point_join(  (char *)coex_ssid,
+                                          strlen((char *)coex_ssid),
+                                          SL_WIFI_PSK_CREDENTIAL,
+                                          (char *)pwd,
+                                          strlen((char *)pwd),
+                                          sec_type,
+                                          APP_NWP_OPERATION_TIMEOUT_MS);
+
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("WLAN Connect Failed, Error Code : 0x%lX\r\n", status);
+    app_wlan_timeout_ble_notification();
+  }
+}
+
+static void app_wlan_timeout_ble_notification(void)
+{
+  uint8_t data[RSI_BLE_MAX_DATA_LEN] = { 0 };
+  
+  memset(data, 0, RSI_BLE_MAX_DATA_LEN);
+  data[0] = 0x02;
+  data[1] = 0x00;
+  rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
+}
+
+sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
+{
+  switch (event->event_id) {
+    case MQTT_CONNECTION_EVENT:{
+      THREAD_SAFE_PRINT("APP mqtt connected, start thermostat operations\n");
+      osEventFlagsSet(thermostat_evt_flags_id, 0x00000001);
+    } break;
+
+    default:
+      break;
+  }//switch(mqtt_event_id)
+
+  return SL_STATUS_OK;
 }

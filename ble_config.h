@@ -30,10 +30,6 @@
  * *                      Macros
  * ******************************************************/
 
-//! Power Save Profile type
-#define PSP_TYPE RSI_MAX_PSP
-#define PSP_MODE RSI_SLEEP_MODE_2
-
 #define RSI_BLE_SET_RAND_ADDR "00:23:A7:12:34:56"
 
 #define CLEAR_ACCEPTLIST              0x00
@@ -45,7 +41,7 @@
 #define RSI_BLE_DEV_ADDR_RESOLUTION_ENABLE 0
 
 #ifdef SLI_SI91X_MCU_INTERFACE
-#define RSI_BLE_MAX_NBR_ATT_REC     20
+#define RSI_BLE_MAX_NBR_ATT_REC     25
 #define RSI_BLE_MAX_NBR_PERIPHERALS 1
 #define RSI_BLE_MAX_NBR_CENTRALS    1
 #define RSI_BLE_NUM_CONN_EVENTS     2
@@ -190,4 +186,4 @@
 #define RSI_BLE_ADV_PAYLOAD_INDEX_FOR_COMPARE            0x00
 #define RSI_BLE_ADV_PAYLOAD_LENGTH_FROM_INDEX_TO_COMPARE 0x00
 
-#endif
+#endif //BLE_CONFIG_H

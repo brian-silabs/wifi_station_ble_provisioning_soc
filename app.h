@@ -18,11 +18,6 @@
 #ifndef APP_H
 #define APP_H
 
-#include "sl_status.h"
-#include "sl_net.h"
-
-extern sl_ip_address_t mqtt_broker_ip;
-
 /***************************************************************************/ /**
  * Initialize application.
  ******************************************************************************/
