@@ -402,3 +402,23 @@ static void app_wlan_timeout_ble_notification(void)
   data[1] = 0x00;
   rsi_ble_set_local_att_value(gattdb_attribute_2, RSI_BLE_MAX_DATA_LEN, data);
 }
+
+sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  switch (event->event_id) {
+    case MQTT_CONNECTION_EVENT:{
+      THREAD_SAFE_PRINT("APP mqtt connected, publishing\n");
+      status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
+      if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
+      }
+    } break;
+
+    default:
+      break;
+  }//switch(mqtt_event_id)
+
+  return SL_STATUS_OK;
+}

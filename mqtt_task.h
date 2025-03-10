@@ -36,4 +36,15 @@ sl_status_t start_mqtt_task_context(void);
 
 sl_status_t mqtt_connect_to_broker(void);
 
+sl_status_t mqtt_publish_to_broker(const char *topic, const char *message);
+
+/**
+ * @brief MQTT Event handler.
+ *        Executes in the context of the MQTT Task
+ *
+ * @return sl_status_t The status of the operation.
+ */
+sl_status_t mqtt_on_event(mqtt_event_msg_t* event);
+
+
 #endif // MQTT_TASK_H

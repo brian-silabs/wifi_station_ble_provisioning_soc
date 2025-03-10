@@ -80,7 +80,6 @@ static void print_char_buffer(char *buffer, uint32_t buffer_length);
 //static void mqtt_client_message_handler(void *client, sl_mqtt_client_message_t *message, void *context);
 static void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event, void *event_data, void *context);
 
-
 /*
  *********************************************************************************************************
  *                                         PUBLIC FUNCTIONS DEFINITIONS
@@ -97,6 +96,29 @@ sl_status_t mqtt_connect_to_broker(void)
     THREAD_SAFE_PRINT("Failed to connect to mqtt broker: 0x%lX\r\n", status);
     return status;
   }
+  return SL_STATUS_OK;
+}
+
+sl_status_t mqtt_publish_to_broker(const char *topic, const char *message)
+{
+  sl_status_t status;
+
+  // Publish a message
+  sl_mqtt_client_message_t message_to_be_published = {
+    .qos_level            = QOS_OF_PUBLISH_MESSAGE,
+    .is_retained          = PUBLISH_MESSAGE_RETAINED,
+    .is_duplicate_message = PUBLISH_MESSAGE_DUPLICATE,
+    .topic                = (uint8_t *)topic,
+    .topic_length         = strlen(topic),
+    .content              = (uint8_t *)message,
+    .content_length       = strlen(message),
+  };
+
+  status = sl_mqtt_client_publish(&client, &message_to_be_published, 0, &message_to_be_published);
+  if (status != SL_STATUS_IN_PROGRESS) {
+    THREAD_SAFE_PRINT("Failed to publish message: 0x%lX\r\n", status);
+  }
+
   return SL_STATUS_OK;
 }
 
@@ -222,22 +244,7 @@ void mqtt_task(void *argument)
             } break;
 
             case MQTT_PUBLISH_EVENT: {
-              // Publish a message
-              sl_mqtt_client_message_t message_to_be_published = {
-                .qos_level            = QOS_OF_PUBLISH_MESSAGE,
-                .is_retained          = PUBLISH_MESSAGE_RETAINED,
-                .is_duplicate_message = PUBLISH_MESSAGE_DUPLICATE,
-                //.topic                = (uint8_t *)PUBLISH_TOPIC,
-                //.topic_length         = strlen(PUBLISH_TOPIC),
-                //.content              = (uint8_t *)PUBLISH_MESSAGE,
-                //.content_length       = strlen(PUBLISH_MESSAGE),
-              };
-
-                THREAD_SAFE_PRINT("MQTT Published\n");
-                status = sl_mqtt_client_publish(&client, &message_to_be_published, 0, &message_to_be_published);
-                if (status != SL_STATUS_IN_PROGRESS) {
-                  THREAD_SAFE_PRINT("Failed to publish message: 0x%lX\r\n", status);
-                }
+              THREAD_SAFE_PRINT("MQTT Published\n");
             } break;
             case MQTT_SUBSCRIBE_EVENT: {
                 THREAD_SAFE_PRINT("MQTT Subscribed\n");
@@ -247,9 +254,8 @@ void mqtt_task(void *argument)
 
             } break;
         }//switch(event_id)
+        mqtt_on_event(&mqtt_event_msg);
     }//while(1)
-
-    osThreadExit();
 }
 
 static void print_char_buffer(char *buffer, uint32_t buffer_length)
@@ -385,3 +391,17 @@ static void mqtt_client_event_handler(void *client, sl_mqtt_client_event_t event
 //    return;
 //  }
 //}
+
+/*
+ *********************************************************************************************************
+ *                                   APP CALLBACK FUNCTIONS DEFINITIONS
+ *********************************************************************************************************
+ */
+
+ SL_WEAK sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
+ {
+ 
+   UNUSED_PARAMETER(event);
+   return SL_STATUS_OK;
+ }
+ 
