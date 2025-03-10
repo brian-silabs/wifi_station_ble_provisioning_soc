@@ -16,8 +16,9 @@
 #include "sl_si91x_driver.h"
 #include "sl_si91x_ble.h"
 #include "sl_wifi.h"
+#include "sl_wifi_callback_framework.h"
 
-#define NWP_FLAGS_MSK  0x00001001U  // Define the flag mask
+#define NWP_FLAGS_MSK  0x000010FFU  // Define the flag mask
 
 /*
  *********************************************************************************************************
@@ -44,13 +45,52 @@ osEventFlagsId_t    nwp_evt_flags_id;  // Event flags ID
 static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
 static sl_bt_performance_profile_t ble_performance_profile_g = { .profile = SL_SI91X_BT_PERFORMANCE_PROFILE };
 
+sl_wifi_twt_request_t default_twt_setup_configuration = {
+  .twt_enable              = 1,
+  .twt_flow_id             = 1,
+  .wake_duration           = TWT_WAKE_DURATION,
+  .wake_duration_unit      = TWT_WAKE_DURATION_UNIT,
+  .wake_duration_tol       = TWT_WAKE_DURATION_TOL,
+  .wake_int_exp            = TWT_WAKE_INT_EXP,
+  .wake_int_exp_tol        = TWT_WAKE_INT_EXP_TOL,
+  .wake_int_mantissa       = TWT_WAKE_INT_MANTISSA,
+  .wake_int_mantissa_tol   = TWT_WAKE_INT_MANTISSA_TOL,
+  .implicit_twt            = 1,
+  .un_announced_twt        = 1,
+  .triggered_twt           = 0,
+  .twt_channel             = 0,
+  .twt_protection          = 0,
+  .restrict_tx_outside_tsp = 1,
+  .twt_retry_limit         = TWT_WAKE_RETRY_LIMIT,
+  .twt_retry_interval      = TWT_WAKE_RETRY_INTERVAL,
+  .req_type                = 1,
+  .negotiation_type        = 0,
+};
+
+sl_wifi_twt_selection_t default_twt_selection_configuration = {
+  .twt_enable                            = 1,
+  .average_tx_throughput                 = 0,
+  .tx_latency                            = 0,
+  .rx_latency                            = TWT_RX_LATENCY,
+  .device_average_throughput             = DEVICE_AVERAGE_THROUGHPUT,
+  .estimated_extra_wake_duration_percent = ESTIMATE_EXTRA_WAKE_DURATION_PERCENT,
+  .twt_tolerable_deviation               = TWT_TOLERABLE_DEVIATION,
+  .default_wake_interval_ms              = TWT_DEFAULT_WAKE_INTERVAL_MS,
+  .default_minimum_wake_duration_ms      = TWT_DEFAULT_WAKE_DURATION_MS,
+  .beacon_wake_up_count_after_sp         = MAX_BEACON_WAKE_UP_AFTER_SP
+};
+
 /*
  *********************************************************************************************************
  *                                         PRIVATE FUNCTIONS DECLARATIONS
  *********************************************************************************************************
  */
 void nwp_task(void *argument);
-
+static sl_status_t nwp_setup_twt(void);
+static sl_status_t twt_callback_handler(sl_wifi_event_t event,
+ sl_si91x_twt_response_t *result,
+ uint32_t result_length,
+ void *arg);
 /*
  *********************************************************************************************************
  *                                         PUBLIC FUNCTIONS DEFINITIONS
@@ -114,6 +154,20 @@ sl_status_t nwp_access_release(void)
   return ret;
 }
 
+sl_status_t nwp_set_event(wlan_event_id_t event_id)
+{
+  sl_status_t ret = SL_STATUS_OK;
+  uint32_t flagsSet = 0;
+  
+  flagsSet = osEventFlagsSet(nwp_evt_flags_id, event_id);
+  if (flagsSet & osFlagsError)
+  {
+    THREAD_SAFE_PRINT("Failed to set event flags\n");
+    ret = SL_STATUS_FAIL;
+  }
+  return ret;
+}
+
 /*
  *********************************************************************************************************
  *                                         PRIVATE FUNCTIONS DEFINITIONS
@@ -124,7 +178,7 @@ void nwp_task(void *argument)
     UNUSED_PARAMETER(argument);
 
     sl_status_t status                 = SL_STATUS_OK;
-    int32_t event_id = -1;
+    uint32_t event_id = 0;
 
     status = nwp_access_request();
     THREAD_SAFE_PRINT("NWP Acquiring NWP Semaphore\r\n");
@@ -185,17 +239,87 @@ void nwp_task(void *argument)
 
      while (true)
     {
-        if (event_id == -1) {
-            osEventFlagsWait(nwp_evt_flags_id, NWP_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
-            // if events are not received loop will be continued.
-            continue;
-        }
+      event_id = osEventFlagsWait(nwp_evt_flags_id, NWP_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
+      osEventFlagsClear(nwp_evt_flags_id, event_id);
 
-        switch (event_id) {
-            default:
-            break;
+      if (event_id & WLAN_JOIN_COMPLETE_EVENT) {
+        if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
+        {
+          THREAD_SAFE_PRINT("NWP Setting Low Power Mode\n");
+          if(WIFI_AUTO_LOW_POWER_TRY_TWT) 
+          {
+            THREAD_SAFE_PRINT("NWP Trying out TWT\n");
+            nwp_setup_twt();
+          } else {
+            THREAD_SAFE_PRINT("NWP Trying out WiFi4 Low Power Mode\n");
+            nwp_set_event((wlan_event_id_t)0x1000); //TODO deal with events ID
+          }
         }
+      } else if (event_id & 0x1000) 
+      {
+        THREAD_SAFE_PRINT("NWP Join Complete\n");
+      } else 
+      {
+        THREAD_SAFE_PRINT("NWP Unknown Event 0x%lX\n", event_id);
+      }
     }//while(1)
+}
+
+//// TODO Deal with statuses returns, its a mess
+static sl_status_t nwp_setup_twt(void){
+  sl_status_t status                                = SL_STATUS_OK;
+
+  status = nwp_access_request();
+  THREAD_SAFE_PRINT("NWP Acquiring NWP Semaphore\r\n");
+  if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("\r\nFailed to acquire NWP semaphore: 0x%lx\r\n", status);
+      return status;
+  }
+
+  THREAD_SAFE_PRINT("\r\nSetting up TWT\n");
+  //! Set TWT Config
+  sl_wifi_set_twt_config_callback(twt_callback_handler, NULL);
+  if (TWT_AUTO_CONFIG == 1) {
+    wifi_performance_profile_g.twt_selection = default_twt_selection_configuration;
+    status                            = sl_wifi_target_wake_time_auto_selection(&wifi_performance_profile_g.twt_selection);
+  } else {
+    wifi_performance_profile_g.twt_request = default_twt_setup_configuration;
+    status                          = sl_wifi_enable_target_wake_time(&wifi_performance_profile_g.twt_request);
+  }
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("Failed to set twt: 0x%lx\r\n", status);
+    THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
+    status = nwp_access_release();
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+        return status ;
+    }
+    return status;
+  }
+
+  //! Apply power save profile
+  wifi_performance_profile_g.profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE_CONNECTED;
+  status                      = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
+    THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
+    status = nwp_access_release();
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+        return status ;
+    }
+    return status;
+  }
+  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
+
+  THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
+  status = nwp_access_release();
+  if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+      return status ;
+  }
+
+  return status;
 }
 
 /*
@@ -203,3 +327,82 @@ void nwp_task(void *argument)
  *                                         CALLBACK FUNCTIONS DEFINITIONS
  *********************************************************************************************************
  */
+
+
+ static sl_status_t twt_callback_handler(sl_wifi_event_t event,
+  sl_si91x_twt_response_t *result,
+  uint32_t result_length,
+  void *arg)
+{
+  UNUSED_PARAMETER(result_length);
+  UNUSED_PARAMETER(arg);
+
+  if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
+      return SL_STATUS_FAIL;
+  }
+
+  switch (event) {
+      case SL_WIFI_TWT_RESPONSE_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup success");
+      break;
+      case SL_WIFI_TWT_UNSOLICITED_SESSION_SUCCESS_EVENT:
+          THREAD_SAFE_PRINT("\r\nUnsolicited TWT Setup success");
+          break;
+      case SL_WIFI_TWT_AP_REJECTED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Setup rejected by AP");
+          break;
+      case SL_WIFI_TWT_OUT_OF_TOLERANCE_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT response out of tolerance limits");
+          break;
+      case SL_WIFI_TWT_RESPONSE_NOT_MATCHED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response not matched with the request parameters");
+          break;
+      case SL_WIFI_TWT_UNSUPPORTED_RESPONSE_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response Unsupported");
+          break;
+      case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Max retries reached");
+          break;
+      case SL_WIFI_TWT_INACTIVE_DUE_TO_ROAMING_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT session inactive due to roaming");
+          break;
+      case SL_WIFI_TWT_INACTIVE_DUE_TO_DISCONNECT_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT session inactive due to wlan disconnection");
+          break;
+      case SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT session teardown success");
+          break;
+      case SL_WIFI_TWT_AP_TEARDOWN_SUCCESS_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT session teardown from AP");
+          break;
+      case SL_WIFI_TWT_INACTIVE_NO_AP_SUPPORT_EVENT:
+          THREAD_SAFE_PRINT("\r\nConnected AP Does not support TWT");
+          break;
+      case SL_WIFI_RESCHEDULE_TWT_SUCCESS_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT rescheduled");
+          break;
+      case SL_WIFI_TWT_INFO_FRAME_EXCHANGE_FAILED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT rescheduling failed due to a failure in the exchange of TWT information frames.");
+          break;
+      default:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed.");
+  }
+
+  if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {
+      THREAD_SAFE_PRINT("\r\n wake duration : 0x%X", result->wake_duration);
+      THREAD_SAFE_PRINT("\r\n wake_duration_unit: 0x%X", result->wake_duration_unit);
+      THREAD_SAFE_PRINT("\r\n wake_int_exp : 0x%X", result->wake_int_exp);
+      THREAD_SAFE_PRINT("\r\n negotiation_type : 0x%X", result->negotiation_type);
+      THREAD_SAFE_PRINT("\r\n wake_int_mantissa : 0x%X", result->wake_int_mantissa);
+      THREAD_SAFE_PRINT("\r\n implicit_twt : 0x%X", result->implicit_twt);
+      THREAD_SAFE_PRINT("\r\n un_announced_twt : 0x%X", result->un_announced_twt);
+      THREAD_SAFE_PRINT("\r\n triggered_twt : 0x%X", result->triggered_twt);
+      THREAD_SAFE_PRINT("\r\n twt_channel : 0x%X", result->twt_channel);
+      THREAD_SAFE_PRINT("\r\n twt_protection : 0x%X", result->twt_protection);
+      THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X\r\n", result->twt_flow_id);
+  } else if (event < SL_WIFI_TWT_EVENTS_END) {
+      THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X", result->twt_flow_id);
+      THREAD_SAFE_PRINT("\r\n negotiation_type : 0x%X\r\n", result->negotiation_type);
+  }
+  return SL_STATUS_OK;
+}
