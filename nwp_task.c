@@ -18,7 +18,14 @@
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
 
-#define NWP_FLAGS_MSK  0x000010FFU  // Define the flag mask
+#define NWP_FLAGS_MSK  0x000FF0FFU  // Define the flag mask
+
+
+typedef enum nwp_event_flag_id_e
+{
+  NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT =               (0x00001000 << 0),
+} nwp_event_flag_id_t;
+
 
 /*
  *********************************************************************************************************
@@ -87,6 +94,7 @@ sl_wifi_twt_selection_t default_twt_selection_configuration = {
  */
 void nwp_task(void *argument);
 static sl_status_t nwp_setup_twt(void);
+static sl_status_t nwp_setup_low_power_wifi4(void);
 static sl_status_t twt_callback_handler(sl_wifi_event_t event,
  sl_si91x_twt_response_t *result,
  uint32_t result_length,
@@ -252,12 +260,17 @@ void nwp_task(void *argument)
             nwp_setup_twt();
           } else {
             THREAD_SAFE_PRINT("NWP Trying out WiFi4 Low Power Mode\n");
-            nwp_set_event((wlan_event_id_t)0x1000); //TODO deal with events ID
+            nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
           }
         }
-      } else if (event_id & 0x1000) 
+      } else if (event_id & NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT) 
       {
-        THREAD_SAFE_PRINT("NWP Join Complete\n");
+        THREAD_SAFE_PRINT("NWP Join Complete no TWT or TWT setup failed \n");
+        if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
+        {
+          THREAD_SAFE_PRINT("NWP Setting WiFi 4 Low Power Mode\n");
+          nwp_setup_low_power_wifi4();
+        }
       } else 
       {
         THREAD_SAFE_PRINT("NWP Unknown Event 0x%lX\n", event_id);
@@ -322,12 +335,55 @@ static sl_status_t nwp_setup_twt(void){
   return status;
 }
 
+static sl_status_t nwp_setup_low_power_wifi4(void)
+{
+  sl_status_t status                                = SL_STATUS_OK;
+
+  status = nwp_access_request();
+  THREAD_SAFE_PRINT("NWP Acquiring NWP Semaphore\r\n");
+  if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("\r\nFailed to acquire NWP semaphore: 0x%lx\r\n", status);
+      return status;
+  }
+
+  // Prepare low power profile as configured in the nwp config header
+  wifi_performance_profile_g.profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE_CONNECTED;
+
+  //TODO Check if clearing the structure is required, as well as TWT disablement sl_wifi_disable_target_wake_time
+
+  // We align on every 3 BEACONs
+  // TODO whenever (if ever) available auto adjust based on AP disconnection rate
+  wifi_performance_profile_g.listen_interval = 3;
+  wifi_performance_profile_g.dtim_aligned_type = SL_SI91X_ALIGN_WITH_BEACON;
+
+  status                      = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
+    THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
+    status = nwp_access_release();
+    if (status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+        return status ;
+    }
+    return status;
+  }
+  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
+
+  THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
+  status = nwp_access_release();
+  if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("\r\nFailed to release NWP semaphore: 0x%lx\r\n", status);
+      return status ;
+  }
+
+  return status;
+}
+
 /*
  *********************************************************************************************************
  *                                         CALLBACK FUNCTIONS DEFINITIONS
  *********************************************************************************************************
  */
-
 
  static sl_status_t twt_callback_handler(sl_wifi_event_t event,
   sl_si91x_twt_response_t *result,
@@ -338,6 +394,8 @@ static sl_status_t nwp_setup_twt(void){
   UNUSED_PARAMETER(arg);
 
   if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
+      THREAD_SAFE_PRINT("\r\nTWT Setup failed");
+      nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
       return SL_STATUS_FAIL;
   }
 
@@ -386,6 +444,7 @@ static sl_status_t nwp_setup_twt(void){
           break;
       default:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed.");
+          nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
   }
 
   if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {
