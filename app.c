@@ -150,9 +150,9 @@ void startup_routine(void *argument)
 
   start_mqtt_task_context();
 
-//  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
-//  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
-//  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
+  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
+  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
+  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
 
   THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();

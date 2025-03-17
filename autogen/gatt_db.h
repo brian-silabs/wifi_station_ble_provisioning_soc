@@ -17,6 +17,7 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_attribute_1                    16
 #define gattdb_attribute_2                    18
 #define gattdb_attribute_3                    20
+#define gattdb_custom_characteristic          24
 
 
 #endif // __GATT_DB_H
