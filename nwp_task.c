@@ -6,6 +6,8 @@
 #include "nwp_task.h"
 #include "nwp_task_config.h"
 
+#include "wlan_task.h"
+
 #include "cmsis_os2.h"
 #include "sl_status.h"
 
@@ -18,14 +20,11 @@
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
 
-#define NWP_FLAGS_MSK  0x000FF0FFU  // Define the flag mask
-
-
-typedef enum nwp_event_flag_id_e
+typedef enum nwp_event_flag_e
 {
-  NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT =               (0x00001000 << 0),
-} nwp_event_flag_id_t;
-
+  NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT =        (1 << 1),
+  NWP_FLAG_UNKNOWN_EVENT =                        (1 << 31)
+} nwp_event_flag_t;
 
 /*
  *********************************************************************************************************
@@ -47,7 +46,8 @@ const osThreadAttr_t nwp_thread_attributes = {
   };
 
 osSemaphoreId_t     nwp_thread_sem;
-osEventFlagsId_t    nwp_evt_flags_id;  // Event flags ID
+osMessageQueueId_t  nwp_evt_queue_id;  // Event flags ID
+static uint8_t      nwp_evt_queue_seq_num_g = 0;
 
 static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
 static sl_bt_performance_profile_t ble_performance_profile_g = { .profile = SL_SI91X_BT_PERFORMANCE_PROFILE };
@@ -99,6 +99,8 @@ static sl_status_t twt_callback_handler(sl_wifi_event_t event,
  sl_si91x_twt_response_t *result,
  uint32_t result_length,
  void *arg);
+static void nwp_wait_event(nwp_event_msg_t *event_msg);
+
 /*
  *********************************************************************************************************
  *                                         PUBLIC FUNCTIONS DEFINITIONS
@@ -116,14 +118,14 @@ sl_status_t start_nwp_task_context(void)
     }
     THREAD_SAFE_PRINT("NWP Semaphore Creation Complete\n");
 
-    nwp_evt_flags_id = osEventFlagsNew(NULL);
-    if (nwp_evt_flags_id == NULL) {
-    THREAD_SAFE_PRINT("Failed to create nwp_evt_flags_id\n");
-    return SL_STATUS_FAIL;
+    nwp_evt_queue_id = osMessageQueueNew(   SL_NWP_EVENT_QUEUE_SIZE, 
+                                            sizeof(nwp_event_msg_t), 
+                                            NULL);  // Create message queue
+    if (nwp_evt_queue_id == NULL) {
+      THREAD_SAFE_PRINT("Failed to create nwp_evt_queue_id\n");
+      return SL_STATUS_FAIL;
     }
-    THREAD_SAFE_PRINT("NWP Flags Creation Complete\n");
-
-    //TODO Init Queue or flag
+    THREAD_SAFE_PRINT("NWP Queue Creation Complete\n");
 
     osThreadId_t nwp_thread_id = osThreadNew((osThreadFunc_t)nwp_task, NULL, &nwp_thread_attributes);
     if (nwp_thread_id == NULL) {
@@ -162,18 +164,43 @@ sl_status_t nwp_access_release(void)
   return ret;
 }
 
-sl_status_t nwp_set_event(wlan_event_id_t event_id)
+void nwp_set_event(uint32_t event_id, void *event_data)
 {
-  sl_status_t ret = SL_STATUS_OK;
-  uint32_t flagsSet = 0;
-  
-  flagsSet = osEventFlagsSet(nwp_evt_flags_id, event_id);
-  if (flagsSet & osFlagsError)
-  {
-    THREAD_SAFE_PRINT("Failed to set event flags\n");
-    ret = SL_STATUS_FAIL;
-  }
-  return ret;
+    nwp_event_msg_t event_msg;
+
+    event_msg.event_id = event_id;
+    event_msg.seq_num = nwp_evt_queue_seq_num_g;
+
+    if(     (event_data != NULL)
+        &&  (sizeof(uint32_t) > 0))
+    {
+        memcpy(event_msg.payload, event_data, sizeof(uint32_t));
+    } else {
+        memset(event_msg.payload, 0, SL_NWP_EVENT_MAX_PAYLOAD_SIZE);
+    }
+
+    osStatus_t status = osMessageQueuePut(  nwp_evt_queue_id, 
+                                            &event_msg, 
+                                            0, // Message priority
+                                            0); // Timeout - Return immediately
+
+    if (status != osOK) {
+        THREAD_SAFE_PRINT("Failed to send wlan event: 0x%lx\r\n", (uint32_t)status);
+    } else {
+        nwp_evt_queue_seq_num_g++;
+    }
+}
+
+static void nwp_wait_event(nwp_event_msg_t *event_msg)
+{
+    osStatus_t status = osMessageQueueGet(  nwp_evt_queue_id, 
+                                            event_msg, 
+                                            NULL, 
+                                            osWaitForever);
+
+    if(status != osOK) {
+        THREAD_SAFE_PRINT("Failed to get wlan event: 0x%lx\r\n", (uint32_t)status);
+    }
 }
 
 /*
@@ -186,7 +213,9 @@ void nwp_task(void *argument)
     UNUSED_PARAMETER(argument);
 
     sl_status_t status                 = SL_STATUS_OK;
-    uint32_t event_id = 0;
+    nwp_event_msg_t nwp_event_msg;
+
+    nwp_evt_queue_seq_num_g = 0; // Init the message queue sequence number to 0
 
     status = nwp_access_request();
     THREAD_SAFE_PRINT("NWP Acquiring NWP Semaphore\r\n");
@@ -247,33 +276,40 @@ void nwp_task(void *argument)
 
      while (true)
     {
-      event_id = osEventFlagsWait(nwp_evt_flags_id, NWP_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
-      osEventFlagsClear(nwp_evt_flags_id, event_id);
-
-      if (event_id & WLAN_JOIN_COMPLETE_EVENT) {
-        if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
-        {
-          THREAD_SAFE_PRINT("NWP Setting Low Power Mode\n");
-          if(WIFI_AUTO_LOW_POWER_TRY_TWT) 
+      nwp_wait_event(&nwp_event_msg);
+      uint32_t event_flag = (*(uint32_t *)(nwp_event_msg.payload));// nwp data is an uint32_t
+      switch (nwp_event_msg.event_id) {
+        case NWP_EVENT: {
+          if (event_flag & NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT)
           {
-            THREAD_SAFE_PRINT("NWP Trying out TWT\n");
-            nwp_setup_twt();
-          } else {
-            THREAD_SAFE_PRINT("NWP Trying out WiFi4 Low Power Mode\n");
-            nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
+            THREAD_SAFE_PRINT("NWP Join Complete no TWT or TWT setup failed \n");
+            if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
+            {
+              THREAD_SAFE_PRINT("NWP Setting WiFi 4 Low Power Mode\n");
+              nwp_setup_low_power_wifi4();
+            }
           }
-        }
-      } else if (event_id & NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT) 
-      {
-        THREAD_SAFE_PRINT("NWP Join Complete no TWT or TWT setup failed \n");
-        if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
-        {
-          THREAD_SAFE_PRINT("NWP Setting WiFi 4 Low Power Mode\n");
-          nwp_setup_low_power_wifi4();
-        }
-      } else 
-      {
-        THREAD_SAFE_PRINT("NWP Unknown Event 0x%lX\n", event_id);
+         } break;
+        case WLAN_EVENT: {
+          if (event_flag & WLAN_JOIN_COMPLETE_EVENT) {
+            if(WIFI_AUTO_LOW_POWER_MODE_ENABLE) 
+            {
+              THREAD_SAFE_PRINT("NWP Setting Low Power Mode\n");
+              if(WIFI_AUTO_LOW_POWER_TRY_TWT) 
+              {
+                THREAD_SAFE_PRINT("NWP Trying out TWT\n");
+                nwp_setup_twt();
+              } else {
+                THREAD_SAFE_PRINT("NWP Trying out WiFi4 Low Power Mode\n");
+                uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
+                nwp_set_event(NWP_EVENT, &event_flag);
+              }
+            }
+          }
+         } break;
+        default:
+          THREAD_SAFE_PRINT("NWP Unknown Event 0x%d\n", nwp_event_msg.event_id);
+          break;
       }
     }//while(1)
 }
@@ -395,7 +431,8 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
 
   if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
       THREAD_SAFE_PRINT("\r\nTWT Setup failed");
-      nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
+      uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
+      nwp_set_event(NWP_EVENT, &event_flag);
       return SL_STATUS_FAIL;
   }
 
@@ -444,7 +481,8 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
           break;
       default:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed.");
-          nwp_set_event((wlan_event_id_t)NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT); //TODO deal with events ID
+          uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
+          nwp_set_event(NWP_EVENT, &event_flag);
   }
 
   if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {

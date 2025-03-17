@@ -19,7 +19,8 @@ typedef enum ble_event_id_e
   BLE_CONNECTION_MTU_EVENT =                (1 << 7),
   BLE_GATT_WRITE_REQUEST_EVENT =            (1 << 8),
   BLE_GATT_READ_REQUEST_EVENT =             (1 << 9),
-  BLE_GATT_DATALEN_CHANGE_EVENT =           (1 << 10)
+  BLE_GATT_DATALEN_CHANGE_EVENT =           (1 << 10),
+  BLE_UNKNOWN_EVENT =                       (1 << 31)
 } ble_event_id_t;   
 
 typedef struct ble_event_msg_s{

@@ -359,7 +359,7 @@ void wlan_task(void *argument)
 
             case WLAN_JOIN_COMPLETE_EVENT: {
                 THREAD_SAFE_PRINT("WIFI Joining complete\n");
-                nwp_set_event(WLAN_JOIN_COMPLETE_EVENT);
+                nwp_set_event(WLAN_EVENT, &(wlan_event_msg.event_id));
                 //! Enable Broadcast data filter
                 status = sl_wifi_filter_broadcast(5000, 1, 1);//TODO provide macro for settings
             } break;

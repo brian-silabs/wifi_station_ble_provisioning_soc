@@ -16,7 +16,8 @@ typedef enum mqtt_event_id_e
   MQTT_CONNECTION_FAILED_EVENT =                   (1 << 3),
   MQTT_DISCONNECTION_EVENT =                       (1 << 4),
   MQTT_PUBLISH_EVENT =                            (1 << 5),
-  MQTT_SUBSCRIBE_EVENT =                        (1 << 6),
+  MQTT_SUBSCRIBE_EVENT =                          (1 << 6),
+  MQTT_UNKNOWN_EVENT =                              (1 << 31)
 } mqtt_event_id_t;   
 
 typedef struct mqtt_event_msg_s{

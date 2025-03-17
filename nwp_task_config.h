@@ -22,7 +22,7 @@
 #define WIFI_AUTO_LOW_POWER_MODE_ENABLE 1
 
 // For WiFi 6 Compatible Access Points only
-#define WIFI_AUTO_LOW_POWER_TRY_TWT     0
+#define WIFI_AUTO_LOW_POWER_TRY_TWT     1
 
 // // For other WiFi Access Points
 // #define WIFI_AUTO_LOW_POWER_MODE_LOWER_POWER        0x00
