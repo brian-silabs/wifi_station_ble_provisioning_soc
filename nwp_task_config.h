@@ -5,17 +5,55 @@
 #include "sl_wifi_device.h"
 #include "ble_config.h"
 
-#define SL_SI91X_OPERATION_MODE                 SL_SI91X_CLIENT_MODE
-#define SL_SI91X_COEX_MODE                      SL_SI91X_WLAN_BLE_MODE
+#define SL_SI91X_OPERATION_MODE                       SL_SI91X_CLIENT_MODE
+#define SL_SI91X_COEX_MODE                            SL_SI91X_WLAN_BLE_MODE
 
-#define SL_SI91X_WIFI_PERFORMANCE_PROFILE       DEEP_SLEEP_WITH_RAM_RETENTION
-#define SL_SI91X_BT_PERFORMANCE_PROFILE         ASSOCIATED_POWER_SAVE
+#define SL_SI91X_WIFI_PERFORMANCE_PROFILE             DEEP_SLEEP_WITH_RAM_RETENTION
+#define SL_SI91X_WIFI_PERFORMANCE_PROFILE_CONNECTED   ASSOCIATED_POWER_SAVE
+#define SL_SI91X_BT_PERFORMANCE_PROFILE               ASSOCIATED_POWER_SAVE
 
 #define EFR32_GATT_DB_COMPAT_ENABLED            1
 
 #if EFR32_GATT_DB_COMPAT_ENABLED
 #define BLE_SIMPLE_GATT                         1
 #endif
+
+// WiFi Auto Low Power Settings
+#define WIFI_AUTO_LOW_POWER_MODE_ENABLE 1
+
+// For WiFi 6 Compatible Access Points only
+#define WIFI_AUTO_LOW_POWER_TRY_TWT     1
+
+// // For other WiFi Access Points
+// #define WIFI_AUTO_LOW_POWER_MODE_LOWER_POWER        0x00
+// #define WIFI_AUTO_LOW_POWER_MODE_HIGHER_COMPAT      0x01
+// #define WIFI_AUTO_LOW_POWER_MODE_BEST_COMPROMISE    0x02
+
+// #define WIFI_AUTO_LOW_POWER_MODE                    WIFI_AUTO_LOW_POWER_MODE_LOWER_POWER
+
+// TWT Related Configuration
+#define TWT_AUTO_CONFIG  1
+#define TWT_SCAN_TIMEOUT 10000
+
+// AUTO TWT based TWT selection params
+#define TWT_RX_LATENCY                          60000 // in milli seconds
+#define DEVICE_AVERAGE_THROUGHPUT               20000 // Kbps
+#define ESTIMATE_EXTRA_WAKE_DURATION_PERCENT    0     // in percentage
+#define TWT_TOLERABLE_DEVIATION                 10    // in percentage
+#define TWT_DEFAULT_WAKE_INTERVAL_MS            1024  // in milli seconds
+#define TWT_DEFAULT_WAKE_DURATION_MS            8     // in milli seconds
+#define MAX_BEACON_WAKE_UP_AFTER_SP             2 // The number of beacons after the service period completion for which the module wakes up and listens for any pending RX.
+
+// MANUAL TWT based TWT selection params, only used wwhen TWT_AUTO_CONFIG is set to 0
+#define TWT_WAKE_DURATION                       0x60
+#define TWT_WAKE_DURATION_UNIT                  0
+#define TWT_WAKE_DURATION_TOL                   0x60
+#define TWT_WAKE_INT_EXP                        13
+#define TWT_WAKE_INT_EXP_TOL                    13
+#define TWT_WAKE_INT_MANTISSA                   0x1D4C
+#define TWT_WAKE_INT_MANTISSA_TOL               0x1D4C
+#define TWT_WAKE_RETRY_LIMIT                    6
+#define TWT_WAKE_RETRY_INTERVAL                 10
 
 ///////// Should not be modified
 /// // Check how to better deal with this config

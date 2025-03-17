@@ -16,7 +16,8 @@ typedef enum wlan_event_id_e
   WLAN_CONNECTED_EVENT =          (1 << 3),
   WLAN_IPCONFIG_DONE_EVENT =      (1 << 4),
   WLAN_SCAN_COMPLETE_EVENT =      (1 << 5),
-  WLAN_JOIN_COMPLETE_EVENT =      (1 << 6)
+  WLAN_JOIN_COMPLETE_EVENT =      (1 << 6),
+  WLAN_UNKNOWN_EVENT =            (1 << 31)
 } wlan_event_id_t;
 
 typedef struct wlan_event_msg_s{
