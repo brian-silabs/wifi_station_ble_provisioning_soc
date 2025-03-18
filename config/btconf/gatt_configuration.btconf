@@ -26,7 +26,19 @@
   </service>
 
   <!--Custom Service-->
-  <service advertise="false" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="AABB">
+  <service advertise="true" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="CCDD">
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" id="second_custom" name="Custom Characteristic" sourceId="" uuid="2aa2">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+
+  <!--Custom Service-->
+  <service advertise="true" id="commissioning" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="AABB">
 
     <!--Custom Characteristic-->
     <characteristic const="false" id="attribute_1" name="Custom Characteristic" sourceId="" uuid="1aa1">

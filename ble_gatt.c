@@ -42,7 +42,7 @@
 #define ADV_FLAGS                                       0x06
 
 // Define the maximum advertising data length
-#define RSI_BLE_MAX_ADV_DATA_LEN                        31
+#define RSI_BLE_MAX_ADV_DATA_LEN                        (31 - 3) // Minus 3 for ADV flags that are managed by NWP
 
 // BLE attribute service types uuid values
 #define RSI_BLE_CHAR_SERV_UUID                          0x2803
@@ -58,6 +58,9 @@
 #define RSI_BLE_ATT_PROPERTY_READ                       0x02
 #define RSI_BLE_ATT_PROPERTY_WRITE                      0x08
 #define RSI_BLE_ATT_PROPERTY_NOTIFY                     0x10
+
+#define MAX_ADVERTISED_16BIT_UUID_SERVICES              13
+#define MAX_ADVERTISED_128BIT_UUID_SERVICES             1
 
 typedef enum gattdb_init_state_e {
     GATTDB_INIT_REGISTER_START                          = 0,
@@ -141,7 +144,7 @@ static sl_status_t lookup_device_name(const sli_bt_gattdb_t *gatt_db, uint8_t **
 
 // Function to add an AD element to the advertising data
 static void add_ad_element(uint8_t *ad_data, uint8_t *ad_len, uint8_t ad_type, uint8_t *data, uint8_t data_len) {
-    ad_data[*ad_len] = data_len + 1; // Length byte
+    ad_data[*ad_len] = data_len + 1; // Length byte is actual data length + its type byte
     ad_data[*ad_len + 1] = ad_type;  // Type byte
     memcpy(&ad_data[*ad_len + 2], data, data_len); // Data bytes
     *ad_len += data_len + 2;
@@ -322,7 +325,10 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
     sli_bt_gattdb_attribute_chrvalue_t *char_data;
     uint8_t char_data_type = 0;
 
-#if 0 // This is done by NWP on 917, may be a config value to dismiss but not documented
+    uint8_t added_16bit_uuid_services = 0;
+    uint8_t added_128bit_uuid_services = 0;
+
+#if 0 // TODO This is done by NWP on 917, may be a config value to dismiss but not documented
     // 1. Add a flags field to advertising data
     uint8_t flags = ADV_FLAGS;
     add_ad_element(adv_data, &ad_len, AD_TYPE_FLAGS, &flags, sizeof(flags));
@@ -354,45 +360,49 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
         }
     }
 
-    // 4. Add a list of 16-bit service UUIDs to advertising data if the 15th bit of permissions is set
+    // 4. Add a list of 16-bit or 128-bit service UUIDs to advertising data if the 15th bit of permissions is set
+    uint8_t list_of_16bit_uuid_services[MAX_ADVERTISED_16BIT_UUID_SERVICES * 2];
     for (uint16_t i = 0; i < gatt_db->attribute_table_size; i++) {
         const sli_bt_gattdb_attribute_t *attr = &gatt_db->attributes[i];
-
         if ((attr->permissions & 0x8000) && attr->uuid == 0x0000) { // Check if it's a service
             sli_bt_gattdb_value_t *constdata = (sli_bt_gattdb_value_t *)attr->constdata;
-            if (constdata->len == 2) {
+            if((constdata->len == 2)
+               && (added_16bit_uuid_services < MAX_ADVERTISED_16BIT_UUID_SERVICES))
+            {
                 uint8_t service_uuid_16bit[2] = { constdata->data[0], constdata->data[1] };
-                uint8_t ad_type = AD_TYPE_16BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
-                add_ad_element(adv_data, &ad_len, ad_type, service_uuid_16bit, sizeof(service_uuid_16bit));
-            }
-        }
-    }
-
-    // 5. Add a list of 128-bit service UUIDs to advertising data if the 15th bit of permissions is set
-    for (uint16_t i = 0; i < gatt_db->attribute_table_size; i++) {
-        const sli_bt_gattdb_attribute_t *attr = &gatt_db->attributes[i];
-
-        if ((attr->permissions & 0x8000) && attr->uuid == 0x0000) { // Check if it's a service
-            sli_bt_gattdb_value_t *constdata = (sli_bt_gattdb_value_t *)attr->constdata;
-            if (constdata->len == 16) {
+                memcpy(list_of_16bit_uuid_services + (added_16bit_uuid_services * 2), service_uuid_16bit, sizeof(service_uuid_16bit));// We store 16 bits uuids as a list for later use
+                added_16bit_uuid_services++;
+            } else if(   (constdata->len == 16)
+                      && (added_128bit_uuid_services < MAX_ADVERTISED_128BIT_UUID_SERVICES)
+                      && (added_16bit_uuid_services == 0)) //128 bit uuids are not allowed if there are already 16 bit uuids
+            {
                 uint8_t service_uuid_128bit[16];
                 memcpy(service_uuid_128bit, constdata->data, sizeof(service_uuid_128bit));
                 uint8_t ad_type = AD_TYPE_128BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
                 add_ad_element(adv_data, &ad_len, ad_type, service_uuid_128bit, sizeof(service_uuid_128bit));
+                added_128bit_uuid_services++;
+            } else {
+                return SL_STATUS_FAIL;
             }
         }
+    } // for 
+
+    if(added_16bit_uuid_services > 0)
+    {
+        uint8_t ad_type = AD_TYPE_16BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
+        add_ad_element(adv_data, &ad_len, ad_type, list_of_16bit_uuid_services, (added_16bit_uuid_services * 2));    
     }
 
-    // 6. Try to add the full local name to advertising data
-    uint8_t privacy_mode = 0; // Example privacy mode
+    // 5. Try to add the full local name to advertising data
+    uint8_t privacy_mode = 0; // Example privacy mode // TODO Support privacy mode by getting it from RSI apis ?
 
     if (!privacy_mode && device_name != NULL) {
         if (device_name_len <= (RSI_BLE_MAX_ADV_DATA_LEN - ad_len)) {
             add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_COMPLETE, device_name, device_name_len);
         } else if ((RSI_BLE_MAX_ADV_DATA_LEN - ad_len) >= 6) {
-            add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_SHORTENED, device_name, RSI_BLE_MAX_ADV_DATA_LEN - ad_len);
+            add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_SHORTENED, device_name, ((RSI_BLE_MAX_ADV_DATA_LEN - ad_len) - 2)); // From all the remaining space (MAX_DATA - ad_len), the data needs to leave space for the length byte and type byte
         } else {
-            // Add local name to scan response data
+            // TODO Add local name to scan response data
         }
     }
 

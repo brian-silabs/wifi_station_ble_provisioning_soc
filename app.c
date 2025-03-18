@@ -210,6 +210,7 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
             THREAD_SAFE_PRINT("gattdb_attribute_3 handle\n");
             break;
           default:
+            THREAD_SAFE_PRINT("Unknown handle 0x%X\n", attr_handle);
             break;
         }
 
