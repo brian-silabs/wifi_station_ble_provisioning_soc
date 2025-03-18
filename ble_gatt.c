@@ -76,20 +76,20 @@ rsi_ble_event_mtu_t app_ble_mtu_event;
 gattdb_init_state_t gattdb_init_state_g = GATTDB_INIT_REGISTER_START;
 gattdb_init_state_t gattdb_init_next_state_g = GATTDB_INIT_REGISTER_START;
 
-static void rsi_ble_add_char_serv_att(void *serv_handler,
+static int rsi_ble_add_char_serv_att(void *serv_handler,
    uint16_t handle,
    uint8_t val_prop,
    uint16_t att_val_handle,
    uuid_t att_val_uuid);
 
-static void rsi_ble_add_char_val_att(void *serv_handler,
+static int rsi_ble_add_char_val_att(void *serv_handler,
     uint16_t handle,
     uuid_t att_type_uuid,
     uint8_t val_prop,
     uint8_t *data,
     uint8_t data_len);
 
-    static void rsi_ble_add_char_val_att_client(void *serv_handler,
+    static int rsi_ble_add_char_val_att_client(void *serv_handler,
         uint16_t handle);
 
 static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t *rsi_ble_write);
@@ -437,6 +437,8 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 
     if(RSI_BLE_MAX_NBR_ATT_REC < gatt_db->attribute_num)
     {
+        THREAD_SAFE_PRINT("Not enough GATT records : Limit of %d < Requested %d\n", RSI_BLE_MAX_NBR_ATT_REC, gatt_db->attribute_num);
+        THREAD_SAFE_PRINT("Please increase RSI_BLE_MAX_NBR_ATT_REC in ble_config.h\n");
         return SL_STATUS_FAIL;// Not enough records
     }
 
@@ -465,6 +467,7 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
             rsi_ble_status = rsi_ble_add_service(new_serv_uuid, &new_serv_resp);
             if (rsi_ble_status != RSI_SUCCESS)
             {
+                THREAD_SAFE_PRINT("Failed to add service\n : %d\n", rsi_ble_status);
                 return SL_STATUS_FAIL;
             }
 
@@ -476,6 +479,7 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
             {
                 // Otherwise this means the NWP has been performing gattdb init
                 // Using EFR32 Gatt db, this is not what we want 
+                THREAD_SAFE_PRINT("attr->handle != new_serv_resp.start_handle\n");
                 return SL_STATUS_FAIL;
             }
         // Characteristic registration
@@ -502,11 +506,16 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
             // //We gather the characteristic handle data from the gatt db
             // characteristic_value_lookup(gatt_db, nextExpectedCharUuid, false, NULL, &nextExpectedCharHandle, NULL, NULL);
 
-            rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
-                                      attr->handle,
-                                      currentCharacteristicProperties,
-                                      expectedCharValueHandle,
-                                      new_char_uuid);
+            rsi_ble_status = rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
+                                                        attr->handle,
+                                                        currentCharacteristicProperties,
+                                                        expectedCharValueHandle,
+                                                        new_char_uuid);
+
+            if (rsi_ble_status != RSI_SUCCESS)
+            {
+                return SL_STATUS_FAIL;
+            }
 
             gattdb_init_next_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE;
 
@@ -525,8 +534,12 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 
                 gattdb_init_next_state_g = 0;
 
-                rsi_ble_add_char_val_att_client(new_serv_resp.serv_handler,
+                rsi_ble_status = rsi_ble_add_char_val_att_client(new_serv_resp.serv_handler,
                                                 attr->handle);
+                if (rsi_ble_status != RSI_SUCCESS)
+                {
+                    return SL_STATUS_FAIL;
+                }
             }
         } else {
             // Characteristic value registration, uses the non standard uuid field of the db
@@ -566,12 +579,17 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
                         dyn_char_data->max_len = RSI_BLE_MAX_DATA_LEN;
                     }
 
-                    rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
+                    rsi_ble_status = rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
                                                 attr->handle,
                                                 new_char_uuid,
                                                 currentCharacteristicProperties,
                                                 dyn_char_data->data,
                                                 RSI_BLE_MAX_DATA_LEN);// TODO check
+
+                    if (rsi_ble_status != RSI_SUCCESS)
+                    {
+                        return SL_STATUS_FAIL;
+                    }
 
                     // If we expect to register a client config attribute (notify, indicate)
                     // we need to register the client config attribute next
@@ -605,13 +623,14 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
  * This function is used at application to create new service.
  */
 
- static void rsi_ble_add_char_val_att(void *serv_handler,
+ static int rsi_ble_add_char_val_att(void *serv_handler,
     uint16_t handle,
     uuid_t att_type_uuid,
     uint8_t val_prop,
     uint8_t *data,
     uint8_t data_len)
  {
+    int rsi_status = RSI_SUCCESS;
     rsi_ble_req_add_att_t new_att = { 0 };
 
     // preparing the attributes
@@ -625,12 +644,15 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     memcpy(new_att.data, data, new_att.data_len);
 
     // add attribute to the service
-    rsi_ble_add_attribute(&new_att);
+    rsi_status = rsi_ble_add_attribute(&new_att);
+    if (rsi_status != RSI_SUCCESS) {
+        THREAD_SAFE_PRINT("Failed to add char val attribute : %d\n", rsi_status);
+    }
 
-    return;
+    return rsi_status;
  }
 
- static void rsi_ble_add_char_val_att_client(void *serv_handler,
+ static int rsi_ble_add_char_val_att_client(void *serv_handler,
     uint16_t handle)
  {
     rsi_ble_req_add_att_t new_att = { 0 };
@@ -648,11 +670,11 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     // add attribute to the service
     rsi_status = rsi_ble_add_attribute(&new_att);
     if(rsi_status != RSI_SUCCESS)
-      {
-        THREAD_SAFE_PRINT("ERROR att : %d\n", rsi_status);
-      }
+    {
+        THREAD_SAFE_PRINT("Failed to add client characteristic : %d\n", rsi_status);
+    }
 
-    return;
+    return rsi_status;
  }
 
 /**
@@ -667,12 +689,13 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 * @section description
 * This function is used at application to add characteristic attribute
 */
-static void rsi_ble_add_char_serv_att(void *serv_handler,
+static int rsi_ble_add_char_serv_att(void *serv_handler,
    uint16_t handle,
    uint8_t val_prop,
    uint16_t att_val_handle,
    uuid_t att_val_uuid)
 {
+    int rsi_status = RSI_SUCCESS;
    rsi_ble_req_add_att_t new_att = { 0 };
 
    // preparing the attribute service structure
@@ -697,9 +720,12 @@ static void rsi_ble_add_char_serv_att(void *serv_handler,
      memcpy(&new_att.data[4], &(att_val_uuid.val.val128), 16);
    }
    // add attribute to the service
-   rsi_ble_add_attribute(&new_att);
+   rsi_status = rsi_ble_add_attribute(&new_att);
+    if (rsi_status != RSI_SUCCESS) {
+         THREAD_SAFE_PRINT("Failed to add char serv attribute : %d\n", rsi_status);
+    }
 
-   return;
+   return rsi_status;
 }
 
 /**
@@ -712,14 +738,16 @@ static void rsi_ble_add_char_serv_att(void *serv_handler,
  */
 void rsi_gatt_configurator_init(void)
 {
+  sl_status_t status = SL_STATUS_OK;
   uint8_t adv_data[RSI_BLE_MAX_ADV_DATA_LEN] = { 0 };
   uint8_t adv_data_len = 0;
   uint8_t *device_name = NULL;
   uint16_t device_name_len = 0;
 
-  //rsi_ble_add_configurator_serv(); // adding simple BLE chat service
-
-  register_gatt_db(&gattdb);
+  status = register_gatt_db(&gattdb);
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("Failed to register GATT database\n");
+  }
 
     // registering the GATT callback functions
     rsi_ble_gatt_register_callbacks(NULL,
