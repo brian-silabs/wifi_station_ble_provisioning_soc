@@ -252,7 +252,6 @@ static sl_status_t service_lookup(const sli_bt_gattdb_t *gatt_db, uint16_t servi
  * @return sl_status_t SL_STATUS_OK if the characteristic UUID is found, otherwise an error code.
  */
 
-//TODO support SIG 128bit UUIDs
 static sl_status_t characteristic_value_lookup(const sli_bt_gattdb_t *gatt_db, uint16_t char_uuid, bool sig_uuid, uint8_t *properties, uint16_t *data_handle, void **char_data, uint8_t *char_data_type)
 {
     void *data;
@@ -429,9 +428,11 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     uuid_t new_char_uuid                        = { 0 };
     rsi_ble_resp_add_serv_t new_serv_resp       = { 0 };
 
-    sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = NULL;
+    //sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = NULL;
     //sli_bt_gattdb_value_t *const_char_data = NULL;
-
+    //uint32_t *char_data_ptr = NULL;
+    sli_bt_gattdb_value_t *char_data = NULL;
+    uint32_t char_data_len = 0;
     uint8_t char_data_type = 0xFF;
 
 
@@ -568,23 +569,32 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
                     }
 
                     // Fetches the characteristic value from the gatt db, and stores it into dyn_char_data
-                    characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&dyn_char_data), &char_data_type);
-
-
-                    // TODO Bug : This is a shortcut. Should be handling the data retrieval in a better way
-                    if(NULL == dyn_char_data)
+                    characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&char_data), &char_data_type);
+                    switch (char_data_type)
                     {
-                        memset(dyn_char_data->data, 0, RSI_BLE_MAX_DATA_LEN);
-                        dyn_char_data->len = 0;
-                        dyn_char_data->max_len = RSI_BLE_MAX_DATA_LEN;
+                        case 0x00:// Const data cannot be NULL in the gatt db
+                            char_data_len = char_data->len;
+                            break;
+                        case 0x01:
+                        case 0x07:{
+                            sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = (sli_bt_gattdb_attribute_chrvalue_t *)char_data; //Dynamically allocated characteristic data
+                            if(NULL == dyn_char_data)
+                            {
+                                char_data_len = 0;// NULL / Un-inittialized attributes
+                            } else {
+                                char_data_len = dyn_char_data->max_len;
+                            }
+                        } break;
+                        default:
+                            break;
                     }
 
                     rsi_ble_status = rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
                                                 attr->handle,
                                                 new_char_uuid,
                                                 currentCharacteristicProperties,
-                                                dyn_char_data->data,
-                                                RSI_BLE_MAX_DATA_LEN);// TODO check
+                                                char_data->data,
+                                                char_data_len);
 
                     if (rsi_ble_status != RSI_SUCCESS)
                     {
@@ -639,9 +649,19 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     memcpy(&new_att.att_uuid, &att_type_uuid, sizeof(uuid_t));
     new_att.property = val_prop;
 
-    // preparing the attribute value
-    new_att.data_len = RSI_MIN(sizeof(new_att.data), data_len);
-    memcpy(new_att.data, data, new_att.data_len);
+
+
+    if(0 == data_len)
+    {
+      // preparing the attribute value
+      new_att.data_len = RSI_BLE_MAX_DATA_LEN;// TODO check if RSI_BLE_MAX_DATA_LEN is an actual RSI limitation
+      memset(new_att.data, 0x00, RSI_BLE_MAX_DATA_LEN);
+    } else
+    {
+      // preparing the attribute value
+      new_att.data_len = RSI_MIN(sizeof(new_att.data), data_len);
+      memcpy(new_att.data, data, new_att.data_len);
+    }
 
     // add attribute to the service
     rsi_status = rsi_ble_add_attribute(&new_att);
