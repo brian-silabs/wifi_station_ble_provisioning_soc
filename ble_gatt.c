@@ -17,15 +17,15 @@
 #include "autogen/gatt_db.h"
 
 // Define constants for AD types
-#define AD_TYPE_FLAGS 0x01
-#define AD_TYPE_TX_POWER_LEVEL 0x0A
-#define AD_TYPE_PERIPHERAL_CONN_INTERVAL_RANGE 0x12
-#define AD_TYPE_16BIT_SERVICE_UUID_COMPLETE 0x03
-#define AD_TYPE_16BIT_SERVICE_UUID_INCOMPLETE 0x02
-#define AD_TYPE_128BIT_SERVICE_UUID_COMPLETE 0x07
-#define AD_TYPE_128BIT_SERVICE_UUID_INCOMPLETE 0x06
-#define AD_TYPE_LOCAL_NAME_COMPLETE 0x09
-#define AD_TYPE_LOCAL_NAME_SHORTENED 0x08
+#define AD_TYPE_FLAGS                                   0x01
+#define AD_TYPE_TX_POWER_LEVEL                          0x0A
+#define AD_TYPE_PERIPHERAL_CONN_INTERVAL_RANGE          0x12
+#define AD_TYPE_16BIT_SERVICE_UUID_COMPLETE             0x03
+#define AD_TYPE_16BIT_SERVICE_UUID_INCOMPLETE           0x02
+#define AD_TYPE_128BIT_SERVICE_UUID_COMPLETE            0x07
+#define AD_TYPE_128BIT_SERVICE_UUID_INCOMPLETE          0x06
+#define AD_TYPE_LOCAL_NAME_COMPLETE                     0x09
+#define AD_TYPE_LOCAL_NAME_SHORTENED                    0x08
 
 /**
  * ADV_FLAGS:
@@ -39,26 +39,35 @@
  * and BR/EDR is not supported.
  */
 // Define the flags field for advertising data
-#define ADV_FLAGS 0x06
+#define ADV_FLAGS                                       0x06
 
 // Define the maximum advertising data length
-#define RSI_BLE_MAX_ADV_DATA_LEN    31
+#define RSI_BLE_MAX_ADV_DATA_LEN                        (31 - 3) // Minus 3 for ADV flags that are managed by NWP
 
 // BLE attribute service types uuid values
-#define RSI_BLE_CHAR_SERV_UUID 0x2803
-#define RSI_BLE_CLIENT_CHAR_UUID 0x2902
+#define RSI_BLE_CHAR_SERV_UUID                          0x2803
+#define RSI_BLE_CLIENT_CHAR_UUID                        0x2902
+
+#define GENERIC_ACCESS_SERVICE_UUID                     0x1800
+#define DEVICE_NAME_CHARACTERISTIC_UUID                 0x2A00
+#define TX_POWER_SERVICE_UUID                           0x1804
+#define TX_POWER_LEVEL_CHARACTERISTIC_UUID              0x2A07
+#define PERIPHERAL_PREFERRED_CONNECTION_PARAMS_UUID     0x2A04
 
 // attribute properties
-#define RSI_BLE_ATT_PROPERTY_READ 0x02
-#define RSI_BLE_ATT_PROPERTY_WRITE 0x08
-#define RSI_BLE_ATT_PROPERTY_NOTIFY 0x10
+#define RSI_BLE_ATT_PROPERTY_READ                       0x02
+#define RSI_BLE_ATT_PROPERTY_WRITE                      0x08
+#define RSI_BLE_ATT_PROPERTY_NOTIFY                     0x10
+
+#define MAX_ADVERTISED_16BIT_UUID_SERVICES              13
+#define MAX_ADVERTISED_128BIT_UUID_SERVICES             1
 
 typedef enum gattdb_init_state_e {
-    GATTDB_INIT_REGISTER_START = 0,
-    GATTDB_INIT_REGISTER_SERVICE = 1,
-    GATTDB_INIT_REGISTER_CHARACTERISTIC = 2,
-    GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE = 3,
-    GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG = 4,
+    GATTDB_INIT_REGISTER_START                          = 0,
+    GATTDB_INIT_REGISTER_SERVICE                        = 1,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC                 = 2,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE           = 3,
+    GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG   = 4,
 } gattdb_init_state_t;
 
 // BLE Variables
@@ -67,25 +76,25 @@ rsi_ble_event_mtu_t app_ble_mtu_event;
 gattdb_init_state_t gattdb_init_state_g = GATTDB_INIT_REGISTER_START;
 gattdb_init_state_t gattdb_init_next_state_g = GATTDB_INIT_REGISTER_START;
 
-static void rsi_ble_add_char_serv_att(void *serv_handler,
+static int rsi_ble_add_char_serv_att(void *serv_handler,
    uint16_t handle,
    uint8_t val_prop,
    uint16_t att_val_handle,
    uuid_t att_val_uuid);
 
-static void rsi_ble_add_char_val_att(void *serv_handler,
+static int rsi_ble_add_char_val_att(void *serv_handler,
     uint16_t handle,
     uuid_t att_type_uuid,
     uint8_t val_prop,
     uint8_t *data,
     uint8_t data_len);
 
-    static void rsi_ble_add_char_val_att_client(void *serv_handler,
+    static int rsi_ble_add_char_val_att_client(void *serv_handler,
         uint16_t handle);
 
 static void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t *rsi_ble_write);
-static void rsi_ble_on_mtu_event(rsi_ble_event_mtu_t *rsi_ble_mtu);
-static void rsi_ble_on_read_resp(uint16_t resp_status,
+static void rsi_ble_on_mtu_event(   rsi_ble_event_mtu_t *rsi_ble_mtu);
+static void rsi_ble_on_read_resp(   uint16_t resp_status,
                                     uint16_t resp_id,
                                     rsi_ble_resp_att_value_t *rsi_ble_resp_att_val);
 static void rsi_ble_on_write_resp(uint16_t resp_status, uint16_t resp_id);
@@ -120,9 +129,9 @@ static sl_status_t lookup_device_name(const sli_bt_gattdb_t *gatt_db, uint8_t **
     uint8_t char_data_type;
 
     // Lookup the Generic Access service (UUID 0x1800)
-    if (service_lookup(gatt_db, 0x1800, &service_handle) == SL_STATUS_OK) {
+    if (service_lookup(gatt_db, GENERIC_ACCESS_SERVICE_UUID, &service_handle) == SL_STATUS_OK) {
         // Lookup the Device Name characteristic (UUID 0x2A00)
-        if (characteristic_value_lookup(gatt_db, 0x2A00, true, &properties, &data_handle, (void *)&char_data, &char_data_type) == SL_STATUS_OK) {
+        if (characteristic_value_lookup(gatt_db, DEVICE_NAME_CHARACTERISTIC_UUID, true, &properties, &data_handle, (void *)&char_data, &char_data_type) == SL_STATUS_OK) {
             if ((char_data != NULL) && (char_data_type == 0x01)) {
                 *name = char_data->data;
                 *name_len = char_data->max_len;
@@ -135,7 +144,7 @@ static sl_status_t lookup_device_name(const sli_bt_gattdb_t *gatt_db, uint8_t **
 
 // Function to add an AD element to the advertising data
 static void add_ad_element(uint8_t *ad_data, uint8_t *ad_len, uint8_t ad_type, uint8_t *data, uint8_t data_len) {
-    ad_data[*ad_len] = data_len + 1; // Length byte
+    ad_data[*ad_len] = data_len + 1; // Length byte is actual data length + its type byte
     ad_data[*ad_len + 1] = ad_type;  // Type byte
     memcpy(&ad_data[*ad_len + 2], data, data_len); // Data bytes
     *ad_len += data_len + 2;
@@ -242,6 +251,7 @@ static sl_status_t service_lookup(const sli_bt_gattdb_t *gatt_db, uint16_t servi
  *                      0x07 -> sli_bt_gattdb_attribute_chrvalue_t
  * @return sl_status_t SL_STATUS_OK if the characteristic UUID is found, otherwise an error code.
  */
+
 static sl_status_t characteristic_value_lookup(const sli_bt_gattdb_t *gatt_db, uint16_t char_uuid, bool sig_uuid, uint8_t *properties, uint16_t *data_handle, void **char_data, uint8_t *char_data_type)
 {
     void *data;
@@ -314,7 +324,10 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
     sli_bt_gattdb_attribute_chrvalue_t *char_data;
     uint8_t char_data_type = 0;
 
-#if 0 // This is done by NWP on 917, may be a config value to dismiss but not documented
+    uint8_t added_16bit_uuid_services = 0;
+    uint8_t added_128bit_uuid_services = 0;
+
+#if 0 // TODO This is done by NWP on 917, may be a config value to dismiss but not documented
     // 1. Add a flags field to advertising data
     uint8_t flags = ADV_FLAGS;
     add_ad_element(adv_data, &ad_len, AD_TYPE_FLAGS, &flags, sizeof(flags));
@@ -327,9 +340,9 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
     }
 
     // 2. Look for the TX Power service (UUID 0x1804)
-    if (service_lookup(gatt_db, 0x1804, &service_handle) == SL_STATUS_OK) {
+    if (service_lookup(gatt_db, TX_POWER_SERVICE_UUID, &service_handle) == SL_STATUS_OK) {
         // Lookup the TX Power Level characteristic (UUID 0x2A07)
-        if (characteristic_value_lookup(gatt_db, 0x2A07, true, &properties, &data_handle, (void**)(&char_data), &char_data_type) == SL_STATUS_OK) {
+        if (characteristic_value_lookup(gatt_db, TX_POWER_LEVEL_CHARACTERISTIC_UUID, true, &properties, &data_handle, (void**)(&char_data), &char_data_type) == SL_STATUS_OK) {
             if (char_data != NULL) {
                 int8_t tx_power_level = char_data->data[0]; // Assuming TX Power Level is a single byte
                 add_ad_element(adv_data, &ad_len, AD_TYPE_TX_POWER_LEVEL, (uint8_t *)&tx_power_level, sizeof(tx_power_level));
@@ -338,7 +351,7 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
     }
 
     // 3. Look for the GAP Peripheral Preferred Connection Parameters characteristic (UUID 0x2A04)
-    if (characteristic_value_lookup(gatt_db, 0x2A04, true, &properties, &data_handle, (void**)(&char_data), &char_data_type) == SL_STATUS_OK) {
+    if (characteristic_value_lookup(gatt_db, PERIPHERAL_PREFERRED_CONNECTION_PARAMS_UUID, true, &properties, &data_handle, (void**)(&char_data), &char_data_type) == SL_STATUS_OK) {
         if (char_data != NULL) {
             uint8_t conn_interval_range[4];
             memcpy(conn_interval_range, char_data->data, sizeof(conn_interval_range)); // Assuming the data is 4 bytes
@@ -346,45 +359,49 @@ static sl_status_t set_adv_data_from_gattdb(const sli_bt_gattdb_t *gatt_db, uint
         }
     }
 
-    // 4. Add a list of 16-bit service UUIDs to advertising data if the 15th bit of permissions is set
+    // 4. Add a list of 16-bit or 128-bit service UUIDs to advertising data if the 15th bit of permissions is set
+    uint8_t list_of_16bit_uuid_services[MAX_ADVERTISED_16BIT_UUID_SERVICES * 2];
     for (uint16_t i = 0; i < gatt_db->attribute_table_size; i++) {
         const sli_bt_gattdb_attribute_t *attr = &gatt_db->attributes[i];
-
         if ((attr->permissions & 0x8000) && attr->uuid == 0x0000) { // Check if it's a service
             sli_bt_gattdb_value_t *constdata = (sli_bt_gattdb_value_t *)attr->constdata;
-            if (constdata->len == 2) {
+            if((constdata->len == 2)
+               && (added_16bit_uuid_services < MAX_ADVERTISED_16BIT_UUID_SERVICES))
+            {
                 uint8_t service_uuid_16bit[2] = { constdata->data[0], constdata->data[1] };
-                uint8_t ad_type = AD_TYPE_16BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
-                add_ad_element(adv_data, &ad_len, ad_type, service_uuid_16bit, sizeof(service_uuid_16bit));
-            }
-        }
-    }
-
-    // 5. Add a list of 128-bit service UUIDs to advertising data if the 15th bit of permissions is set
-    for (uint16_t i = 0; i < gatt_db->attribute_table_size; i++) {
-        const sli_bt_gattdb_attribute_t *attr = &gatt_db->attributes[i];
-
-        if ((attr->permissions & 0x8000) && attr->uuid == 0x0000) { // Check if it's a service
-            sli_bt_gattdb_value_t *constdata = (sli_bt_gattdb_value_t *)attr->constdata;
-            if (constdata->len == 16) {
+                memcpy(list_of_16bit_uuid_services + (added_16bit_uuid_services * 2), service_uuid_16bit, sizeof(service_uuid_16bit));// We store 16 bits uuids as a list for later use
+                added_16bit_uuid_services++;
+            } else if(   (constdata->len == 16)
+                      && (added_128bit_uuid_services < MAX_ADVERTISED_128BIT_UUID_SERVICES)
+                      && (added_16bit_uuid_services == 0)) //128 bit uuids are not allowed if there are already 16 bit uuids
+            {
                 uint8_t service_uuid_128bit[16];
                 memcpy(service_uuid_128bit, constdata->data, sizeof(service_uuid_128bit));
                 uint8_t ad_type = AD_TYPE_128BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
                 add_ad_element(adv_data, &ad_len, ad_type, service_uuid_128bit, sizeof(service_uuid_128bit));
+                added_128bit_uuid_services++;
+            } else {
+                return SL_STATUS_FAIL;
             }
         }
+    } // for 
+
+    if(added_16bit_uuid_services > 0)
+    {
+        uint8_t ad_type = AD_TYPE_16BIT_SERVICE_UUID_COMPLETE; // Assuming complete list for simplicity
+        add_ad_element(adv_data, &ad_len, ad_type, list_of_16bit_uuid_services, (added_16bit_uuid_services * 2));    
     }
 
-    // 6. Try to add the full local name to advertising data
-    uint8_t privacy_mode = 0; // Example privacy mode
+    // 5. Try to add the full local name to advertising data
+    uint8_t privacy_mode = 0; // Example privacy mode // TODO Support privacy mode by getting it from RSI apis ?
 
     if (!privacy_mode && device_name != NULL) {
         if (device_name_len <= (RSI_BLE_MAX_ADV_DATA_LEN - ad_len)) {
             add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_COMPLETE, device_name, device_name_len);
         } else if ((RSI_BLE_MAX_ADV_DATA_LEN - ad_len) >= 6) {
-            add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_SHORTENED, device_name, RSI_BLE_MAX_ADV_DATA_LEN - ad_len);
+            add_ad_element(adv_data, &ad_len, AD_TYPE_LOCAL_NAME_SHORTENED, device_name, ((RSI_BLE_MAX_ADV_DATA_LEN - ad_len) - 2)); // From all the remaining space (MAX_DATA - ad_len), the data needs to leave space for the length byte and type byte
         } else {
-            // Add local name to scan response data
+            // TODO Add local name to scan response data
         }
     }
 
@@ -411,14 +428,18 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     uuid_t new_char_uuid                        = { 0 };
     rsi_ble_resp_add_serv_t new_serv_resp       = { 0 };
 
-    sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = NULL;
+    //sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = NULL;
     //sli_bt_gattdb_value_t *const_char_data = NULL;
-
+    //uint32_t *char_data_ptr = NULL;
+    sli_bt_gattdb_value_t *char_data = NULL;
+    uint32_t char_data_len = 0;
     uint8_t char_data_type = 0xFF;
 
 
     if(RSI_BLE_MAX_NBR_ATT_REC < gatt_db->attribute_num)
     {
+        THREAD_SAFE_PRINT("Not enough GATT records : Limit of %d < Requested %d\n", RSI_BLE_MAX_NBR_ATT_REC, gatt_db->attribute_num);
+        THREAD_SAFE_PRINT("Please increase RSI_BLE_MAX_NBR_ATT_REC in ble_config.h\n");
         return SL_STATUS_FAIL;// Not enough records
     }
 
@@ -427,16 +448,27 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     {
         const sli_bt_gattdb_attribute_t *attr = &(gatt_db->attributes[gattdb_init_index]);
 
+        // Service registration
         if ((attr->uuid == 0x0000) && (attr->handle != lastRegisteredServiceHandle) && (attr->datatype == 0x00))
         {
             gattdb_init_state_g = GATTDB_INIT_REGISTER_SERVICE;
 
             new_serv_uuid.size      = attr->constdata->len;
-            new_serv_uuid.val.val16 = attr->constdata->data[0] | (attr->constdata->data[1] << 8);
+            if(new_serv_uuid.size == 2)
+            {
+                new_serv_uuid.val.val16 = attr->constdata->data[0] | (attr->constdata->data[1] << 8);
+            } else if (new_serv_uuid.size == 16)
+            {
+              memcpy(&(new_serv_uuid.val.val128), attr->constdata->data, new_serv_uuid.size);
+            } else
+            {
+              return SL_STATUS_FAIL;// Bad Size
+            }
 
             rsi_ble_status = rsi_ble_add_service(new_serv_uuid, &new_serv_resp);
             if (rsi_ble_status != RSI_SUCCESS)
             {
+                THREAD_SAFE_PRINT("Failed to add service\n : %d\n", rsi_ble_status);
                 return SL_STATUS_FAIL;
             }
 
@@ -448,14 +480,24 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
             {
                 // Otherwise this means the NWP has been performing gattdb init
                 // Using EFR32 Gatt db, this is not what we want 
+                THREAD_SAFE_PRINT("attr->handle != new_serv_resp.start_handle\n");
                 return SL_STATUS_FAIL;
             }
+        // Characteristic registration
         } else if((attr->uuid == 0x0002) && (attr->handle != 0xFF))
         {
             gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC;
 
-            new_char_uuid.val.val16 = gatt_db->uuid16[attr->characteristic.char_uuid];
-            new_char_uuid.size      = 2;
+            if((attr->characteristic.char_uuid & 0x8000) == 0x8000)//16bit UUID
+            {
+                new_char_uuid.size      = 16;
+                uint32_t uuid128_index = (attr->characteristic.char_uuid & 0x00FF) * 16;
+                memcpy(&new_char_uuid.val.val128, &(gatt_db->uuid128[uuid128_index]),16);
+            } else //16bit uuid
+            {
+                new_char_uuid.size      = 2;
+                new_char_uuid.val.val16 = gatt_db->uuid16[attr->characteristic.char_uuid];
+            }
 
             //char_uuid holds the BG Tool uuid for the characteristic value
             expectedCharValueUuid = attr->characteristic.char_uuid;
@@ -465,14 +507,20 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
             // //We gather the characteristic handle data from the gatt db
             // characteristic_value_lookup(gatt_db, nextExpectedCharUuid, false, NULL, &nextExpectedCharHandle, NULL, NULL);
 
-            rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
-                                      attr->handle,
-                                      currentCharacteristicProperties,
-                                      expectedCharValueHandle,
-                                      new_char_uuid);
+            rsi_ble_status = rsi_ble_add_char_serv_att(new_serv_resp.serv_handler,
+                                                        attr->handle,
+                                                        currentCharacteristicProperties,
+                                                        expectedCharValueHandle,
+                                                        new_char_uuid);
+
+            if (rsi_ble_status != RSI_SUCCESS)
+            {
+                return SL_STATUS_FAIL;
+            }
 
             gattdb_init_next_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE;
 
+        // Characteristic Client side registration for notifications and indications
         }  else if((attr->uuid == 0x000b) && (attr->handle != 0xFF))
         {
             gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_CLIENT_CONFIG;
@@ -487,10 +535,15 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 
                 gattdb_init_next_state_g = 0;
 
-                rsi_ble_add_char_val_att_client(new_serv_resp.serv_handler,
+                rsi_ble_status = rsi_ble_add_char_val_att_client(new_serv_resp.serv_handler,
                                                 attr->handle);
+                if (rsi_ble_status != RSI_SUCCESS)
+                {
+                    return SL_STATUS_FAIL;
+                }
             }
         } else {
+            // Characteristic value registration, uses the non standard uuid field of the db
             if(gattdb_init_next_state_g == GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE)
             {
                 gattdb_init_state_g = GATTDB_INIT_REGISTER_CHARACTERISTIC_VALUE;
@@ -504,17 +557,49 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
                     expectedCharValueUuid = 0xFFFF;
                     expectedCharValueHandle = 0xFFFF;
 
-                    new_char_uuid.val.val16 = gatt_db->uuid16[attr->uuid];
-                    new_char_uuid.size      = 2;
+                    if((attr->uuid & 0x8000) == 0x8000)//16bit UUID
+                    {
+                        new_char_uuid.size      = 16;
+                        uint32_t uuid128_index = (attr->characteristic.char_uuid & 0x00FF) * 16;
+                        memcpy(&new_char_uuid.val.val128, &(gatt_db->uuid128[uuid128_index]),16);
+                    } else
+                    {
+                        new_char_uuid.val.val16 = gatt_db->uuid16[attr->uuid];
+                        new_char_uuid.size      = 2;
+                    }
 
-                    characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&dyn_char_data), &char_data_type);
+                    // Fetches the characteristic value from the gatt db, and stores it into dyn_char_data
+                    characteristic_value_lookup(gatt_db, attr->uuid, false, NULL, NULL, (void**)(&char_data), &char_data_type);
+                    switch (char_data_type)
+                    {
+                        case 0x00:// Const data cannot be NULL in the gatt db
+                            char_data_len = char_data->len;
+                            break;
+                        case 0x01:
+                        case 0x07:{
+                            sli_bt_gattdb_attribute_chrvalue_t *dyn_char_data = (sli_bt_gattdb_attribute_chrvalue_t *)char_data; //Dynamically allocated characteristic data
+                            if(NULL == dyn_char_data)
+                            {
+                                char_data_len = 0;// NULL / Un-inittialized attributes
+                            } else {
+                                char_data_len = dyn_char_data->max_len;
+                            }
+                        } break;
+                        default:
+                            break;
+                    }
 
-                    rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
+                    rsi_ble_status = rsi_ble_add_char_val_att(new_serv_resp.serv_handler,
                                                 attr->handle,
                                                 new_char_uuid,
                                                 currentCharacteristicProperties,
-                                                dyn_char_data->data,
-                                                RSI_BLE_MAX_DATA_LEN);// TODO check
+                                                char_data->data,
+                                                char_data_len);
+
+                    if (rsi_ble_status != RSI_SUCCESS)
+                    {
+                        return SL_STATUS_FAIL;
+                    }
 
                     // If we expect to register a client config attribute (notify, indicate)
                     // we need to register the client config attribute next
@@ -548,13 +633,14 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
  * This function is used at application to create new service.
  */
 
- static void rsi_ble_add_char_val_att(void *serv_handler,
+ static int rsi_ble_add_char_val_att(void *serv_handler,
     uint16_t handle,
     uuid_t att_type_uuid,
     uint8_t val_prop,
     uint8_t *data,
     uint8_t data_len)
  {
+    int rsi_status = RSI_SUCCESS;
     rsi_ble_req_add_att_t new_att = { 0 };
 
     // preparing the attributes
@@ -563,17 +649,30 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     memcpy(&new_att.att_uuid, &att_type_uuid, sizeof(uuid_t));
     new_att.property = val_prop;
 
-    // preparing the attribute value
-    new_att.data_len = RSI_MIN(sizeof(new_att.data), data_len);
-    memcpy(new_att.data, data, new_att.data_len);
+
+
+    if(0 == data_len)
+    {
+      // preparing the attribute value
+      new_att.data_len = RSI_BLE_MAX_DATA_LEN;// TODO check if RSI_BLE_MAX_DATA_LEN is an actual RSI limitation
+      memset(new_att.data, 0x00, RSI_BLE_MAX_DATA_LEN);
+    } else
+    {
+      // preparing the attribute value
+      new_att.data_len = RSI_MIN(sizeof(new_att.data), data_len);
+      memcpy(new_att.data, data, new_att.data_len);
+    }
 
     // add attribute to the service
-    rsi_ble_add_attribute(&new_att);
+    rsi_status = rsi_ble_add_attribute(&new_att);
+    if (rsi_status != RSI_SUCCESS) {
+        THREAD_SAFE_PRINT("Failed to add char val attribute : %d\n", rsi_status);
+    }
 
-    return;
+    return rsi_status;
  }
 
- static void rsi_ble_add_char_val_att_client(void *serv_handler,
+ static int rsi_ble_add_char_val_att_client(void *serv_handler,
     uint16_t handle)
  {
     rsi_ble_req_add_att_t new_att = { 0 };
@@ -591,11 +690,11 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
     // add attribute to the service
     rsi_status = rsi_ble_add_attribute(&new_att);
     if(rsi_status != RSI_SUCCESS)
-      {
-        THREAD_SAFE_PRINT("ERROR att : %d\n", rsi_status);
-      }
+    {
+        THREAD_SAFE_PRINT("Failed to add client characteristic : %d\n", rsi_status);
+    }
 
-    return;
+    return rsi_status;
  }
 
 /**
@@ -610,12 +709,13 @@ static sl_status_t register_gatt_db(const sli_bt_gattdb_t *gatt_db)
 * @section description
 * This function is used at application to add characteristic attribute
 */
-static void rsi_ble_add_char_serv_att(void *serv_handler,
+static int rsi_ble_add_char_serv_att(void *serv_handler,
    uint16_t handle,
    uint8_t val_prop,
    uint16_t att_val_handle,
    uuid_t att_val_uuid)
 {
+    int rsi_status = RSI_SUCCESS;
    rsi_ble_req_add_att_t new_att = { 0 };
 
    // preparing the attribute service structure
@@ -626,15 +726,26 @@ static void rsi_ble_add_char_serv_att(void *serv_handler,
    new_att.property           = RSI_BLE_ATT_PROPERTY_READ;
 
    // preparing the characteristic attribute value
-   new_att.data_len = 6;
-   new_att.data[0]  = val_prop;
-   rsi_uint16_to_2bytes(&new_att.data[2], att_val_handle);
-   rsi_uint16_to_2bytes(&new_att.data[4], att_val_uuid.val.val16);
-
+   if(att_val_uuid.size == 2)
+   {
+     new_att.data_len = 6;
+     new_att.data[0]  = val_prop;
+     rsi_uint16_to_2bytes(&new_att.data[2], att_val_handle);
+     rsi_uint16_to_2bytes(&new_att.data[4], att_val_uuid.val.val16);
+   } else if (att_val_uuid.size == 16)
+   {
+     new_att.data_len = 20;
+     new_att.data[0]  = val_prop;
+     rsi_uint16_to_2bytes(&new_att.data[2], att_val_handle);
+     memcpy(&new_att.data[4], &(att_val_uuid.val.val128), 16);
+   }
    // add attribute to the service
-   rsi_ble_add_attribute(&new_att);
+   rsi_status = rsi_ble_add_attribute(&new_att);
+    if (rsi_status != RSI_SUCCESS) {
+         THREAD_SAFE_PRINT("Failed to add char serv attribute : %d\n", rsi_status);
+    }
 
-   return;
+   return rsi_status;
 }
 
 /**
@@ -647,14 +758,16 @@ static void rsi_ble_add_char_serv_att(void *serv_handler,
  */
 void rsi_gatt_configurator_init(void)
 {
+  sl_status_t status = SL_STATUS_OK;
   uint8_t adv_data[RSI_BLE_MAX_ADV_DATA_LEN] = { 0 };
   uint8_t adv_data_len = 0;
   uint8_t *device_name = NULL;
   uint16_t device_name_len = 0;
 
-  //rsi_ble_add_configurator_serv(); // adding simple BLE chat service
-
-  register_gatt_db(&gattdb);
+  status = register_gatt_db(&gattdb);
+  if (status != SL_STATUS_OK) {
+    THREAD_SAFE_PRINT("Failed to register GATT database\n");
+  }
 
     // registering the GATT callback functions
     rsi_ble_gatt_register_callbacks(NULL,

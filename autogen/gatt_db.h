@@ -14,9 +14,11 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_database_hash                  6
 #define gattdb_client_support_features        8
 #define gattdb_device_name                    11
+#define gattdb_commissioning                  14
 #define gattdb_attribute_1                    16
 #define gattdb_attribute_2                    18
 #define gattdb_attribute_3                    20
+#define gattdb_test                           24
 
 
 #endif // __GATT_DB_H

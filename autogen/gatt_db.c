@@ -25,7 +25,16 @@ GATT_DATA(const uint16_t gattdb_uuidtable_16_map[]) =
 
 GATT_DATA(const uint8_t gattdb_uuidtable_128_map[]) =
 {
-  0x0 //IAR workaround for empty array
+  0xf4, 0xe9, 0x94, 0xef, 0xb4, 0x49, 0xa7, 0xb6, 0x6f, 0x43, 0xb7, 0x09, 0x95, 0x99, 0x13, 0x72, 
+  0x5c, 0xfb, 0x54, 0xe8, 0x06, 0xdf, 0x33, 0x87, 0xc9, 0x46, 0xaf, 0x2d, 0xd0, 0x1f, 0xe7, 0xca, 
+};
+GATT_DATA(const sli_bt_gattdb_value_t gattdb_attribute_field_24) = {
+  .len = 16,
+  .data = { 0xeb, 0x4b, 0x1e, 0xf6, 0xdf, 0x4b, 0xf7, 0x8e, 0x52, 0x46, 0xb1, 0xd4, 0x9a, 0x50, 0xf2, 0x22, }
+};
+GATT_DATA(const sli_bt_gattdb_value_t gattdb_attribute_field_21) = {
+  .len = 16,
+  .data = { 0x62, 0x11, 0x50, 0x09, 0x95, 0x77, 0x9d, 0x8d, 0x9e, 0x4e, 0xcf, 0x64, 0x74, 0x95, 0xbe, 0x2a, }
 };
 GATT_DATA(const sli_bt_gattdb_value_t gattdb_attribute_field_13) = {
   .len = 2,
@@ -78,7 +87,7 @@ GATT_DATA(const sli_bt_gattdb_attribute_t gattdb_attributes_map[]) = {
   { .handle = 0x0b, .uuid = 0x0003, .permissions = 0x803, .caps = 0xffff, .state = 0x00, .datatype = 0x01, .dynamicdata = &gattdb_attribute_field_10 },
   { .handle = 0x0c, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x02, .char_uuid = 0x0004 } },
   { .handle = 0x0d, .uuid = 0x0004, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x00, .constdata = &gattdb_attribute_field_12 },
-  { .handle = 0x0e, .uuid = 0x0000, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x00, .constdata = &gattdb_attribute_field_13 },
+  { .handle = 0x0e, .uuid = 0x0000, .permissions = 0x8801, .caps = 0xffff, .state = 0x00, .datatype = 0x00, .constdata = &gattdb_attribute_field_13 },
   { .handle = 0x0f, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x08, .char_uuid = 0x0005 } },
   { .handle = 0x10, .uuid = 0x0005, .permissions = 0x802, .caps = 0xffff, .state = 0x00, .datatype = 0x07, .dynamicdata = NULL },
   { .handle = 0x11, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x0a, .char_uuid = 0x0006 } },
@@ -86,18 +95,24 @@ GATT_DATA(const sli_bt_gattdb_attribute_t gattdb_attributes_map[]) = {
   { .handle = 0x13, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x12, .char_uuid = 0x0007 } },
   { .handle = 0x14, .uuid = 0x0007, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x07, .dynamicdata = NULL },
   { .handle = 0x15, .uuid = 0x000b, .permissions = 0x803, .caps = 0xffff, .state = 0x00, .datatype = 0x03, .configdata = { .flags = 0x01, .clientconfig_index = 0x01 } },
+  { .handle = 0x16, .uuid = 0x0000, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x00, .constdata = &gattdb_attribute_field_21 },
+  { .handle = 0x17, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x02, .char_uuid = 0x8000 } },
+  { .handle = 0x18, .uuid = 0x8000, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x07, .dynamicdata = NULL },
+  { .handle = 0x19, .uuid = 0x0000, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x00, .constdata = &gattdb_attribute_field_24 },
+  { .handle = 0x1a, .uuid = 0x0002, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x05, .characteristic = { .properties = 0x02, .char_uuid = 0x8001 } },
+  { .handle = 0x1b, .uuid = 0x8001, .permissions = 0x801, .caps = 0xffff, .state = 0x00, .datatype = 0x07, .dynamicdata = NULL },
 };
 
 GATT_HEADER(const sli_bt_gattdb_t gattdb) = {
   .attributes = gattdb_attributes_map,
-  .attribute_table_size = 21,
-  .attribute_num = 21,
+  .attribute_table_size = 27,
+  .attribute_num = 27,
   .uuid16 = gattdb_uuidtable_16_map,
   .uuid16_table_size = 12,
   .uuid16_num = 12,
   .uuid128 = gattdb_uuidtable_128_map,
-  .uuid128_table_size = 0,
-  .uuid128_num = 0,
+  .uuid128_table_size = 2,
+  .uuid128_num = 2,
   .num_ccfg = 2,
   .caps_mask = 0xffff,
   .enabled_caps = 0xffff,
