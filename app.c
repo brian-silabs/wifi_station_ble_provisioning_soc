@@ -45,6 +45,7 @@
 #include "wlan_task.h"
 #include "ble_task.h"
 #include "mqtt_task.h"
+#include "heap_monitor_task.h"
 
 #include "sl_si91x_power_manager.h"
 
@@ -124,7 +125,6 @@ void app_init(void)
     THREAD_SAFE_PRINT("Failed to create thermostat_evt_flags_id\n");
     while(1); // Count on WDOG for the sample app
   }
-
 }
 
 void startup_routine(void *argument)
@@ -148,11 +148,13 @@ void startup_routine(void *argument)
       start_ble_task_context();
   }
 
+  start_heap_monitor_task_context();
+
   start_mqtt_task_context();
 
-  THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
-  //Add PS4 Power State Requirement, to prevent M4 going to Sleep
-  sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
+  // THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
+  // //Add PS4 Power State Requirement, to prevent M4 going to Sleep
+  // sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
 
   THREAD_SAFE_PRINT("Application tasks setup Done, killing startup routine\n");
   osThreadExit();
