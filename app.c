@@ -46,6 +46,7 @@
 #include "ble_task.h"
 #include "mqtt_task.h"
 #include "heap_monitor_task.h"
+#include "http_server_task.h"
 
 #include "sl_si91x_power_manager.h"
 
@@ -152,6 +153,8 @@ void startup_routine(void *argument)
 
   start_mqtt_task_context();
 
+  start_http_server_task_context();
+
   // THREAD_SAFE_PRINT("DEBUG : Suspending Low Power Support \n");
   // //Add PS4 Power State Requirement, to prevent M4 going to Sleep
   // sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS4);
@@ -178,7 +181,6 @@ void thermostat_routine(void *argument)
       THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
     }
   }
-
 }
 
 sl_status_t bt_on_event(ble_event_msg_t* event)
@@ -292,10 +294,14 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
                                   RSI_BLE_MAX_DATA_LEN,
                                   data); // set the local attribute value.
 
+     status = mqtt_connect_to_broker();
+     if (status != SL_STATUS_OK) {
+       THREAD_SAFE_PRINT("Failed to connect to MQTT broker : 0x%lX\n", status);
+     }
 
-      status = mqtt_connect_to_broker();
+      status = http_server_start();
       if (status != SL_STATUS_OK) {
-        THREAD_SAFE_PRINT("Failed to connect to MQTT broker : 0x%lX\n", status);
+        THREAD_SAFE_PRINT("Failed to start HTTP server : 0x%lX\n", status);
       }
 
       THREAD_SAFE_PRINT("AP joined successfully\n\n");

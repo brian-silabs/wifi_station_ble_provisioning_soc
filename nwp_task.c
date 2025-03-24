@@ -280,6 +280,7 @@ void nwp_task(void *argument)
       uint32_t event_flag = (*(uint32_t *)(nwp_event_msg.payload));// nwp data is an uint32_t
       switch (nwp_event_msg.event_id) {
         case NWP_EVENT: {
+          THREAD_SAFE_PRINT("NWP EVENT\n");
           if (event_flag & NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT)
           {
             THREAD_SAFE_PRINT("NWP Join Complete no TWT or TWT setup failed \n");
@@ -359,7 +360,6 @@ static sl_status_t nwp_setup_twt(void){
     }
     return status;
   }
-  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
 
   THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
   status = nwp_access_release();
@@ -429,8 +429,10 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
   UNUSED_PARAMETER(result_length);
   UNUSED_PARAMETER(arg);
 
+  bool failure = false;
+
   if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
-      THREAD_SAFE_PRINT("\r\nTWT Setup failed");
+      THREAD_SAFE_PRINT("\r\nTWT Setup failed. General Failure");
       uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
       nwp_set_event(NWP_EVENT, &event_flag);
       return SL_STATUS_FAIL;
@@ -445,18 +447,23 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
           break;
       case SL_WIFI_TWT_AP_REJECTED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Setup rejected by AP");
+          failure = true;
           break;
       case SL_WIFI_TWT_OUT_OF_TOLERANCE_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT response out of tolerance limits");
+          failure = true;
           break;
       case SL_WIFI_TWT_RESPONSE_NOT_MATCHED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response not matched with the request parameters");
+          failure = true;
           break;
       case SL_WIFI_TWT_UNSUPPORTED_RESPONSE_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response Unsupported");
+          failure = true;
           break;
       case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Max retries reached");
+          failure = true;
           break;
       case SL_WIFI_TWT_INACTIVE_DUE_TO_ROAMING_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT session inactive due to roaming");
@@ -478,11 +485,17 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
           break;
       case SL_WIFI_TWT_INFO_FRAME_EXCHANGE_FAILED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT rescheduling failed due to a failure in the exchange of TWT information frames.");
+          failure = true;
           break;
       default:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed.");
-          uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
-          nwp_set_event(NWP_EVENT, &event_flag);
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Unknown Reason");
+          failure = true;
+  }
+
+  if(failure)
+  {
+    uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
+    nwp_set_event(NWP_EVENT, &event_flag);
   }
 
   if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {

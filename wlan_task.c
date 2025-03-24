@@ -204,10 +204,10 @@ sl_status_t start_wlan_access_point_join(const void *ssid,
   }
 
   if (SL_STATUS_OK == status) {
-    THREAD_SAFE_PRINT("\n WLAN AP connection is successful\n");
+    THREAD_SAFE_PRINT("WLAN AP connection is successful\n");
     wlan_set_dataless_event(WLAN_CONNECTED_EVENT);
   } else {
-    THREAD_SAFE_PRINT("\n WLAN connection failed\n");
+    THREAD_SAFE_PRINT("WLAN connection failed\n");
   }
 
   return status;

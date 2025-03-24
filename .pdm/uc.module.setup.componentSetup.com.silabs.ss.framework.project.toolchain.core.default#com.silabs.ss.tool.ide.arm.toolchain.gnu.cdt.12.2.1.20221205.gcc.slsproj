@@ -290,6 +290,14 @@
                   <file name="sl_si91x_ble.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/wireless/ble/inc/sl_si91x_ble.h"/>
                 </folder>
               </folder>
+              <folder name="asynchronous_socket">
+                <folder name="src">
+                  <file name="sl_si91x_socket.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/wireless/asynchronous_socket/src/sl_si91x_socket.c"/>
+                </folder>
+                <folder name="inc">
+                  <file name="sl_si91x_socket.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/wireless/asynchronous_socket/inc/sl_si91x_socket.h"/>
+                </folder>
+              </folder>
               <folder name="memory">
                 <file name="malloc_buffers.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/wireless/memory/malloc_buffers.c"/>
               </folder>
@@ -437,6 +445,10 @@
           </folder>
         </folder>
         <folder name="bsd_socket">
+          <folder name="si91x_socket">
+            <file name="sl_si91x_bsd_socket.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/bsd_socket/si91x_socket/sl_si91x_bsd_socket.c"/>
+            <file name="sl_si91x_socket_support.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/bsd_socket/si91x_socket/sl_si91x_socket_support.h"/>
+          </folder>
           <folder name="inc">
             <file name="netdb.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/bsd_socket/inc/netdb.h"/>
             <file name="netinet_in.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/bsd_socket/inc/netinet_in.h"/>
@@ -454,6 +466,15 @@
           <folder name="inc">
             <file name="sl_mqtt_client.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/mqtt/inc/sl_mqtt_client.h"/>
             <file name="sl_mqtt_client_types.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/mqtt/inc/sl_mqtt_client_types.h"/>
+          </folder>
+        </folder>
+        <folder name="sl_http_server">
+          <folder name="src">
+            <file name="sl_http_server.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/sl_http_server/src/sl_http_server.c"/>
+          </folder>
+          <folder name="inc">
+            <file name="sl_http_server.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/sl_http_server/inc/sl_http_server.h"/>
+            <file name="sl_http_server_types.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/service/sl_http_server/inc/sl_http_server_types.h"/>
           </folder>
         </folder>
       </folder>
@@ -665,7 +686,6 @@
   </folder>
   <file name="app.c" linked="false" uri="studio:/project/app.c"/>
   <file name="main.c" linked="false" uri="studio:/project/main.c"/>
-  <file name="ble_app.c" linked="false" uri="studio:/project/ble_app.c"/>
   <file name="app.h" linked="false" uri="studio:/project/app.h"/>
   <file name="ble_config.h" linked="false" uri="studio:/project/ble_config.h"/>
   <file name="wifi_config.h" linked="false" uri="studio:/project/wifi_config.h"/>
@@ -684,6 +704,7 @@
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/protocol/wifi/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/ble/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/service/bsd_socket/inc"/>
+  <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/service/bsd_socket/si91x_socket"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/cmsis_driver/CMSIS/Driver/Include"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/cmsis_driver"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/service/mqtt/inc"/>
@@ -696,7 +717,9 @@
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/core/common/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/unified_api/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/service/clock_manager/inc"/>
+  <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/service/sl_http_server/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/mcu/drivers/service/power_manager/inc"/>
+  <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/asynchronous_socket/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/errno/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/sl_net/inc"/>
   <includePath uri="studio:/project/wiseconnect3_sdk_3.4.1/components/device/silabs/si91x/wireless/icmp"/>

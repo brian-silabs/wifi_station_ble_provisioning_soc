@@ -13,7 +13,7 @@ DocumentNamespace: https://silabs.com
 
 ## Creation Information
 Creator: Organization: Silicon Laboratories, Inc.
-Created: 2025-02-24T10:52:04.537857Z
+Created: 2025-03-24T14:38:43.348984Z
 ## Relationships
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-wiseconnect3_sdk-3.4.1
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-simplicity_sdk-2024.12.1
@@ -30,9 +30,12 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-basic_network_config_manager
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-ble
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-brd4338a
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-mqtt
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-network_manager
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si917_memory_default_config
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_basic_buffers
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_internal_stack
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-syscalls
@@ -42,6 +45,7 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_opamp
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-wiseconnect_toolchain_gcc_standard
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_egpio
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_usart
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_headers
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_driver_headers
@@ -53,6 +57,7 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_clock_manager
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_usart
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_udma_wrapper
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-freertos_config
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_errno
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_packing
@@ -61,6 +66,7 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_udma
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_common_driver
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_udma
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_udma
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_dac
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-brd4338a_config
@@ -69,10 +75,12 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_adc
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_romtable
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_wireless
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_reg_spi
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_romtable_headers
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_crc
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-bsd_socket_api
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_headers
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_headers
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-external_flash_none
@@ -96,23 +104,18 @@ Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_common_flash
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_debug
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_chip
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_socket
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_udma_wrapper
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_stack_size_configuration
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-cmsis_usart_driver
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_ulpss
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_http_server
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_asynchronous_socket
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1 CONTAINS SPDXRef-wiseconnect3_sdk-3.4.1-bsd_socket
 
 ## Package Information
 PackageName: SIWG917M111MGTBA
@@ -159,6 +162,17 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-brd4338a CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
+PackageName: PM UULP Calendar
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
 PackageName: MQTT Client
 SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-mqtt
 PackageVersion: 3.4.1
@@ -190,6 +204,28 @@ PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-si917_memory_default_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Calendar
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Power Manager
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: Basic Buffer Manager
@@ -289,6 +325,17 @@ PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_egpio CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: POWER SAVE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: CMSIS USART
@@ -412,6 +459,17 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_udma_wrapper CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
+PackageName: ROM DRIVER POWER SAVE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
 PackageName: SL SI91X FreeRTOS Configuration
 SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-freertos_config
 PackageVersion: 3.4.1
@@ -498,6 +556,17 @@ PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_udma CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: SI91X TICK-LESS MODE
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: MSLA
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: ROM DRIVER UDMA
@@ -588,6 +657,17 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_wireless CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
+PackageName: Si91x Cortex-M4 Powersave
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
 PackageName: REG SPI
 SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_reg_spi
 PackageVersion: 3.4.1
@@ -644,6 +724,17 @@ PackageHomePage: https://github.com/MDK-Packs/IoT_Socket
 ExternalRef: PACKAGE-MANAGER purl pkg:github/MDK-Packs/IoT_Socket@1.3.0
 ## Relationships
 Relationship: SPDXRef-bsd_socket_api-1.3.0 DESCENDANT_OF SPDXRef-wiseconnect3_sdk-3.4.1-bsd_socket_api
+
+## Package Information
+PackageName: PM Wakeup Source Configuration
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: ROM Driver Headers
@@ -899,6 +990,28 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_chip CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
+PackageName: SYSRTC
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Power Manager Configuration
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
 PackageName: Si91x Socket
 SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_socket
 PackageVersion: 3.4.1
@@ -930,6 +1043,17 @@ PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_stack_size_configuration CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: Sleep Timer for Si91x
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: CMSIS USART DRIVER
@@ -965,125 +1089,37 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_crc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
-PackageName: Calendar
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_calendar CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: PM UULP Calendar
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-calendar_ulp_component CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: Power Manager
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_power_manager CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: POWER SAVE
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-systemlevel_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: ROM DRIVER POWER SAVE
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-romdriver_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: SI91X TICK-LESS MODE
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode
+PackageName: HTTP Server
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_http_server
 PackageVersion: 3.4.1
 PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: MSLA
 ## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-si91x_tickless_mode CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_http_server CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
-PackageName: Si91x Cortex-M4 Powersave
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save
+PackageName: Si91x Asynchronous Socket
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_asynchronous_socket
+PackageVersion: 3.4.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: NOASSERTION
+PackageLicenseConcluded: MSLA
+## Relationships
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sl_si91x_asynchronous_socket CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+
+## Package Information
+PackageName: BSD Socket
+SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-bsd_socket
 PackageVersion: 3.4.1
 PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageSupplier: Organization: NOASSERTION
 PackageLicenseConcluded: Zlib
 ## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sllib_m4_power_save CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: PM Wakeup Source Configuration
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-wakeup_source_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: SYSRTC
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-rsilib_sysrtc CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: Power Manager Configuration
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-power_manager_config CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
-
-## Package Information
-PackageName: Sleep Timer for Si91x
-SPDXID: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x
-PackageVersion: 3.4.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: NOASSERTION
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-sleeptimer_si91x CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
+Relationship: SPDXRef-wiseconnect3_sdk-3.4.1-bsd_socket CONTAINED_BY SPDXRef-wiseconnect3_sdk-3.4.1
 
 ## Package Information
 PackageName: Simplicity SDK Suite
@@ -1118,9 +1154,9 @@ Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sl_core
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-cmsis_core
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-emlib_core
+Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sl_system_init
 Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sl_common
-Relationship: SPDXRef-simplicity_sdk-2024.12.1 CONTAINS SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
 
 ## Package Information
 PackageName: BRD4002A
@@ -1458,6 +1494,17 @@ PackageLicenseConcluded: Zlib
 Relationship: SPDXRef-simplicity_sdk-2024.12.1-emlib_core CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1
 
 ## Package Information
+PackageName: Sleep Timer
+SPDXID: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
+PackageVersion: 2024.12.1
+PrimaryPackagePurpose: LIBRARY
+PackageDownloadLocation: NOASSERTION
+PackageSupplier: Organization: Silicon Laboratories, Inc.
+PackageLicenseConcluded: Zlib
+## Relationships
+Relationship: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1
+
+## Package Information
 PackageName: System Init
 SPDXID: SPDXRef-simplicity_sdk-2024.12.1-sl_system_init
 PackageVersion: 2024.12.1
@@ -1478,14 +1525,3 @@ PackageSupplier: Organization: Silicon Laboratories, Inc.
 PackageLicenseConcluded: Zlib
 ## Relationships
 Relationship: SPDXRef-simplicity_sdk-2024.12.1-sl_common CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1
-
-## Package Information
-PackageName: Sleep Timer
-SPDXID: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer
-PackageVersion: 2024.12.1
-PrimaryPackagePurpose: LIBRARY
-PackageDownloadLocation: NOASSERTION
-PackageSupplier: Organization: Silicon Laboratories, Inc.
-PackageLicenseConcluded: Zlib
-## Relationships
-Relationship: SPDXRef-simplicity_sdk-2024.12.1-sleeptimer CONTAINED_BY SPDXRef-simplicity_sdk-2024.12.1
