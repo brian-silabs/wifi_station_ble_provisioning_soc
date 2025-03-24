@@ -10,6 +10,22 @@
 #include "sl_status.h"
 #include "thread_safe_print.h"
 
+#if HEAP_MONITOR_TICKLESS
+#include "sl_si91x_power_manager.h"
+
+// Define the event mask for all power state transitions you want to monitor
+#define PS_EVENT_MASK  (SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_ENTERING_PS4 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_LEAVING_PS4 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_ENTERING_PS3 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_LEAVING_PS3 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_ENTERING_PS2 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_LEAVING_PS2 \
+    | SL_SI91X_POWER_MANAGER_EVENT_TRANSITION_LEAVING_SLEEP)
+
+#endif
+
+#define HEAP_MONITOR_FLAGS_MSK 0x00000001U  // Define the flag mask
+
 // RTOS Variables
 const osThreadAttr_t heap_monitor_thread_attributes = {
     .name       = "heap_monitor_thread",
@@ -23,7 +39,14 @@ const osThreadAttr_t heap_monitor_thread_attributes = {
     .reserved   = 0,
   };
 
+  osEventFlagsId_t    heap_monitor_evt_flags_id;  // Event flags ID
   static bool heap_monitor_limit_reached_g = false;
+
+#if HEAP_MONITOR_TICKLESS
+// Declare the event handle
+sl_power_manager_ps_transition_event_handle_t handle;
+#endif
+
 
 /*
  *********************************************************************************************************
@@ -31,6 +54,11 @@ const osThreadAttr_t heap_monitor_thread_attributes = {
  *********************************************************************************************************
  */
 void heap_monitor_task(void *argument);
+
+#if HEAP_MONITOR_TICKLESS
+// Define the callback function that will be called during power state transitions
+void transition_callback(sl_power_state_t from, sl_power_state_t to);
+#endif
 
 /*
  *********************************************************************************************************
@@ -51,6 +79,13 @@ sl_status_t start_heap_monitor_task_context(void)
     }
     THREAD_SAFE_PRINT("Heap Monitor Task Startup Complete\n");
 
+
+    heap_monitor_evt_flags_id = osEventFlagsNew(NULL);
+    if (heap_monitor_evt_flags_id == NULL) {
+      THREAD_SAFE_PRINT("Failed to create heap_monitor_evt_flags_id\n");
+      while(1); // Count on WDOG for the sample app
+    }
+
     THREAD_SAFE_PRINT("Heap Monitor Task Context Init Done\n\n");
     return ret;
 }
@@ -70,9 +105,28 @@ void heap_monitor_task(void *argument)
     heap_monitor_limit_reached_g = false;
     THREAD_SAFE_PRINT("Heap Monitor Limit Set to %ld\n", heap_redzone_limit);
 
+#if HEAP_MONITOR_TICKLESS
+    // Create the event info structure with the event mask and callback function
+    sl_power_manager_ps_transition_event_info_t info = { 
+        .event_mask = PS_EVENT_MASK,
+        .on_event = transition_callback 
+    };
+    
+    // Subscribe to power state transition events
+    sl_status_t status = sl_si91x_power_manager_subscribe_ps_transition_event(&handle, &info);
+    if (status != SL_STATUS_OK) {
+        // Handle subscription error
+        THREAD_SAFE_PRINT("Failed to subscribe to ps transition 0x%lX\n", status);
+    }
+#endif
+
     while (true)
     {
-        osDelay(ticks);
+#if HEAP_MONITOR_TICKLESS
+        ticks = osWaitForever;
+#endif
+        uint32_t flag = osEventFlagsWait(heap_monitor_evt_flags_id, HEAP_MONITOR_FLAGS_MSK, osFlagsWaitAny, ticks);
+        osEventFlagsClear(heap_monitor_evt_flags_id, flag);
 
         // Get the minimum ever free heap size
         size_t minEverFreeHeapSize = xPortGetMinimumEverFreeHeapSize();
@@ -87,3 +141,17 @@ void heap_monitor_task(void *argument)
 
     } // while(true)
 }
+
+#if HEAP_MONITOR_TICKLESS
+// Define the callback function that will be called during power state transitions
+void transition_callback(sl_power_state_t from, sl_power_state_t to)
+{
+  UNUSED_PARAMETER(from);
+  if((SL_SI91X_POWER_MANAGER_PS4 == to)
+    || (SL_SI91X_POWER_MANAGER_PS3 == to))
+  {
+    // If the system is waking up sleep, we enable the heap monitor for a spin
+    osEventFlagsSet(heap_monitor_evt_flags_id, 0x00000001);
+  }
+}
+#endif

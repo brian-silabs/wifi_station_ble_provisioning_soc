@@ -166,12 +166,13 @@ void thermostat_routine(void *argument)
 
   sl_status_t status = SL_STATUS_OK;
 
-  osEventFlagsWait(thermostat_evt_flags_id, THERMOSTAT_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
+  uint32_t flag = osEventFlagsWait(thermostat_evt_flags_id, THERMOSTAT_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
+  osEventFlagsClear(thermostat_evt_flags_id, flag);
   THREAD_SAFE_PRINT("Thermostat start event received\n");
 
   while(1)
   {
-    osDelay(5000);
+    osDelay(5000);// TODO Make it a configurable parameter
     status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
     if (status != SL_STATUS_OK) {
       THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
