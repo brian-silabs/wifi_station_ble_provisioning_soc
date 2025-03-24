@@ -28,6 +28,7 @@
         "sl_si91x_power_manager.h": "c",
         "sl_constants.h": "c",
         "sl_mqtt_client.h": "c",
-        "sl_sleeptimer.h": "c"
+        "sl_sleeptimer.h": "c",
+        "heap_monitor_task_config.h": "c"
     }
 }
