@@ -38,6 +38,7 @@ const osThreadAttr_t heap_monitor_thread_attributes = {
     .tz_module  = 0,
     .reserved   = 0,
   };
+
   osEventFlagsId_t    heap_monitor_evt_flags_id;  // Event flags ID
   static bool heap_monitor_limit_reached_g = false;
 
@@ -45,6 +46,7 @@ const osThreadAttr_t heap_monitor_thread_attributes = {
 // Declare the event handle
 sl_power_manager_ps_transition_event_handle_t handle;
 #endif
+
 
 /*
  *********************************************************************************************************
@@ -76,6 +78,7 @@ sl_status_t start_heap_monitor_task_context(void)
         return SL_STATUS_FAIL;
     }
     THREAD_SAFE_PRINT("Heap Monitor Task Startup Complete\n");
+
 
     heap_monitor_evt_flags_id = osEventFlagsNew(NULL);
     if (heap_monitor_evt_flags_id == NULL) {
@@ -135,6 +138,7 @@ void heap_monitor_task(void *argument)
             // Print or log a warning message once
             THREAD_SAFE_PRINT("WARNING: Minimum ever free heap size has been reached: Reached %d, limit was %ld\n", minEverFreeHeapSize, heap_redzone_limit);
         }
+
     } // while(true)
 }
 
