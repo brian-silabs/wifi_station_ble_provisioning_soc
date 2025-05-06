@@ -16,6 +16,7 @@
 #include "sl_constants.h"
 
 #include "sl_si91x_driver.h"
+#include "sl_si91x_protocol_types.h"
 #include "sl_si91x_ble.h"
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
@@ -214,6 +215,7 @@ void nwp_task(void *argument)
 
     sl_status_t status                 = SL_STATUS_OK;
     nwp_event_msg_t nwp_event_msg;
+    uint8_t join_feature = 0;
 
     nwp_evt_queue_seq_num_g = 0; // Init the message queue sequence number to 0
 
@@ -266,6 +268,18 @@ void nwp_task(void *argument)
             THREAD_SAFE_PRINT("Failed to set BLE performance profile, Error Code : 0x%lX\r\n", status);
         }
     }
+
+
+    if(!(join_feature & SL_SI91X_JOIN_FEAT_PS_CMD_LISTEN_INTERVAL_VALID))
+    {
+      THREAD_SAFE_PRINT("[NWP] - Warning : PS Listen Interval not supported, enabling it\n");
+      join_feature |= SL_SI91X_JOIN_FEAT_PS_CMD_LISTEN_INTERVAL_VALID;
+      status = sl_si91x_set_join_configuration(SL_WIFI_CLIENT_INTERFACE, join_feature);
+      if(status != SL_STATUS_OK) {
+        THREAD_SAFE_PRINT("Failed to set join configuration: 0x%lx\r\n", status);
+      }
+    }
+
 
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
     status = nwp_access_release();
@@ -387,9 +401,9 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
 
   //TODO Check if clearing the structure is required, as well as TWT disablement sl_wifi_disable_target_wake_time
 
-  // We align on every 3 BEACONs
   // TODO whenever (if ever) available auto adjust based on AP disconnection rate
-  wifi_performance_profile_g.listen_interval = 3;
+  wifi_performance_profile_g.listen_interval = 300;// The doc lies, this is in ms, not beacon intervals
+                                                    // Also, this is effective only if the join_feature_bitmap is set prior to joining the AP (see nwp task init section)
   wifi_performance_profile_g.dtim_aligned_type = SL_SI91X_ALIGN_WITH_BEACON;
 
   status                      = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
@@ -403,7 +417,8 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
     }
     return status;
   }
-  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled\n");
+  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %d beacons\n", sl_si91x_get_listen_interval(), wifi_performance_profile_g.listen_interval);
+
 
   THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
   status = nwp_access_release();
