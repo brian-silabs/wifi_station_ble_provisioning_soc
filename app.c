@@ -58,11 +58,15 @@
 #include "sl_net_constants.h"
 #include "sl_net.h"
 
+#include "sl_net_default_values.h"
+
 // APP version
 #define APP_FW_VERSION "0.1"
 #define APP_NWP_OPERATION_TIMEOUT_MS  15000
 
 #define THERMOSTAT_FLAGS_MSK 0x00000001U  // Define the flag mask
+
+#define APP_JOIN_WITH_DEFAULT_CREDENTIALS 1
 
 const osThreadAttr_t startup_thread_attributes = {
   .name       = "startup_thread",
@@ -186,6 +190,11 @@ sl_status_t bt_on_event(ble_event_msg_t* event)
 
   switch (event->event_id) {
     case BLE_SYSTEM_BOOT_EVENT : {
+#if !APP_JOIN_WITH_DEFAULT_CREDENTIALS
+      // set device in advertising mode.
+      rsi_ble_start_advertising();
+      THREAD_SAFE_PRINT("\r\nBLE Advertising Started...\r\n");
+#endif
     } break;
 
     case BLE_CONNECTION_OPENED_EVENT: {
@@ -232,6 +241,13 @@ sl_status_t wlan_on_event(wlan_event_msg_t* event)
 
   switch (event->event_id) {
     case WLAN_BOOT_EVENT :
+#if APP_JOIN_WITH_DEFAULT_CREDENTIALS
+      memcpy(coex_ssid, DEFAULT_WIFI_CLIENT_PROFILE_SSID, sizeof(DEFAULT_WIFI_CLIENT_PROFILE_SSID));
+      memcpy(pwd, DEFAULT_WIFI_CLIENT_CREDENTIAL, sizeof(DEFAULT_WIFI_CLIENT_CREDENTIAL));
+      sec_type = DEFAULT_WIFI_CLIENT_SECURITY_TYPE;
+      THREAD_SAFE_PRINT("[APP] Join Default AP Request\n");
+      app_wlan_connect_to_ap();
+#endif
     break;
 
     case WLAN_SCAN_COMPLETE_EVENT: {

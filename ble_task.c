@@ -203,9 +203,6 @@ void ble_task(void *argument)
         switch (ble_event_msg.event_id) {
             case BLE_SYSTEM_BOOT_EVENT :
                 THREAD_SAFE_PRINT("BLE Boot\n");
-                // set device in advertising mode.
-                rsi_ble_start_advertising();
-                THREAD_SAFE_PRINT("\r\nBLE Advertising Started...\r\n");
             break;
 
             case BLE_CONNECTION_OPENED_EVENT: {
