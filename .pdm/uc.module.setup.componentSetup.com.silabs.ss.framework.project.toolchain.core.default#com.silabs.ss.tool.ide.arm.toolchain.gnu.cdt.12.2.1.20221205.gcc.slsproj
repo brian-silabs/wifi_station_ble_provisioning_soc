@@ -195,12 +195,14 @@
                     <file name="sl_si91x_bjt_temperature_sensor.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_bjt_temperature_sensor.c"/>
                     <file name="sl_si91x_calendar.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_calendar.c"/>
                     <file name="sl_si91x_dma.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_dma.c"/>
+                    <file name="sl_si91x_watchdog_timer.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/src/sl_si91x_watchdog_timer.c"/>
                   </folder>
                   <folder name="inc">
                     <file name="sl_si91x_adc.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_adc.h"/>
                     <file name="sl_si91x_bjt_temperature_sensor.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_bjt_temperature_sensor.h"/>
                     <file name="sl_si91x_calendar.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_calendar.h"/>
                     <file name="sl_si91x_dma.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_dma.h"/>
+                    <file name="sl_si91x_watchdog_timer.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/unified_api/inc/sl_si91x_watchdog_timer.h"/>
                   </folder>
                 </folder>
                 <folder name="service">
@@ -245,6 +247,7 @@
                     <file name="rsi_temp_sensor.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_temp_sensor.c"/>
                     <file name="rsi_time_period.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_time_period.c"/>
                     <file name="rsi_ulpss_clk.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_ulpss_clk.c"/>
+                    <file name="rsi_wwdt.c" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/src/rsi_wwdt.c"/>
                   </folder>
                   <folder name="inc">
                     <file name="rsi_bod.h" linked="false" uri="studio:/sdk/extension/wiseconnect/components/device/silabs/si91x/mcu/drivers/systemlevel/inc/rsi_bod.h"/>
@@ -665,7 +668,6 @@
   </folder>
   <file name="app.c" linked="false" uri="studio:/project/app.c"/>
   <file name="main.c" linked="false" uri="studio:/project/main.c"/>
-  <file name="ble_app.c" linked="false" uri="studio:/project/ble_app.c"/>
   <file name="app.h" linked="false" uri="studio:/project/app.h"/>
   <file name="ble_config.h" linked="false" uri="studio:/project/ble_config.h"/>
   <file name="wifi_config.h" linked="false" uri="studio:/project/wifi_config.h"/>

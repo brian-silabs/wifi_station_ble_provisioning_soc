@@ -269,7 +269,6 @@ void nwp_task(void *argument)
         }
     }
 
-
     if(!(join_feature & SL_SI91X_JOIN_FEAT_PS_CMD_LISTEN_INTERVAL_VALID))
     {
       THREAD_SAFE_PRINT("[NWP] - Warning : PS Listen Interval not supported, enabling it\n");
@@ -280,6 +279,12 @@ void nwp_task(void *argument)
       }
     }
 
+    sl_wifi_listen_interval_t listen_interval;
+    listen_interval.listen_interval=WIFI_MAX_LISTEN_INTERVAL;
+    status = sl_wifi_set_listen_interval(SL_WIFI_CLIENT_INTERFACE,listen_interval);
+    if (status != SL_STATUS_OK) {
+      THREAD_SAFE_PRINT("\r\n Failed to configure listen interval\r\n");
+    }
 
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
     status = nwp_access_release();
@@ -402,7 +407,7 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
   //TODO Check if clearing the structure is required, as well as TWT disablement sl_wifi_disable_target_wake_time
 
   // TODO whenever (if ever) available auto adjust based on AP disconnection rate
-  wifi_performance_profile_g.listen_interval = 300;// The doc lies, this is in ms, not beacon intervals
+  wifi_performance_profile_g.listen_interval = WIFI_PS_LISTEN_INTERVAL;// The doc lies, this is in ms, not beacon intervals
                                                     // Also, this is effective only if the join_feature_bitmap is set prior to joining the AP (see nwp task init section)
   wifi_performance_profile_g.dtim_aligned_type = SL_SI91X_ALIGN_WITH_BEACON;
 

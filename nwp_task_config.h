@@ -31,6 +31,13 @@
 
 // #define WIFI_AUTO_LOW_POWER_MODE                    WIFI_AUTO_LOW_POWER_MODE_LOWER_POWER
 
+#define WIFI_MAX_LISTEN_INTERVAL                      1000
+#define WIFI_PS_LISTEN_INTERVAL                       1000
+
+#if WIFI_PS_LISTEN_INTERVAL > WIFI_MAX_LISTEN_INTERVAL
+#error "Listen interval is greater than maximum listen interval"
+#endif
+
 // TWT Related Configuration
 #define TWT_AUTO_CONFIG  1
 #define TWT_SCAN_TIMEOUT 10000
