@@ -38,6 +38,7 @@
 #include "sl_constants.h"
 #include "app.h"
 #include "thread_safe_print.h"
+#include "watchdog_timer.h"
 
 #include "nwp_task_config.h"
 
@@ -113,6 +114,8 @@ void app_init(void)
   {
     while(1); // Count on WDOG for the sample app
   }
+
+  watchdog_timer_init();
 
   osThreadId_t startup_thread_id = osThreadNew((osThreadFunc_t)startup_routine, NULL, &startup_thread_attributes);
   if (startup_thread_id == NULL) {

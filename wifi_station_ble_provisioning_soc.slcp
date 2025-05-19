@@ -41,6 +41,7 @@ component:
 - {from: wiseconnect3_sdk, id: sl_power_manager}
 - {from: wiseconnect3_sdk, id: sl_si91x_basic_buffers}
 - {from: wiseconnect3_sdk, id: sl_si91x_internal_stack}
+- {from: wiseconnect3_sdk, id: sl_watchdog_timer}
 - {from: wiseconnect3_sdk, id: syscalls}
 - {from: wiseconnect3_sdk, id: wifi}
 - {from: wiseconnect3_sdk, id: wifi_resources}
