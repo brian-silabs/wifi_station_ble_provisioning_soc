@@ -20,6 +20,14 @@ typedef struct nwp_event_msg_s{
   uint8_t payload[SL_NWP_EVENT_QUEUE_SIZE];
 } nwp_event_msg_t;
 
+typedef struct nwp_config_s{
+  uint32_t max_listen_interval;
+  uint32_t ps_listen_interval;
+  uint8_t twt_enabled;
+  uint8_t twt_auto_configured;
+  uint32_t twt_period;
+} nwp_config_t;
+
 /**
  * @brief Start the NWP task context.
  *
@@ -33,5 +41,7 @@ void nwp_set_event(uint32_t event_id, void *event_data);
 // Synchronization functions
 sl_status_t nwp_access_request(void);
 sl_status_t nwp_access_release(void);
+
+sl_status_t nwp_get_running_config(nwp_config_t *config);
 
 #endif // NWP_TASK_H
