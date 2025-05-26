@@ -306,6 +306,7 @@ void nwp_task(void *argument)
     if (status != SL_STATUS_OK) {
       THREAD_SAFE_PRINT("\r\n Failed to configure listen interval\r\n");
     }
+
     nwp_config_g.max_listen_interval = listen_interval.listen_interval;
 
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
