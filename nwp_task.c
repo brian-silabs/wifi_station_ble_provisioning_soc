@@ -53,6 +53,8 @@ static uint8_t      nwp_evt_queue_seq_num_g = 0;
 static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
 static sl_bt_performance_profile_t ble_performance_profile_g = { .profile = SL_SI91X_BT_PERFORMANCE_PROFILE };
 
+static nwp_config_t nwp_config_g = { 0 };// Configuration structure
+
 sl_wifi_twt_request_t default_twt_setup_configuration = {
   .twt_enable              = 1,
   .twt_flow_id             = 1,
@@ -204,6 +206,25 @@ static void nwp_wait_event(nwp_event_msg_t *event_msg)
     }
 }
 
+sl_status_t nwp_get_running_config(nwp_config_t *config)
+{
+    sl_status_t ret = SL_STATUS_OK;
+
+    if(config == NULL)
+    {
+        THREAD_SAFE_PRINT("Invalid config pointer\n");
+        return SL_STATUS_FAIL;
+    }
+
+    config->max_listen_interval = nwp_config_g.max_listen_interval;
+    config->ps_listen_interval   = nwp_config_g.ps_listen_interval;
+    config->twt_enabled          = nwp_config_g.twt_enabled;
+    config->twt_period  = nwp_config_g.twt_period;
+    config->twt_auto_configured = nwp_config_g.twt_auto_configured;
+
+    return ret;
+}
+
 /*
  *********************************************************************************************************
  *                                         PRIVATE FUNCTIONS DEFINITIONS
@@ -286,6 +307,8 @@ void nwp_task(void *argument)
       THREAD_SAFE_PRINT("\r\n Failed to configure listen interval\r\n");
     }
 
+    nwp_config_g.max_listen_interval = listen_interval.listen_interval;
+
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
     status = nwp_access_release();
     if (status != SL_STATUS_OK) {
@@ -350,9 +373,11 @@ static sl_status_t nwp_setup_twt(void){
   if (TWT_AUTO_CONFIG == 1) {
     wifi_performance_profile_g.twt_selection = default_twt_selection_configuration;
     status                            = sl_wifi_target_wake_time_auto_selection(&wifi_performance_profile_g.twt_selection);
+    nwp_config_g.twt_auto_configured = 1;
   } else {
     wifi_performance_profile_g.twt_request = default_twt_setup_configuration;
     status                          = sl_wifi_enable_target_wake_time(&wifi_performance_profile_g.twt_request);
+    nwp_config_g.twt_auto_configured = 0;
   }
   if (status != SL_STATUS_OK) {
     THREAD_SAFE_PRINT("Failed to set twt: 0x%lx\r\n", status);
@@ -422,6 +447,7 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
     }
     return status;
   }
+  nwp_config_g.ps_listen_interval = wifi_performance_profile_g.listen_interval;
   THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %d beacons\n", sl_si91x_get_listen_interval(), wifi_performance_profile_g.listen_interval);
 
 
@@ -517,6 +543,10 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
       THREAD_SAFE_PRINT("\r\n twt_channel : 0x%X", result->twt_channel);
       THREAD_SAFE_PRINT("\r\n twt_protection : 0x%X", result->twt_protection);
       THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X\r\n", result->twt_flow_id);
+
+      nwp_config_g.twt_enabled = 1;
+      nwp_config_g.twt_period = result->wake_int_mantissa * (1 << result->wake_int_exp);//TODO check math
+
   } else if (event < SL_WIFI_TWT_EVENTS_END) {
       THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X", result->twt_flow_id);
       THREAD_SAFE_PRINT("\r\n negotiation_type : 0x%X\r\n", result->negotiation_type);

@@ -32,6 +32,8 @@
 /**
  * Include files
  **/
+#include <stdio.h>
+
 //! SL Wi-Fi SDK includes
 #include "sl_board_configuration.h"
 #include "cmsis_os2.h"
@@ -66,6 +68,7 @@
 #define APP_NWP_OPERATION_TIMEOUT_MS  15000
 
 #define THERMOSTAT_FLAGS_MSK 0x00000001U  // Define the flag mask
+#define THERMOSTAT_REPORT_PERIOD_MS       10000
 
 #define APP_JOIN_WITH_DEFAULT_CREDENTIALS 1
 
@@ -106,6 +109,7 @@ static void app_start_wlan_scan(void);
 static void app_wlan_connect_to_ap(void);
 static void process_ble_attr1_command(uint8_t *att_value);
 static void app_wlan_timeout_ble_notification(void);
+static sl_status_t publish_wifi_config(const nwp_config_t *config, uint32_t mqtt_report_interval_ms);
 
 void app_init(void)
 {
@@ -172,6 +176,7 @@ void thermostat_routine(void *argument)
   UNUSED_PARAMETER(argument);
 
   sl_status_t status = SL_STATUS_OK;
+  nwp_config_t config;
 
   uint32_t flag = osEventFlagsWait(thermostat_evt_flags_id, THERMOSTAT_FLAGS_MSK, osFlagsWaitAny, osWaitForever);
   osEventFlagsClear(thermostat_evt_flags_id, flag);
@@ -179,8 +184,14 @@ void thermostat_routine(void *argument)
 
   while(1)
   {
-    osDelay(5000);// TODO Make it a configurable parameter
-    status = mqtt_publish_to_broker("THERMOSTAT-DATA\0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\0");
+    osDelay(THERMOSTAT_REPORT_PERIOD_MS);
+    if (nwp_get_running_config(&config) == SL_STATUS_OK) {
+      publish_wifi_config(&config, THERMOSTAT_REPORT_PERIOD_MS);
+    } else {
+      THREAD_SAFE_PRINT("Failed to get running config\n");
+    }
+
+    // status = mqtt_publish_to_broker("Temperature\0", "27\0");
     if (status != SL_STATUS_OK) {
       THREAD_SAFE_PRINT("Failed to publish to broker : 0x%lX\n", status);
     }
@@ -488,3 +499,19 @@ sl_status_t mqtt_on_event(mqtt_event_msg_t* event)
 
   return SL_STATUS_OK;
 }
+
+
+sl_status_t publish_wifi_config(const nwp_config_t *config, uint32_t mqtt_report_interval) {
+  char payload[256];
+  snprintf(payload, sizeof(payload),
+            "TWT_Enabled = %u; TWT_Auto_Configured = %u; TWT_Period = %lu; Max_Listen_Interval = %lu; PS_Listen_Interval = %lu (n/a if TWT enabled); MQTT_Report_Interval = %lu",
+            config->twt_enabled,
+            config->twt_auto_configured,
+            config->twt_period,
+            config->max_listen_interval,
+            config->ps_listen_interval,
+            mqtt_report_interval);
+
+  return mqtt_publish_to_broker("WiFi-Config", payload);
+}
+
