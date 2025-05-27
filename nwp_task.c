@@ -475,6 +475,8 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
   UNUSED_PARAMETER(result_length);
   UNUSED_PARAMETER(arg);
 
+  bool setup_status = SL_STATUS_OK;
+
   if (SL_WIFI_CHECK_IF_EVENT_FAILED(event)) {
       THREAD_SAFE_PRINT("\r\nTWT Setup failed");
       uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
@@ -488,21 +490,6 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
       break;
       case SL_WIFI_TWT_UNSOLICITED_SESSION_SUCCESS_EVENT:
           THREAD_SAFE_PRINT("\r\nUnsolicited TWT Setup success");
-          break;
-      case SL_WIFI_TWT_AP_REJECTED_EVENT:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Setup rejected by AP");
-          break;
-      case SL_WIFI_TWT_OUT_OF_TOLERANCE_EVENT:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT response out of tolerance limits");
-          break;
-      case SL_WIFI_TWT_RESPONSE_NOT_MATCHED_EVENT:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response not matched with the request parameters");
-          break;
-      case SL_WIFI_TWT_UNSUPPORTED_RESPONSE_EVENT:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response Unsupported");
-          break;
-      case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
-          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Max retries reached");
           break;
       case SL_WIFI_TWT_INACTIVE_DUE_TO_ROAMING_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT session inactive due to roaming");
@@ -524,11 +511,43 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
           break;
       case SL_WIFI_TWT_INFO_FRAME_EXCHANGE_FAILED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT rescheduling failed due to a failure in the exchange of TWT information frames.");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_AP_REJECTED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Setup rejected by AP");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_OUT_OF_TOLERANCE_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT response out of tolerance limits");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_RESPONSE_NOT_MATCHED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response not matched with the request parameters");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_UNSUPPORTED_RESPONSE_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. TWT Response Unsupported");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
+          THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Max retries reached");
+          setup_status = SL_STATUS_FAIL;
           break;
       default:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed.");
-          uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
-          nwp_set_event(NWP_EVENT, &event_flag);
+          setup_status = SL_STATUS_FAIL;
+  }
+
+  if(SL_STATUS_FAIL == setup_status)
+  {
+    uint32_t event_flag = NWP_JOINED_WITH_NO_TWT_OR_FAILED_EVENT;
+    nwp_set_event(NWP_EVENT, &event_flag);
+    nwp_config_g.twt_enabled = 0;
+    nwp_config_g.twt_period = 0;
+  } else
+  {
+    nwp_config_g.twt_enabled = 1;
+    nwp_config_g.twt_period = result->wake_int_mantissa * (1 << result->wake_int_exp);//TODO check math
   }
 
   if (event < SL_WIFI_TWT_TEARDOWN_SUCCESS_EVENT) {
@@ -544,12 +563,9 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
       THREAD_SAFE_PRINT("\r\n twt_protection : 0x%X", result->twt_protection);
       THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X\r\n", result->twt_flow_id);
 
-      nwp_config_g.twt_enabled = 1;
-      nwp_config_g.twt_period = result->wake_int_mantissa * (1 << result->wake_int_exp);//TODO check math
-
   } else if (event < SL_WIFI_TWT_EVENTS_END) {
       THREAD_SAFE_PRINT("\r\n twt_flow_id : 0x%X", result->twt_flow_id);
       THREAD_SAFE_PRINT("\r\n negotiation_type : 0x%X\r\n", result->negotiation_type);
   }
-  return SL_STATUS_OK;
+  return setup_status;
 }
