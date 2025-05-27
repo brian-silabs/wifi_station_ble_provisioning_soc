@@ -503,9 +503,6 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
       case SL_WIFI_TWT_AP_TEARDOWN_SUCCESS_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT session teardown from AP");
           break;
-      case SL_WIFI_TWT_INACTIVE_NO_AP_SUPPORT_EVENT:
-          THREAD_SAFE_PRINT("\r\nConnected AP Does not support TWT");
-          break;
       case SL_WIFI_RESCHEDULE_TWT_SUCCESS_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT rescheduled");
           break;
@@ -531,6 +528,10 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
           break;
       case SL_WIFI_TWT_FAIL_MAX_RETRIES_REACHED_EVENT:
           THREAD_SAFE_PRINT("\r\nTWT Setup Failed. Max retries reached");
+          setup_status = SL_STATUS_FAIL;
+          break;
+      case SL_WIFI_TWT_INACTIVE_NO_AP_SUPPORT_EVENT:
+          THREAD_SAFE_PRINT("\r\nConnected AP Does not support TWT");
           setup_status = SL_STATUS_FAIL;
           break;
       default:
