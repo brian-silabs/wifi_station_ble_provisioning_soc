@@ -50,7 +50,8 @@ osSemaphoreId_t     nwp_thread_sem;
 osMessageQueueId_t  nwp_evt_queue_id;  // Event flags ID
 static uint8_t      nwp_evt_queue_seq_num_g = 0;
 
-static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
+//static sl_wifi_performance_profile_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
+static sl_wifi_performance_profile_v2_t wifi_performance_profile_g = { .profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE };
 static sl_bt_performance_profile_t ble_performance_profile_g = { .profile = SL_SI91X_BT_PERFORMANCE_PROFILE };
 
 static nwp_config_t nwp_config_g = { 0 };// Configuration structure
@@ -271,7 +272,7 @@ void nwp_task(void *argument)
         || (SL_SI91X_COEX_MODE == SL_SI91X_BLE_MODE))
     {
         THREAD_SAFE_PRINT("Setting Up NWP-WiFi Performance profile to %d\r\n", wifi_performance_profile_g.profile);
-        status = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+        status = sl_wifi_set_performance_profile_v2(&wifi_performance_profile_g);
         if(status != SL_STATUS_OK) {
             THREAD_SAFE_PRINT("Failed to set wifi performance profile, Error Code : 0x%lX\r\n", status);
             return; // Should be an assertion
@@ -300,9 +301,9 @@ void nwp_task(void *argument)
       }
     }
 
-    sl_wifi_listen_interval_t listen_interval;
+    sl_wifi_listen_interval_v2_t listen_interval;
     listen_interval.listen_interval=WIFI_MAX_LISTEN_INTERVAL;
-    status = sl_wifi_set_listen_interval(SL_WIFI_CLIENT_INTERFACE,listen_interval);
+    status = sl_wifi_set_listen_interval_v2(SL_WIFI_CLIENT_INTERFACE,listen_interval);
     if (status != SL_STATUS_OK) {
       THREAD_SAFE_PRINT("\r\n Failed to configure listen interval\r\n");
     }
@@ -392,7 +393,7 @@ static sl_status_t nwp_setup_twt(void){
 
   //! Apply power save profile
   wifi_performance_profile_g.profile = SL_SI91X_WIFI_PERFORMANCE_PROFILE_CONNECTED;
-  status                      = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+  status                      = sl_wifi_set_performance_profile_v2(&wifi_performance_profile_g);
   if (status != SL_STATUS_OK) {
     THREAD_SAFE_PRINT("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
@@ -436,7 +437,7 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
                                                     // Also, this is effective only if the join_feature_bitmap is set prior to joining the AP (see nwp task init section)
   wifi_performance_profile_g.dtim_aligned_type = SL_SI91X_ALIGN_WITH_BEACON;
 
-  status                      = sl_wifi_set_performance_profile(&wifi_performance_profile_g);
+  status                      = sl_wifi_set_performance_profile_v2(&wifi_performance_profile_g);
   if (status != SL_STATUS_OK) {
     THREAD_SAFE_PRINT("\r\nPowersave Configuration Failed, Error Code : 0x%lX\r\n", status);
     THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
@@ -452,7 +453,7 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
   sl_wifi_listen_interval_v2_t listen_interval_s;
   sli_si91x_get_listen_interval(&listen_interval_s);
 
-  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %d beacons\n", listen_interval_s.listen_interval, wifi_performance_profile_g.listen_interval);
+  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %lu beacons\n", listen_interval_s.listen_interval, wifi_performance_profile_g.listen_interval);
 
 
   THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
