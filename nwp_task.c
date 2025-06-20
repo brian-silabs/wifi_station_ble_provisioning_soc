@@ -448,7 +448,11 @@ static sl_status_t nwp_setup_low_power_wifi4(void)
     return status;
   }
   nwp_config_g.ps_listen_interval = wifi_performance_profile_g.listen_interval;
-  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %d beacons\n", sl_si91x_get_listen_interval(), wifi_performance_profile_g.listen_interval);
+
+  sl_wifi_listen_interval_v2_t listen_interval_s;
+  sli_si91x_get_listen_interval(&listen_interval_s);
+
+  THREAD_SAFE_PRINT("\r\nAssociated Power Save Enabled, Max LI: %lu ms, power save set LI: %d beacons\n", listen_interval_s.listen_interval, wifi_performance_profile_g.listen_interval);
 
 
   THREAD_SAFE_PRINT("NWP Releasing NWP Semaphore\r\n");
