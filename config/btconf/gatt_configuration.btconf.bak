@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--Custom BLE GATT-->
+<gatt gatt_caching="false" generic_attribute_service="true" header="gatt_db.h" name="Custom BLE GATT" out="gatt_db.c" prefix="gattdb_">
+
+  <!--Generic Access-->
+  <service advertise="false" name="Generic Access" requirement="mandatory" sourceId="org.bluetooth.service.generic_access" type="primary" uuid="1800">
+    <informativeText>Abstract: The generic_access service contains generic information about the device. All available Characteristics are readonly. </informativeText>
+
+    <!--Device Name-->
+    <characteristic const="false" id="device_name" name="Device Name" sourceId="org.bluetooth.characteristic.gap.device_name" uuid="2A00">
+      <value length="16" type="utf-8" variable_length="false">BLE_CONFIGURATOR</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Appearance-->
+    <characteristic const="true" name="Appearance" sourceId="org.bluetooth.characteristic.gap.appearance" uuid="2A01">
+      <informativeText>Abstract: The external appearance of this device. The values are composed of a category (10-bits) and sub-categories (6-bits). </informativeText>
+      <value length="2" type="hex" variable_length="false">0000</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+
+  <!--Custom Service-->
+  <service advertise="true" id="commissioning" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="AABB">
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" id="attribute_1" name="Custom Characteristic" sourceId="" uuid="1aa1">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" id="attribute_2" name="Custom Characteristic" sourceId="" uuid="1BB1">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" id="attribute_3" name="Custom Characteristic" sourceId="" uuid="1cc1">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+        <notify authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+
+  <!--Custom Service-->
+  <service advertise="false" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="2abe9574-64cf-4e9e-8d9d-779509501162">
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" id="test" name="Custom Characteristic" sourceId="" uuid="72139995-09b7-436f-b6a7-49b4ef94e9f4">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+
+  <!--Custom Service-->
+  <service advertise="false" name="Custom Service" requirement="mandatory" sourceId="" type="primary" uuid="22f2509a-d4b1-4652-8ef7-4bdff61e4beb">
+
+    <!--Custom Characteristic-->
+    <characteristic const="false" name="Custom Characteristic" sourceId="" uuid="cae71fd0-2daf-46c9-8733-df06e854fb5c">
+      <value length="0" type="user" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

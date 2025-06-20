@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
   <descriptors name="wifi_station_ble_provisioning_soc">
-    <properties key="projectCommon.sdkId" value="com.silabs.sdk.stack.sisdk:2024.12.1._-1208501503"/>
+    <properties key="projectCommon.sdkId" value="com.silabs.sdk.stack.sisdk:2025.6.0._-1208501473"/>
     <properties key="universalConfig.relativeWorkspacePath" value="../wifi_station_ble_provisioning_soc.slcw"/>
     <properties key="universalConfig.generationDirectory" value=""/>
     <properties key="projectCommon.boardIds" value="brd4002a:0.0.0.A06 brd4338a:0.0.0.A11"/>

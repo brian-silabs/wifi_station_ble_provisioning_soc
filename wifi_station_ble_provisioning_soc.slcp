@@ -25,7 +25,7 @@ include:
   - {path: app.h}
   - {path: ble_config.h}
   - {path: wifi_config.h}
-sdk: {id: simplicity_sdk, version: 2024.12.1}
+sdk: {id: simplicity_sdk, version: 2025.6.0}
 toolchain_settings:
 - {value: -Wall -Werror, option: gcc_compiler_option}
 component:
@@ -72,7 +72,7 @@ ui_hints:
   highlight:
   - {path: readme.md, focus: true}
 sdk_extension:
-- {id: wiseconnect3_sdk, version: 3.4.1}
+- {id: wiseconnect3_sdk, version: 3.5.0}
 post_build:
 - {path: wifi_station_ble_provisioning_soc.slpb}
 
